@@ -2,7 +2,23 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCustomerOverview } from "../api/customers";
 import Header from "../components/Header";
-import { FiArrowLeft, FiChevronRight, FiMapPin } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiChevronRight,
+  FiMapPin,
+  FiHome,
+  FiServer,
+  FiCpu,
+  FiLayers,
+} from "react-icons/fi";
+
+const KPI_ITEMS = [
+  { key: "sites", label: "Sites", icon: FiHome },
+  { key: "locations", label: "Locaties", icon: FiMapPin },
+  { key: "racks", label: "Racks", icon: FiServer },
+  { key: "devices", label: "Devices", icon: FiCpu },
+  { key: "patch_panels", label: "Patch panels", icon: FiLayers },
+];
 
 export default function Dashboard() {
   const { klantId } = useParams();
@@ -40,6 +56,7 @@ export default function Dashboard() {
   }
 
   const sites = overview.sites ?? [];
+  const stats = overview.stats ?? {};
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-12">
@@ -57,9 +74,28 @@ export default function Dashboard() {
         <span className="text-gray-800 font-medium">{overview.name}</span>
       </nav>
 
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">{overview.name}</h1>
         <p className="text-sm text-gray-500 mt-1">Infrastructuur-overzicht</p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+        {KPI_ITEMS.map(({ key, label, icon: Icon }) => (
+          <div
+            key={key}
+            className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4"
+          >
+            <div className="flex items-center gap-2 text-gray-400 mb-2">
+              <Icon className="text-base text-blue-600" />
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {label}
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-gray-900">
+              {Number(stats[key]) || 0}
+            </p>
+          </div>
+        ))}
       </div>
 
       {sites.length === 0 ? (
@@ -75,12 +111,7 @@ export default function Dashboard() {
             toevoegen kan in de volgende stappen.
           </p>
         </div>
-      ) : (
-        <p className="text-sm text-gray-400">
-          {sites.length} {sites.length === 1 ? "site" : "sites"} geladen.
-          Cijfers en sitelijst volgen in de volgende stappen.
-        </p>
-      )}
+      ) : null}
     </div>
   );
 }
