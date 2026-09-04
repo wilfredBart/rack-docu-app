@@ -41,6 +41,19 @@ const customerController = {
   },
 
   /**
+   * GET /customers/:id/overview
+   */
+  async getOverview(req, res, next) {
+    try {
+      const overview = await customerModel.getOverview(req.params.id);
+      if (!overview) throw new ApiError(404, 'Klant niet gevonden');
+      res.json(overview);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
    * POST /customers
    */
   async create(req, res, next) {

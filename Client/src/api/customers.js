@@ -27,3 +27,7 @@ export const deleteCustomer = async (id) => {
 // GET klant met ID
 export const fetchCustomerById = (id) =>
   api.get(`/customers/${id}`).then((res) => res.data);
+
+// GET klant-overview (stats + sites → locations → racks)
+export const fetchCustomerOverview = (id) =>
+  api.get(`/customers/${id}/overview`).then((res) => res.data);
