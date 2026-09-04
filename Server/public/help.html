@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rack-Doc-App — Help</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-title">Rack-Doc-App Help</div>
+    <nav>
+      <ul>
+        <li><a href="#wachtwoord-herstellen" class="nav-link active">Wachtwoord herstellen</a></li>
+        <li><a href="#" class="nav-link disabled">Klanten beheren</a></li>
+        <li><a href="#" class="nav-link disabled">Racks &amp; devices</a></li>
+        <li><a href="#" class="nav-link disabled">Gebruikers &amp; rollen</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="content">
+
+    <section id="wachtwoord-herstellen">
+      <h1>Wachtwoord vergeten? Zo herstel je het.</h1>
+      <p class="subtitle">Je hoeft niets van programmeren te kennen om dit te doen.</p>
+
+      <h2>Wanneer gebruik je dit?</h2>
+      <ul>
+        <li>Je bent je wachtwoord vergeten en kan niet meer inloggen</li>
+        <li>Er is geen enkele andere admin meer die je kan helpen</li>
+        <li>Je wil het wachtwoord van iemand anders resetten (bv. een collega die vastzit)</li>
+      </ul>
+
+      <h2>Wat heb je nodig?</h2>
+      <p>
+        Je moet <strong>fysiek bij de server zelf kunnen</strong> — dit werkt niet vanaf je
+        eigen laptop of telefoon thuis, enkel rechtstreeks op de machine waar de applicatie
+        op draait (of via een verbinding die daar rechtstreeks toegang toe geeft, zoals Remote
+        Desktop naar die server). Dit is een bewuste beveiliging: zo kan niemand van buitenaf
+        via het internet ooit een wachtwoord resetten.
+      </p>
+
+      <h2>Stap voor stap</h2>
+      <ol>
+        <li>
+          <strong>Zorg dat de applicatie draait.</strong> Vraag dit na bij wie de applicatie
+          normaal opstart, of check of collega's momenteel nog kunnen inloggen — als zij wel
+          kunnen inloggen, draait de server.
+        </li>
+        <li>
+          <strong>Open een internetbrowser op de server zelf.</strong> Chrome, Edge, Firefox —
+          maakt niet uit welke.
+        </li>
+        <li>
+          <strong>Ga naar deze specifieke pagina:</strong><br>
+          <code>http://localhost:3000/recovery</code>
+        </li>
+        <li>
+          <strong>Vul het formulier in:</strong>
+          <table>
+            <tr><th>Veld</th><th>Wat je invult</th></tr>
+            <tr><td>Email</td><td>Het email-adres van het account waarvan je het wachtwoord wil wijzigen</td></tr>
+            <tr><td>Nieuw wachtwoord</td><td>Een nieuw wachtwoord naar keuze, minstens 8 karakters</td></tr>
+            <tr><td>Bevestig wachtwoord</td><td>Hetzelfde wachtwoord, nog eens ingeven ter controle</td></tr>
+          </table>
+        </li>
+        <li><strong>Klik op "Wachtwoord wijzigen."</strong> Bij succes zie je een groen bericht.</li>
+        <li><strong>Log in met je nieuwe wachtwoord</strong> op de gewone inlogpagina van de app.</li>
+      </ol>
+
+      <h2>Als er iets misgaat</h2>
+      <p><strong>Ik zie een foutmelding zoals "Forbidden" of "403"</strong><br>
+      Je probeert deze pagina te openen vanaf een ander toestel dan de server zelf. Dit werkt
+      bewust enkel wanneer je <strong>op de server zelf</strong> surft naar deze pagina.</p>
+
+      <p><strong>Ik zie "kon geen verbinding maken met de server"</strong><br>
+      De applicatie draait waarschijnlijk niet. Iemand moet deze eerst opstarten.</p>
+
+      <p><strong>"Geen gebruiker gevonden met dit email-adres"</strong><br>
+      Je hebt het email-adres verkeerd getypt, of dat account bestaat niet.</p>
+
+      <h2>Wat gebeurt er eigenlijk?</h2>
+      <p>
+        Het nieuwe wachtwoord wordt veilig versleuteld opgeslagen — niemand kan het originele
+        wachtwoord ooit terug uitlezen. Er verandert verder niets aan je andere gegevens:
+        klanten, sites, racks blijven gewoon staan zoals ze waren.
+      </p>
+    </section>
+
+  </main>
+
+</div>
+
+</body>
+</html>

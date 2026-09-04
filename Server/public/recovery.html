@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rack-Doc-App — Wachtwoord herstellen</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="page-center">
+  <div class="card">
+    <h1>Wachtwoord herstellen</h1>
+    <p class="subtitle">Rack-Doc-App — beheerderstoegang</p>
+
+    <div class="warning">
+      Deze pagina is enkel bruikbaar vanaf de server zelf. Vul het email-adres
+      van het account in en kies een nieuw wachtwoord.
+    </div>
+
+    <div id="messageBox"></div>
+
+    <form id="recoveryForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" required>
+
+      <label for="password">Nieuw wachtwoord</label>
+      <input type="password" id="password" minlength="8" required>
+
+      <label for="confirmPassword">Bevestig wachtwoord</label>
+      <input type="password" id="confirmPassword" minlength="8" required>
+
+      <button type="submit" id="submitBtn">Wachtwoord wijzigen</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('recoveryForm');
+  const messageBox = document.getElementById('messageBox');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function showMessage(text, type) {
+    messageBox.innerHTML = `<div class="message ${type}">${text}</div>`;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    messageBox.innerHTML = '';
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPassword) {
+      showMessage('Wachtwoorden komen niet overeen.', 'error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Bezig...';
+
+    try {
+      const res = await fetch('/auth/recovery-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showMessage(data.error || 'Er ging iets mis.', 'error');
+      } else {
+        showMessage(data.message, 'success');
+        form.reset();
+      }
+    } catch (err) {
+      showMessage('Kon geen verbinding maken met de server.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Wachtwoord wijzigen';
+    }
+  });
+</script>
+
+</body>
+</html>
