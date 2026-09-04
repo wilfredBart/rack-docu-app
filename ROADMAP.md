@@ -8,12 +8,12 @@ Repo: https://github.com/wilfredBart/rack-docu-app
 
 ## Huidige stap
 
-**1.1 — Overview header: breadcrumb, titel, empty state bij 0 sites**
+**1.2 — KPI-rij (sites, locaties, racks, devices, patch panels)**
 
 Status: `open`  
 Laatst bijgewerkt: 2026-09-04
 
-Als deze klaar is → **1.2 KPI-rij**.
+Als deze klaar is → **1.3 Sitelijst links**.
 
 ---
 
@@ -45,11 +45,6 @@ Dit is een **beheertool voor techniekers**, geen klantenportaal.
 - [x] **0.1** Routes en nav rechtzetten
 - [x] **0.2** Frontend API-helpers (`sites.js`, `locations.js`, `racks.js`)
 - [x] **0.3** `GET /customers/:id/overview`
-  - 3 queries, geen N+1
-  - Payload: klant + `stats` + sites → locations → racks
-  - Counts: sites, locations, racks, devices, patch_panels
-  - Per rack: `height_u`, `occupied_u`, `device_count`
-  - Client: `fetchCustomerOverview(id)`
 
 ---
 
@@ -57,7 +52,9 @@ Dit is een **beheertool voor techniekers**, geen klantenportaal.
 
 Bestaande `Dashboard.jsx` mag vervangen worden. **Geen device-CRUD, geen patchplan-editor.**
 
-- [ ] **1.1** Header: breadcrumb (Klanten / naam), titel, empty state bij 0 sites
+- [x] **1.1** Header: breadcrumb (Klanten / naam), titel, empty state bij 0 sites
+  - Gebruikt `fetchCustomerOverview`
+  - Oude nested site-kaarten verwijderd (komen terug in 1.3–1.6)
 - [ ] **1.2** KPI-rij (sites, locaties, racks, devices, patch panels) — cijfers = DB
 - [ ] **1.3** Sitelijst links: zoeken, selectie, stad + rack-count
 - [ ] **1.4** Geselecteerde site: adres, aanmaken / bewerken / verwijderen (cascade-waarschuwing)
@@ -116,6 +113,7 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet.
 | 2026-09-04 | 0.1 | Grok | Nav contextueel; `/klanten` redirect; dode `/racks/:id` link disabled |
 | 2026-09-04 | 0.2 | Grok | API-helpers sites / locations / racks |
 | 2026-09-04 | 0.3 | Grok | `GET /customers/:id/overview` + `fetchCustomerOverview` |
+| 2026-09-04 | 1.1 | Grok | Overview header + empty state; oude site-kaarten weg |
 
 ---
 
@@ -124,4 +122,4 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet.
 1. Vink de afgewerkte stap: `- [ ]` → `- [x]`
 2. Zet **Huidige stap** op het volgende nummer
 3. Rij in het log
-4. Commit, bv. `docs: vink 0.3 af, start 1.1`
+4. Commit, bv. `docs: vink 1.1 af, start 1.2`
