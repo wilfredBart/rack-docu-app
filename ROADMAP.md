@@ -41,7 +41,7 @@ Dit is een **beheertool voor techniekers**, geen klantenportaal.
 
 ## Fase 0 — Fundament
 
-- [ ] **0.1** Routes en nav rechtzetten
+- [x ] **0.1** Routes en nav rechtzetten
   - `/` = klantenlijst
   - `/klanten/:klantId` = overview
   - Dode header-links weg (`/klanten`, `/patchplan` zonder klant)
@@ -112,8 +112,8 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet.
 
 ## Log
 
-| Datum | Stap | Wie | Notitie |
-|---|---|---|---|
+| Datum      | Stap | Wie            | Notitie                           |
+| ---------- | ---- | -------------- | --------------------------------- |
 | 2026-09-04 | plan | Grok + Wilfred | Roadmap aangemaakt; start bij 0.1 |
 
 ---

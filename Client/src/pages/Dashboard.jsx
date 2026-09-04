@@ -65,7 +65,9 @@ export default function Dashboard() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{customer.name}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {customer.name}
+            </h1>
             <p className="text-sm text-gray-500">
               Beheer hier alle sites, locaties, racks en patchplannen.
             </p>
@@ -109,7 +111,6 @@ export default function Dashboard() {
 
               {/* Site Content (2 Kolommen) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-                
                 {/* Kolom 1: Locaties & Racks */}
                 <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/80">
                   <div className="flex justify-between items-center mb-3">
@@ -140,12 +141,12 @@ export default function Dashboard() {
                                   <span className="text-gray-700 font-mono font-medium">
                                     {rack.name} ({rack.height_u} U)
                                   </span>
-                                  <Link
-                                    to={`/racks/${rack.id}`}
-                                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold transition"
+                                  <span
+                                    className="inline-flex items-center gap-1 text-gray-400 font-semibold cursor-not-allowed"
+                                    title="Rack-pagina volgt in fase 2"
                                   >
                                     Openen <FiChevronRight />
-                                  </Link>
+                                  </span>
                                 </div>
                               ))}
                             </div>
@@ -173,13 +174,16 @@ export default function Dashboard() {
                   <div>
                     <div className="flex justify-between items-center mb-3">
                       <h3 className="font-semibold text-gray-800 flex items-center gap-2 text-sm">
-                        <FiLayers className="text-blue-600" /> Patchplannen & Verbindingen
+                        <FiLayers className="text-blue-600" /> Patchplannen &
+                        Verbindingen
                       </h3>
                     </div>
 
                     <div className="bg-white p-4 rounded-xl border border-gray-200 text-center shadow-2xs">
                       <p className="text-xs text-gray-500 mb-4">
-                        Bekijk of beheer de actieve patchverbindingen en infrastructuur visualisaties voor <strong>{site.name}</strong>.
+                        Bekijk of beheer de actieve patchverbindingen en
+                        infrastructuur visualisaties voor{" "}
+                        <strong>{site.name}</strong>.
                       </p>
                       <Link
                         to={`/klanten/${klantId}/patchplan?siteId=${site.id}`}
@@ -190,14 +194,14 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           ))}
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center text-gray-400">
-          Nog geen sites gekoppeld aan {customer.name}. Klik op "Nieuwe Site Toevoegen" om te beginnen.
+          Nog geen sites gekoppeld aan {customer.name}. Klik op "Nieuwe Site
+          Toevoegen" om te beginnen.
         </div>
       )}
     </div>
