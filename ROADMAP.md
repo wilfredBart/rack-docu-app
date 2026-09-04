@@ -8,20 +8,21 @@ Repo: https://github.com/wilfredBart/rack-docu-app
 
 ## Huidige stap
 
-**0.1 — Routes en navigatie rechtzetten**
+**0.3 — GET /customers/:id/overview**
 
 Status: `open`  
 Laatst bijgewerkt: 2026-09-04
 
-Als deze klaar is → **0.2 Frontend API-helpers**.
+Als deze klaar is → **1.1 Overview header + empty state**.
 
 ---
 
 ## Afspraak
 
 - We bouwen niet vooruit op een open stap (geen rack-pagina zolang overview geen site/locatie/rack kan aanmaken).
-- Elke PR / sessie raakt bij voorkeur **één** genummerde stap.
-- Extra ideeën komen onder [Backlog / niet vergeten](#fase-4--niet-vergeten-randzaken), niet tussendoor in de huidige stap.
+- Elke sessie raakt bij voorkeur **één** genummerde stap.
+- Geen feature-branches; alles op `main`.
+- Extra ideeën komen onder [Fase 4](#fase-4--niet-vergeten-randzaken), niet tussendoor in de huidige stap.
 
 ---
 
@@ -41,12 +42,18 @@ Dit is een **beheertool voor techniekers**, geen klantenportaal.
 
 ## Fase 0 — Fundament
 
-- [x ] **0.1** Routes en nav rechtzetten
+- [x] **0.1** Routes en nav rechtzetten
   - `/` = klantenlijst
+  - `/klanten` redirect naar `/`
   - `/klanten/:klantId` = overview
-  - Dode header-links weg (`/klanten`, `/patchplan` zonder klant)
-  - `/racks/:id` nog niet als losse route; later onder de klant
-- [ ] **0.2** Frontend API-helpers voor `sites`, `locations`, `racks` (naast bestaande `customers.js`)
+  - Header: op klant-pagina’s “Overzicht” + “Patchplan” (met klantId)
+  - Dode links `/patchplan` en `/klanten` weg
+  - Geen losse `/racks/:id` (fase 2); “Openen” op overview is voorlopig disabled
+- [x] **0.2** Frontend API-helpers
+  - `Client/src/api/sites.js`
+  - `Client/src/api/locations.js`
+  - `Client/src/api/racks.js`
+  - Zelfde patroon als `customers.js` (CRUD + optionele nested GET)
 - [ ] **0.3** `GET /customers/:id/overview`
   - Geen N+1 loop
   - Payload: klant + `stats` + sites → locations → racks
@@ -112,9 +119,11 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet.
 
 ## Log
 
-| Datum      | Stap | Wie            | Notitie                           |
-| ---------- | ---- | -------------- | --------------------------------- |
+| Datum | Stap | Wie | Notitie |
+|---|---|---|---|
 | 2026-09-04 | plan | Grok + Wilfred | Roadmap aangemaakt; start bij 0.1 |
+| 2026-09-04 | 0.1 | Grok | Nav contextueel; `/klanten` redirect; dode `/racks/:id` link disabled |
+| 2026-09-04 | 0.2 | Grok | API-helpers sites / locations / racks |
 
 ---
 
@@ -123,4 +132,4 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet.
 1. Vink de afgewerkte stap: `- [ ]` → `- [x]`
 2. Zet **Huidige stap** op het volgende nummer
 3. Rij in het log
-4. Commit, bv. `docs: vink 0.1 af, start 0.2`
+4. Commit, bv. `docs: vink 0.2 af, start 0.3`
