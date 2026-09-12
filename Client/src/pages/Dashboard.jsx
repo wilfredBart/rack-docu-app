@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 import { fetchCustomerOverview } from "../api/customers";
+import { createSite, updateSite, deleteSite } from "../api/sites";
 import Header from "../components/Header";
+import Modal from "../components/UI/Modal";
+import FormModal from "../components/UI/FormModal";
 import {
   FiArrowLeft,
   FiChevronRight,
@@ -12,6 +16,9 @@ import {
   FiGrid,
   FiBox,
   FiSearch,
+  FiPlus,
+  FiEdit2,
+  FiTrash2,
 } from "react-icons/fi";
 
 const KPI_ITEMS = [
@@ -22,17 +29,48 @@ const KPI_ITEMS = [
   { key: "patch_panels", label: "Patch panels", icon: FiBox },
 ];
 
+const SITE_FIELDS = [
+  { name: "name", label: "Sitenaam", type: "text", required: true },
+  { name: "street", label: "Straat", type: "text" },
+  { name: "house_number", label: "Huisnummer", type: "text" },
+  { name: "postal_code", label: "Postcode", type: "text" },
+  { name: "city", label: "Stad", type: "text" },
+  { name: "country", label: "Land", type: "text" },
+];
+
+const EMPTY_SITE = {
+  name: "",
+  street: "",
+  house_number: "",
+  postal_code: "",
+  city: "",
+  country: "",
+};
+
+function formatAddress(site) {
+  const line = [site.street, site.house_number].filter(Boolean).join(" ");
+  const cityLine = [site.postal_code, site.city].filter(Boolean).join(" ");
+  const parts = [line, cityLine, site.country].filter(Boolean);
+  return parts.length ? parts.join(", ") : null;
+}
+
 export default function Dashboard() {
   const { klantId } = useParams();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSiteId, setSelectedSiteId] = useState(null);
+  const [siteModalOpen, setSiteModalOpen] = useState(false);
+  const [editingSite, setEditingSite] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const overviewQueryKey = ["customer-overview", klantId];
 
   const {
     data: overview,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["customer-overview", klantId],
+    queryKey: overviewQueryKey,
     queryFn: () => fetchCustomerOverview(klantId),
     enabled: !!klantId,
   });
@@ -61,6 +99,80 @@ export default function Dashboard() {
   }, [sites, searchTerm]);
 
   const selectedSite = sites.find((s) => s.id === selectedSiteId) ?? null;
+
+  const invalidateOverview = () =>
+    queryClient.invalidateQueries({ queryKey: overviewQueryKey });
+
+  const createMutation = useMutation({
+    mutationFn: createSite,
+    onSuccess: (created) => {
+      invalidateOverview();
+      if (created?.id) setSelectedSiteId(created.id);
+      toast.success("Site aangemaakt");
+      setSiteModalOpen(false);
+      setEditingSite(null);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Fout bij aanmaken van site");
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateSite,
+    onSuccess: () => {
+      invalidateOverview();
+      toast.success("Site bijgewerkt");
+      setSiteModalOpen(false);
+      setEditingSite(null);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Fout bij bijwerken van site");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteSite,
+    onSuccess: (data) => {
+      invalidateOverview();
+      toast.success(data?.message || "Site verwijderd");
+      setDeleteTarget(null);
+    },
+    onError: (err) => {
+      toast.error(
+        err.response?.data?.message || "Fout bij verwijderen van site",
+      );
+    },
+  });
+
+  const openNewSite = () => {
+    setEditingSite(null);
+    setSiteModalOpen(true);
+  };
+
+  const openEditSite = (site) => {
+    setEditingSite(site);
+    setSiteModalOpen(true);
+  };
+
+  const handleSiteSubmit = (values) => {
+    const payload = {
+      name: values.name,
+      street: values.street || null,
+      house_number: values.house_number || null,
+      postal_code: values.postal_code || null,
+      city: values.city || null,
+      country: values.country || null,
+    };
+
+    if (editingSite) {
+      updateMutation.mutate({ id: editingSite.id, ...payload });
+    } else {
+      createMutation.mutate({
+        customer_id: Number(klantId),
+        ...payload,
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -92,6 +204,8 @@ export default function Dashboard() {
     patch_panels: 0,
   };
 
+  const address = selectedSite ? formatAddress(selectedSite) : null;
+
   return (
     <div className="min-h-screen bg-gray-50/50 pb-12">
       <Header />
@@ -109,9 +223,22 @@ export default function Dashboard() {
           <span className="text-gray-800 font-medium">{overview.name}</span>
         </nav>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{overview.name}</h1>
-          <p className="text-sm text-gray-500 mt-1">Infrastructuur-overzicht</p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {overview.name}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Infrastructuur-overzicht
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={openNewSite}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm cursor-pointer"
+          >
+            <FiPlus /> Nieuwe site
+          </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
@@ -142,9 +269,15 @@ export default function Dashboard() {
               Nog geen sites
             </h2>
             <p className="text-sm text-gray-500 mt-2 max-w-md mx-auto">
-              Er zijn nog geen vestigingen gekoppeld aan {overview.name}. Een
-              site toevoegen kan in de volgende stappen.
+              Er zijn nog geen vestigingen gekoppeld aan {overview.name}.
             </p>
+            <button
+              type="button"
+              onClick={openNewSite}
+              className="mt-5 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm cursor-pointer"
+            >
+              <FiPlus /> Eerste site toevoegen
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4">
@@ -205,11 +338,39 @@ export default function Dashboard() {
             <section className="bg-white rounded-2xl border border-gray-200 p-6">
               {selectedSite ? (
                 <>
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    {selectedSite.name}
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Site-detail (adres, bewerken, locaties) volgt in 1.4.
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {selectedSite.name}
+                      </h2>
+                      <p className="text-sm text-gray-500 mt-1 inline-flex items-start gap-1.5">
+                        <FiMapPin className="mt-0.5 shrink-0" />
+                        {address || (
+                          <span className="italic">Geen adres opgegeven</span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => openEditSite(selectedSite)}
+                        className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 cursor-pointer"
+                        title="Bewerken"
+                      >
+                        <FiEdit2 />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(selectedSite)}
+                        className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-gray-100 cursor-pointer"
+                        title="Verwijderen"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400 mt-6">
+                    Locaties volgen in stap 1.5.
                   </p>
                 </>
               ) : (
@@ -219,6 +380,63 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <FormModal
+        key={editingSite?.id ?? "new-site"}
+        isOpen={siteModalOpen}
+        onClose={() => {
+          setSiteModalOpen(false);
+          setEditingSite(null);
+        }}
+        title={editingSite ? "Site bewerken" : "Nieuwe site"}
+        fields={SITE_FIELDS}
+        initialValues={
+          editingSite
+            ? {
+                name: editingSite.name || "",
+                street: editingSite.street || "",
+                house_number: editingSite.house_number || "",
+                postal_code: editingSite.postal_code || "",
+                city: editingSite.city || "",
+                country: editingSite.country || "",
+              }
+            : EMPTY_SITE
+        }
+        onSubmit={handleSiteSubmit}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+      />
+
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Site verwijderen"
+      >
+        <p className="text-sm text-gray-600">
+          Weet je zeker dat je <strong>{deleteTarget?.name}</strong> wilt
+          verwijderen?
+          <span className="text-xs text-red-500 mt-2 block font-medium">
+            Let op: alle locaties, racks, devices, patch panels en verbindingen
+            onder deze site gaan mee weg (CASCADE).
+          </span>
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setDeleteTarget(null)}
+            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+          >
+            Annuleren
+          </button>
+          <button
+            type="button"
+            onClick={() => deleteMutation.mutate(deleteTarget.id)}
+            disabled={deleteMutation.isPending}
+            className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-50"
+          >
+            {deleteMutation.isPending ? "Verwijderen..." : "Site verwijderen"}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
