@@ -22,7 +22,7 @@ Bestaande `Dashboard.jsx` mag vervangen worden. **Geen device-CRUD, geen patchpl
   - Gebruikt `fetchCustomerOverview`
   - Oude nested site-kaarten verwijderd (komen terug in 1.3–1.6)
 - [x] **1.2** KPI-rij (sites, locaties, racks, devices, patch panels) — cijfers = DB
-- [ ] **1.3** Sitelijst links: zoeken, selectie, stad + rack-count
+- [x] **1.3** Sitelijst links: zoeken, selectie, stad + rack-count
 - [ ] **1.4** Geselecteerde site: adres, aanmaken / bewerken / verwijderen (cascade-waarschuwing)
 - [ ] **1.5** Locatiekaarten: toevoegen / bewerken / verwijderen
 - [ ] **1.6** Rack-rijen: naam, U, bezettingsbalk, toevoegen / bewerken / verwijderen
