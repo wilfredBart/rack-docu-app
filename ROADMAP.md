@@ -24,7 +24,7 @@ Bestaande `Dashboard.jsx` mag vervangen worden. **Geen device-CRUD, geen patchpl
 - [x] **1.2** KPI-rij (sites, locaties, racks, devices, patch panels) — cijfers = DB
 - [x] **1.3** Sitelijst links: zoeken, selectie, stad + rack-count
 - [x] **1.4** Geselecteerde site: adres, aanmaken / bewerken / verwijderen (cascade-waarschuwing)
-- [ ] **1.5** Locatiekaarten: toevoegen / bewerken / verwijderen
+- [x] **1.5** Locatiekaarten: toevoegen / bewerken / verwijderen
 - [ ] **1.6** Rack-rijen: naam, U, bezettingsbalk, toevoegen / bewerken / verwijderen
   - Knop “Openen” mag naar een stub tot fase 2
 - [ ] **1.7** Knop “Patchplan” per site → `/klanten/:klantId/patchplan?siteId=` (nog geen echte data)
