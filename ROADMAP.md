@@ -43,7 +43,7 @@ Bestaande `Dashboard.jsx` mag vervangen worden. **Geen device-CRUD, geen patchpl
 Route: `/klanten/:klantId/racks/:rackId`  
 API (bestaat): `GET /racks/:id/contents` + slot-validatie.
 
-- [ ] **2.1** Elevation-view: `height_u` van boven naar beneden
+- [x] **2.1** Elevation-view: `height_u` van boven naar beneden
 - [ ] **2.2** Devices in slots (type, label, U; overlap onmogelijk)
 - [ ] **2.3** Patch panels in slots
 - [ ] **2.4** Cable management in slots
@@ -110,6 +110,7 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet of net voor productie
 | 2026-09-20 | 1.6  | Claude         | Rack-rijen per locatie (naam, U, bezettingsbalk, CRUD); "Openen" → nieuwe stub-route `/klanten/:klantId/racks/:rackId` (`Rack.jsx`) toegevoegd aan `App.jsx` |
 | 2026-09-20 | 1.7  | Claude         | "Patchplan"-knop per site → `/klanten/:klantId/patchplan?siteId=`; geen echte data (volgt in Fase 3) — **Fase 1 klaar** |
 | 2026-09-20 | 1.7.1 | Claude + Wilfred | `Navigation.jsx`: `Overzicht`/`Patchplan`-pills weg, enkel `Klanten` blijft — besproken en gebouwd (redundant/riskant tov. breadcrumbs + site-specifieke Patchplan-knop, zie uitleg bij 1.7.1 hierboven) |
+| 2026-09-20 | 2.1  | Claude         | Elevation-view in `Rack.jsx`: lege genummerde U-slots van `height_u` naar `1U` (boven naar onder). Nog geen devices/panels/cable in de slots — volgt in 2.2–2.4. |
 
 ---
 
