@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { fetchCustomerOverview } from "../api/customers";
@@ -9,6 +9,7 @@ import {
   updateLocation,
   deleteLocation,
 } from "../api/locations";
+import { createRack, updateRack, deleteRack } from "../api/racks";
 import Header from "../components/Header";
 import Modal from "../components/UI/Modal";
 import FormModal from "../components/UI/FormModal";
@@ -25,6 +26,7 @@ import {
   FiEdit2,
   FiTrash2,
   FiFolder,
+  FiExternalLink,
 } from "react-icons/fi";
 
 const KPI_ITEMS = [
@@ -63,6 +65,25 @@ const EMPTY_LOCATION = {
   description: "",
 };
 
+const RACK_FIELDS = [
+  { name: "name", label: "Naam", type: "text", required: true },
+  { name: "height_u", label: "Hoogte (U)", type: "number", required: true },
+  { name: "notes", label: "Notities", type: "textarea" },
+];
+
+const EMPTY_RACK = {
+  name: "",
+  height_u: 42,
+  notes: "",
+};
+
+function occupancyPercent(rack) {
+  const total = Number(rack.height_u) || 0;
+  if (!total) return 0;
+  const used = Number(rack.occupied_u) || 0;
+  return Math.min(100, Math.round((used / total) * 100));
+}
+
 function formatAddress(site) {
   const line = [site.street, site.house_number].filter(Boolean).join(" ");
   const cityLine = [site.postal_code, site.city].filter(Boolean).join(" ");
@@ -72,6 +93,7 @@ function formatAddress(site) {
 
 export default function Dashboard() {
   const { klantId } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSiteId, setSelectedSiteId] = useState(null);
@@ -82,6 +104,11 @@ export default function Dashboard() {
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState(null);
   const [deleteLocationTarget, setDeleteLocationTarget] = useState(null);
+
+  const [rackModalOpen, setRackModalOpen] = useState(false);
+  const [rackModalLocationId, setRackModalLocationId] = useState(null);
+  const [editingRack, setEditingRack] = useState(null);
+  const [deleteRackTarget, setDeleteRackTarget] = useState(null);
 
   const overviewQueryKey = ["customer-overview", klantId];
 
@@ -229,6 +256,77 @@ export default function Dashboard() {
     } else {
       createLocationMutation.mutate({
         site_id: selectedSite.id,
+        ...payload,
+      });
+    }
+  };
+
+  const createRackMutation = useMutation({
+    mutationFn: createRack,
+    onSuccess: () => {
+      invalidateOverview();
+      toast.success("Rack aangemaakt");
+      setRackModalOpen(false);
+      setEditingRack(null);
+      setRackModalLocationId(null);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Fout bij aanmaken van rack");
+    },
+  });
+
+  const updateRackMutation = useMutation({
+    mutationFn: updateRack,
+    onSuccess: () => {
+      invalidateOverview();
+      toast.success("Rack bijgewerkt");
+      setRackModalOpen(false);
+      setEditingRack(null);
+      setRackModalLocationId(null);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Fout bij bijwerken van rack");
+    },
+  });
+
+  const deleteRackMutation = useMutation({
+    mutationFn: deleteRack,
+    onSuccess: (data) => {
+      invalidateOverview();
+      toast.success(data?.message || "Rack verwijderd");
+      setDeleteRackTarget(null);
+    },
+    onError: (err) => {
+      toast.error(
+        err.response?.data?.message || "Fout bij verwijderen van rack",
+      );
+    },
+  });
+
+  const openNewRack = (locationId) => {
+    setEditingRack(null);
+    setRackModalLocationId(locationId);
+    setRackModalOpen(true);
+  };
+
+  const openEditRack = (rack, locationId) => {
+    setEditingRack(rack);
+    setRackModalLocationId(locationId);
+    setRackModalOpen(true);
+  };
+
+  const handleRackSubmit = (values) => {
+    const payload = {
+      name: values.name,
+      height_u: Number(values.height_u) || 42,
+      notes: values.notes || null,
+    };
+
+    if (editingRack) {
+      updateRackMutation.mutate({ id: editingRack.id, ...payload });
+    } else {
+      createRackMutation.mutate({
+        location_id: rackModalLocationId,
         ...payload,
       });
     }
@@ -525,12 +623,93 @@ export default function Dashboard() {
                               </button>
                             </div>
                           </div>
-                          <p className="text-xs text-gray-400">
-                            {(location.racks?.length ?? 0)}{" "}
-                            {(location.racks?.length ?? 0) === 1
-                              ? "rack"
-                              : "racks"}
-                          </p>
+                          <div className="mt-1 flex items-center justify-between">
+                            <p className="text-xs text-gray-400">
+                              {(location.racks?.length ?? 0)}{" "}
+                              {(location.racks?.length ?? 0) === 1
+                                ? "rack"
+                                : "racks"}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => openNewRack(location.id)}
+                              className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 cursor-pointer"
+                            >
+                              <FiPlus className="text-xs" /> Rack
+                            </button>
+                          </div>
+
+                          {(location.racks?.length ?? 0) > 0 && (
+                            <ul className="flex flex-col gap-1.5 mt-1">
+                              {location.racks.map((rack) => {
+                                const pct = occupancyPercent(rack);
+                                return (
+                                  <li
+                                    key={rack.id}
+                                    className="flex items-center gap-2 border border-gray-100 rounded-lg px-2.5 py-2"
+                                  >
+                                    <FiServer className="text-gray-400 shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center justify-between gap-2">
+                                        <span className="text-xs font-semibold text-gray-800 truncate">
+                                          {rack.name}
+                                        </span>
+                                        <span className="text-[11px] text-gray-400 tabular-nums shrink-0">
+                                          {rack.occupied_u ?? 0}/{rack.height_u}U
+                                        </span>
+                                      </div>
+                                      <div className="mt-1 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div
+                                          className={`h-full rounded-full ${
+                                            pct >= 90
+                                              ? "bg-red-500"
+                                              : pct >= 70
+                                                ? "bg-amber-500"
+                                                : "bg-blue-500"
+                                          }`}
+                                          style={{ width: `${pct}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-0.5 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          navigate(
+                                            `/klanten/${klantId}/racks/${rack.id}`,
+                                          )
+                                        }
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 cursor-pointer"
+                                        title="Openen"
+                                      >
+                                        <FiExternalLink className="text-sm" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          openEditRack(rack, location.id)
+                                        }
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 cursor-pointer"
+                                        title="Bewerken"
+                                      >
+                                        <FiEdit2 className="text-sm" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setDeleteRackTarget(rack)
+                                        }
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-gray-100 cursor-pointer"
+                                        title="Verwijderen"
+                                      >
+                                        <FiTrash2 className="text-sm" />
+                                      </button>
+                                    </div>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -656,6 +835,65 @@ export default function Dashboard() {
             {deleteLocationMutation.isPending
               ? "Verwijderen..."
               : "Locatie verwijderen"}
+          </button>
+        </div>
+      </Modal>
+
+      <FormModal
+        key={editingRack?.id ?? `new-rack-${rackModalLocationId ?? ""}`}
+        isOpen={rackModalOpen}
+        onClose={() => {
+          setRackModalOpen(false);
+          setEditingRack(null);
+          setRackModalLocationId(null);
+        }}
+        title={editingRack ? "Rack bewerken" : "Nieuw rack"}
+        fields={RACK_FIELDS}
+        initialValues={
+          editingRack
+            ? {
+                name: editingRack.name || "",
+                height_u: editingRack.height_u ?? 42,
+                notes: editingRack.notes || "",
+              }
+            : EMPTY_RACK
+        }
+        onSubmit={handleRackSubmit}
+        isSubmitting={
+          createRackMutation.isPending || updateRackMutation.isPending
+        }
+      />
+
+      <Modal
+        isOpen={!!deleteRackTarget}
+        onClose={() => setDeleteRackTarget(null)}
+        title="Rack verwijderen"
+      >
+        <p className="text-sm text-gray-600">
+          Weet je zeker dat je <strong>{deleteRackTarget?.name}</strong> wilt
+          verwijderen?
+          <span className="text-xs text-red-500 mt-2 block font-medium">
+            Let op: alle devices, patch panels en cable management in dit
+            rack gaan mee weg (CASCADE).
+          </span>
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setDeleteRackTarget(null)}
+            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+          >
+            Annuleren
+          </button>
+          <button
+            type="button"
+            onClick={() => deleteRackMutation.mutate(deleteRackTarget.id)}
+            disabled={deleteRackMutation.isPending}
+            className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-50"
+          >
+            {deleteRackMutation.isPending
+              ? "Verwijderen..."
+              : "Rack verwijderen"}
           </button>
         </div>
       </Modal>

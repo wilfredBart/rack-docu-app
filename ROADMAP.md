@@ -25,7 +25,7 @@ Bestaande `Dashboard.jsx` mag vervangen worden. **Geen device-CRUD, geen patchpl
 - [x] **1.3** Sitelijst links: zoeken, selectie, stad + rack-count
 - [x] **1.4** Geselecteerde site: adres, aanmaken / bewerken / verwijderen (cascade-waarschuwing)
 - [x] **1.5** Locatiekaarten: toevoegen / bewerken / verwijderen
-- [ ] **1.6** Rack-rijen: naam, U, bezettingsbalk, toevoegen / bewerken / verwijderen
+- [x] **1.6** Rack-rijen: naam, U, bezettingsbalk, toevoegen / bewerken / verwijderen
   - Knop “Openen” mag naar een stub tot fase 2
 - [ ] **1.7** Knop “Patchplan” per site → `/klanten/:klantId/patchplan?siteId=` (nog geen echte data)
 
@@ -69,22 +69,22 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet of net voor productie
 - [ ] **4.4** Klantenlijst-zoekfilter: al aanwezig, laten staan
 - [ ] **4.5** Soft-delete / audit: niet nu
 - [ ] **4.6** Indexes toevoegen op foreign keys  
-      Doel: snellere queries als de data groeit.  
-      Tabellen/kolommen:  
-      `sites(customer_id)`, `locations(site_id)`, `racks(location_id)`,  
-      `devices(rack_id)`, `devices(device_type_id)`,  
-      `patch_panels(rack_id)`, `cable_management(rack_id)`,  
-      `ports(device_id)`, `ports(patch_panel_id)`,  
-      `connections(from_port_id)`, `connections(to_port_id)`
+       Doel: snellere queries als de data groeit.  
+       Tabellen/kolommen:  
+       `sites(customer_id)`, `locations(site_id)`, `racks(location_id)`,  
+       `devices(rack_id)`, `devices(device_type_id)`,  
+       `patch_panels(rack_id)`, `cable_management(rack_id)`,  
+       `ports(device_id)`, `ports(patch_panel_id)`,  
+       `connections(from_port_id)`, `connections(to_port_id)`
 - [ ] **4.7** Connection integrity constraints  
-      Doel: voorkomen dat één poort in meerdere verbindingen zit en dat een poort met zichzelf verbonden wordt.  
-      Toe te voegen:
+       Doel: voorkomen dat één poort in meerdere verbindingen zit en dat een poort met zichzelf verbonden wordt.  
+       Toe te voegen:
   - `UNIQUE (from_port_id)`
   - `UNIQUE (to_port_id)`
   - `CHECK (from_port_id <> to_port_id)`
 - [ ] **4.8** Label uniek per rack  
-      Doel: binnen één rack mag een device- of patch-panel-label niet dubbel voorkomen.  
-      Toe te voegen:
+       Doel: binnen één rack mag een device- of patch-panel-label niet dubbel voorkomen.  
+       Toe te voegen:
   - `UNIQUE (rack_id, label)` op `devices`
   - `UNIQUE (rack_id, label)` op `patch_panels`
 
@@ -92,16 +92,17 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet of net voor productie
 
 ## Log
 
-| Datum      | Stap | Wie            | Notitie                                                               |
-| ---------- | ---- | -------------- | --------------------------------------------------------------------- |
-| 2026-09-04 | plan | Grok + Wilfred | Roadmap aangemaakt; start bij 0.1                                     |
-| 2026-09-04 | 0.1  | Grok           | Nav contextueel; `/klanten` redirect; dode `/racks/:id` link disabled |
-| 2026-09-04 | 0.2  | Grok           | API-helpers sites / locations / racks                                 |
-| 2026-09-04 | 0.3  | Grok           | `GET /customers/:id/overview` + `fetchCustomerOverview`               |
-| 2026-09-04 | 1.1  | Grok           | Overview header + empty state; oude site-kaarten weg                  |
-| 2026-09-05 | docs | Grok + Wilfred | Afspraak aangescherpt + 4.6 / 4.7 / 4.8 (DB-verbeteringen) toegevoegd |
-| 2026-09-05 | 1.2  | Grok           | KPI-rij toegevoegd (sites, locaties, racks, devices, patch panels)    |
-| 2026-09-20 | 1.5  | Claude         | Locatiekaarten (toevoegen/bewerken/verwijderen) effectief gebouwd in `Dashboard.jsx` — was al afgevinkt maar stond nog niet in de code |
+| Datum      | Stap | Wie            | Notitie                                                                                                                                                      |
+| ---------- | ---- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-04 | plan | Grok + Wilfred | Roadmap aangemaakt; start bij 0.1                                                                                                                            |
+| 2026-09-04 | 0.1  | Grok           | Nav contextueel; `/klanten` redirect; dode `/racks/:id` link disabled                                                                                        |
+| 2026-09-04 | 0.2  | Grok           | API-helpers sites / locations / racks                                                                                                                        |
+| 2026-09-04 | 0.3  | Grok           | `GET /customers/:id/overview` + `fetchCustomerOverview`                                                                                                      |
+| 2026-09-04 | 1.1  | Grok           | Overview header + empty state; oude site-kaarten weg                                                                                                         |
+| 2026-09-05 | docs | Grok + Wilfred | Afspraak aangescherpt + 4.6 / 4.7 / 4.8 (DB-verbeteringen) toegevoegd                                                                                        |
+| 2026-09-05 | 1.2  | Grok           | KPI-rij toegevoegd (sites, locaties, racks, devices, patch panels)                                                                                           |
+| 2026-09-20 | 1.5  | Claude         | Locatiekaarten (toevoegen/bewerken/verwijderen) effectief gebouwd in `Dashboard.jsx` — was al afgevinkt maar stond nog niet in de code                       |
+| 2026-09-20 | 1.6  | Claude         | Rack-rijen per locatie (naam, U, bezettingsbalk, CRUD); "Openen" → nieuwe stub-route `/klanten/:klantId/racks/:rackId` (`Rack.jsx`) toegevoegd aan `App.jsx` |
 
 ---
 

@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -9,6 +8,7 @@ import Auth from "./pages/Auth";
 import Klanten from "./pages/Klanten";
 import Dashboard from "./pages/Dashboard";
 import PatchPlan from "./pages/PatchPlan";
+import Rack from "./pages/Rack";
 
 export default function App() {
   return (
@@ -22,6 +22,10 @@ export default function App() {
             <Route path="/" element={<Klanten />} />
             <Route path="/klanten" element={<Navigate to="/" replace />} />
             <Route path="/klanten/:klantId" element={<Dashboard />} />
+            <Route
+              path="/klanten/:klantId/racks/:rackId"
+              element={<Rack />}
+            />
             <Route path="/klanten/:klantId/patchplan" element={<PatchPlan />} />
           </Route>
 
