@@ -1,8 +1,6 @@
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function Navigation() {
-  const { klantId } = useParams();
-
   const linkStyle = ({ isActive }) =>
     `px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
       isActive
@@ -15,17 +13,6 @@ function Navigation() {
       <NavLink to="/" end className={linkStyle}>
         Klanten
       </NavLink>
-
-      {klantId && (
-        <>
-          <NavLink to={`/klanten/${klantId}`} end className={linkStyle}>
-            Overzicht
-          </NavLink>
-          <NavLink to={`/klanten/${klantId}/patchplan`} className={linkStyle}>
-            Patchplan
-          </NavLink>
-        </>
-      )}
     </nav>
   );
 }
