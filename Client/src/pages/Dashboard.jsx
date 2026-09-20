@@ -4,6 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { fetchCustomerOverview } from "../api/customers";
 import { createSite, updateSite, deleteSite } from "../api/sites";
+import {
+  createLocation,
+  updateLocation,
+  deleteLocation,
+} from "../api/locations";
 import Header from "../components/Header";
 import Modal from "../components/UI/Modal";
 import FormModal from "../components/UI/FormModal";
@@ -19,6 +24,7 @@ import {
   FiPlus,
   FiEdit2,
   FiTrash2,
+  FiFolder,
 } from "react-icons/fi";
 
 const KPI_ITEMS = [
@@ -47,6 +53,16 @@ const EMPTY_SITE = {
   country: "",
 };
 
+const LOCATION_FIELDS = [
+  { name: "name", label: "Naam", type: "text", required: true },
+  { name: "description", label: "Omschrijving", type: "textarea" },
+];
+
+const EMPTY_LOCATION = {
+  name: "",
+  description: "",
+};
+
 function formatAddress(site) {
   const line = [site.street, site.house_number].filter(Boolean).join(" ");
   const cityLine = [site.postal_code, site.city].filter(Boolean).join(" ");
@@ -62,6 +78,10 @@ export default function Dashboard() {
   const [siteModalOpen, setSiteModalOpen] = useState(false);
   const [editingSite, setEditingSite] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [editingLocation, setEditingLocation] = useState(null);
+  const [deleteLocationTarget, setDeleteLocationTarget] = useState(null);
 
   const overviewQueryKey = ["customer-overview", klantId];
 
@@ -143,6 +163,76 @@ export default function Dashboard() {
       );
     },
   });
+
+  const createLocationMutation = useMutation({
+    mutationFn: createLocation,
+    onSuccess: () => {
+      invalidateOverview();
+      toast.success("Locatie aangemaakt");
+      setLocationModalOpen(false);
+      setEditingLocation(null);
+    },
+    onError: (err) => {
+      toast.error(
+        err.response?.data?.message || "Fout bij aanmaken van locatie",
+      );
+    },
+  });
+
+  const updateLocationMutation = useMutation({
+    mutationFn: updateLocation,
+    onSuccess: () => {
+      invalidateOverview();
+      toast.success("Locatie bijgewerkt");
+      setLocationModalOpen(false);
+      setEditingLocation(null);
+    },
+    onError: (err) => {
+      toast.error(
+        err.response?.data?.message || "Fout bij bijwerken van locatie",
+      );
+    },
+  });
+
+  const deleteLocationMutation = useMutation({
+    mutationFn: deleteLocation,
+    onSuccess: (data) => {
+      invalidateOverview();
+      toast.success(data?.message || "Locatie verwijderd");
+      setDeleteLocationTarget(null);
+    },
+    onError: (err) => {
+      toast.error(
+        err.response?.data?.message || "Fout bij verwijderen van locatie",
+      );
+    },
+  });
+
+  const openNewLocation = () => {
+    setEditingLocation(null);
+    setLocationModalOpen(true);
+  };
+
+  const openEditLocation = (location) => {
+    setEditingLocation(location);
+    setLocationModalOpen(true);
+  };
+
+  const handleLocationSubmit = (values) => {
+    const payload = {
+      name: values.name,
+      description: values.description || null,
+    };
+
+    if (editingLocation) {
+      updateLocationMutation.mutate({ id: editingLocation.id, ...payload });
+    } else {
+      createLocationMutation.mutate({
+        site_id: selectedSite.id,
+        ...payload,
+      });
+    }
+  };
 
   const openNewSite = () => {
     setEditingSite(null);
@@ -369,9 +459,82 @@ export default function Dashboard() {
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-400 mt-6">
-                    Locaties volgen in stap 1.5.
-                  </p>
+                  <div className="mt-6 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-900">
+                      Locaties
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={openNewLocation}
+                      className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 text-sm font-medium cursor-pointer"
+                    >
+                      <FiPlus /> Nieuwe locatie
+                    </button>
+                  </div>
+
+                  {(selectedSite.locations ?? []).length === 0 ? (
+                    <div className="mt-3 border border-dashed border-gray-200 rounded-xl p-6 text-center">
+                      <p className="text-sm text-gray-400">
+                        Nog geen locaties voor deze site.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={openNewLocation}
+                        className="mt-3 inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 text-sm font-medium cursor-pointer"
+                      >
+                        <FiPlus /> Eerste locatie toevoegen
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {selectedSite.locations.map((location) => (
+                        <div
+                          key={location.id}
+                          className="border border-gray-200 rounded-xl p-4 flex flex-col gap-2"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2 min-w-0">
+                              <FiFolder className="text-gray-400 mt-0.5 shrink-0" />
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                  {location.name}
+                                </p>
+                                {location.description && (
+                                  <p className="text-xs text-gray-500 mt-0.5">
+                                    {location.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => openEditLocation(location)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 cursor-pointer"
+                                title="Bewerken"
+                              >
+                                <FiEdit2 className="text-sm" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteLocationTarget(location)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-gray-100 cursor-pointer"
+                                title="Verwijderen"
+                              >
+                                <FiTrash2 className="text-sm" />
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-400">
+                            {(location.racks?.length ?? 0)}{" "}
+                            {(location.racks?.length ?? 0) === 1
+                              ? "rack"
+                              : "racks"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </>
               ) : (
                 <p className="text-sm text-gray-400">Selecteer een site.</p>
@@ -434,6 +597,65 @@ export default function Dashboard() {
             className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-50"
           >
             {deleteMutation.isPending ? "Verwijderen..." : "Site verwijderen"}
+          </button>
+        </div>
+      </Modal>
+
+      <FormModal
+        key={editingLocation?.id ?? "new-location"}
+        isOpen={locationModalOpen}
+        onClose={() => {
+          setLocationModalOpen(false);
+          setEditingLocation(null);
+        }}
+        title={editingLocation ? "Locatie bewerken" : "Nieuwe locatie"}
+        fields={LOCATION_FIELDS}
+        initialValues={
+          editingLocation
+            ? {
+                name: editingLocation.name || "",
+                description: editingLocation.description || "",
+              }
+            : EMPTY_LOCATION
+        }
+        onSubmit={handleLocationSubmit}
+        isSubmitting={
+          createLocationMutation.isPending || updateLocationMutation.isPending
+        }
+      />
+
+      <Modal
+        isOpen={!!deleteLocationTarget}
+        onClose={() => setDeleteLocationTarget(null)}
+        title="Locatie verwijderen"
+      >
+        <p className="text-sm text-gray-600">
+          Weet je zeker dat je <strong>{deleteLocationTarget?.name}</strong>{" "}
+          wilt verwijderen?
+          <span className="text-xs text-red-500 mt-2 block font-medium">
+            Let op: alle racks, devices, patch panels en verbindingen onder
+            deze locatie gaan mee weg (CASCADE).
+          </span>
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setDeleteLocationTarget(null)}
+            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+          >
+            Annuleren
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              deleteLocationMutation.mutate(deleteLocationTarget.id)
+            }
+            disabled={deleteLocationMutation.isPending}
+            className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-50"
+          >
+            {deleteLocationMutation.isPending
+              ? "Verwijderen..."
+              : "Locatie verwijderen"}
           </button>
         </div>
       </Modal>

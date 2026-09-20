@@ -101,12 +101,19 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet of net voor productie
 | 2026-09-04 | 1.1  | Grok           | Overview header + empty state; oude site-kaarten weg                  |
 | 2026-09-05 | docs | Grok + Wilfred | Afspraak aangescherpt + 4.6 / 4.7 / 4.8 (DB-verbeteringen) toegevoegd |
 | 2026-09-05 | 1.2  | Grok           | KPI-rij toegevoegd (sites, locaties, racks, devices, patch panels)    |
+| 2026-09-20 | 1.5  | Claude         | Locatiekaarten (toevoegen/bewerken/verwijderen) effectief gebouwd in `Dashboard.jsx` — was al afgevinkt maar stond nog niet in de code |
 
 ---
 
 ## Hoe bijwerken
 
-1. Vink de afgewerkte stap: `- [ ]` → `- [x]`
-2. Zet **Huidige stap** op het volgende nummer
-3. Rij in het log
-4. Commit, bv. `docs: vink 1.1 af, start 1.2`
+Werkwijze per puntje (Claude of Grok):
+
+1. AI bouwt de code voor het puntje en levert die aan.
+2. AI werkt **deze ROADMAP.md** meteen mee bij:
+   - `- [ ]` → `- [x]` voor het afgewerkte punt
+   - nieuwe rij in de tabel hierboven (**Datum, Stap, Wie, Notitie**)
+3. AI geeft de exacte `git add / commit / push`-commands mee — zelf te kopiëren, AI pusht niet.
+4. Jij test lokaal.
+5. Pas als jij "ok" zegt: voer je de gegeven commands uit.
+6. **Bij de start van elk volgend puntje** checkt de AI eerst of de vorige commit ook echt op GitHub staat (en niet enkel het vinkje) vóór er verder gebouwd wordt.
