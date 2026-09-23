@@ -22,10 +22,7 @@ export default function App() {
             <Route path="/" element={<Klanten />} />
             <Route path="/klanten" element={<Navigate to="/" replace />} />
             <Route path="/klanten/:klantId" element={<Dashboard />} />
-            <Route
-              path="/klanten/:klantId/racks/:rackId"
-              element={<Rack />}
-            />
+            <Route path="/klanten/:klantId/racks/:rackId" element={<Rack />} />
             <Route path="/klanten/:klantId/patchplan" element={<PatchPlan />} />
           </Route>
 

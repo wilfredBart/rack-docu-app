@@ -539,6 +539,12 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
+                      <Link
+                        to={`/klanten/${klantId}/patchplan?siteId=${selectedSite.id}`}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-100"
+                      >
+                        <FiBox className="text-base" /> Patchplan
+                      </Link>
                       <button
                         type="button"
                         onClick={() => openEditSite(selectedSite)}
