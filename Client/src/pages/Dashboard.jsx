@@ -364,7 +364,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50/50 pb-12">
+      <div className="min-h-screen bg-slate-50 pb-12">
         <Header />
         <div className="flex justify-center items-center h-64 text-gray-500 font-medium">
           Laden van klantgegevens...
@@ -375,7 +375,7 @@ export default function Dashboard() {
 
   if (error || !overview) {
     return (
-      <div className="min-h-screen bg-gray-50/50 pb-12">
+      <div className="min-h-screen bg-slate-50 pb-12">
         <Header />
         <div className="max-w-4xl mx-auto mt-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-medium text-center">
           Er is een fout opgetreden bij het laden van de klantgegevens.
@@ -395,7 +395,7 @@ export default function Dashboard() {
   const address = selectedSite ? formatAddress(selectedSite) : null;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-12">
+    <div className="min-h-screen bg-slate-50 pb-12">
       <Header />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -433,7 +433,7 @@ export default function Dashboard() {
           {KPI_ITEMS.map(({ key, label, icon: Icon }) => (
             <div
               key={key}
-              className="bg-white rounded-2xl border border-gray-200 px-4 py-4 flex flex-col gap-1"
+              className="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-4 flex flex-col gap-1"
             >
               <div className="flex items-center gap-2 text-gray-400">
                 <Icon className="text-base" />
@@ -449,8 +449,8 @@ export default function Dashboard() {
         </div>
 
         {sites.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-            <div className="mx-auto mb-4 w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
+            <div className="mx-auto mb-4 w-12 h-12 rounded-2xl bg-slate-50 border border-gray-200 flex items-center justify-center text-gray-400">
               <FiMapPin className="text-xl" />
             </div>
             <h2 className="text-lg font-semibold text-gray-800">
@@ -469,7 +469,7 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4">
-            <aside className="bg-white rounded-2xl border border-gray-200 p-3 h-fit">
+            <aside className="bg-white rounded-2xl border border-gray-200 shadow-sm p-3 h-fit">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1 mb-2">
                 Sites
               </p>
@@ -523,7 +523,7 @@ export default function Dashboard() {
               )}
             </aside>
 
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
+            <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               {selectedSite ? (
                 <>
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -652,7 +652,7 @@ export default function Dashboard() {
                                 return (
                                   <li
                                     key={rack.id}
-                                    className="flex items-center gap-2 border border-gray-100 rounded-lg px-2.5 py-2"
+                                    className="flex items-center gap-2 border border-gray-200 rounded-lg px-2.5 py-2 bg-slate-50/50"
                                   >
                                     <FiServer className="text-gray-400 shrink-0" />
                                     <div className="min-w-0 flex-1">

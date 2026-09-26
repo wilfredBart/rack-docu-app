@@ -517,7 +517,7 @@ export default function Rack() {
   const elevationRows = rack ? buildElevationRows(rack) : [];
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-12">
+    <div className="min-h-screen bg-slate-50 pb-12">
       <Header />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6">

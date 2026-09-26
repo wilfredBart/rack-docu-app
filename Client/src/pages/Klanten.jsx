@@ -105,7 +105,7 @@ function Klanten() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50/50">
+      <div className="min-h-screen bg-slate-50">
         <Header />
         <div className="flex justify-center items-center h-64 text-gray-500 font-medium">
           Klanten inladen...
@@ -116,7 +116,7 @@ function Klanten() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50/50">
+      <div className="min-h-screen bg-slate-50">
         <Header />
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-medium">
           Er ging iets mis bij het ophalen van de klanten. Controleer de
@@ -127,7 +127,7 @@ function Klanten() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-12">
+    <div className="min-h-screen bg-slate-50 pb-12">
       <Header />
 
       {/* Pagina Header met zoekbalk en actieknop */}
@@ -142,14 +142,14 @@ function Klanten() {
 
         <button
           onClick={openNewModal}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition shadow-xs cursor-pointer"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition shadow-sm cursor-pointer"
         >
           <FiPlus className="text-lg" /> Nieuwe klant
         </button>
       </div>
 
       {/* Zoekbalk & Stats Card */}
-      <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-xs mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+      <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
         <div className="relative w-full sm:w-80">
           <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
           <input
@@ -172,7 +172,7 @@ function Klanten() {
       </div>
 
       {/* Klanten Tabel Card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {filteredCustomers.length === 0 ? (
           <div className="p-12 text-center text-gray-400">
             Geen klanten gevonden.
@@ -180,7 +180,7 @@ function Klanten() {
         ) : (
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 border-b border-gray-100 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <tr className="bg-slate-50 border-b border-gray-200 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 <th className="p-4">Klantnaam</th>
                 <th className="p-4">Aangemaakt op</th>
                 <th className="p-4 text-right">Acties</th>
