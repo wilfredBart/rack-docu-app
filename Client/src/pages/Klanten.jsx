@@ -107,7 +107,7 @@ function Klanten() {
     return (
       <div className="min-h-screen bg-slate-50">
         <Header />
-        <div className="flex justify-center items-center h-64 text-gray-500 font-medium">
+        <div className="flex justify-center items-center h-64 text-slate-500 font-medium">
           Klanten inladen...
         </div>
       </div>
@@ -133,8 +133,8 @@ function Klanten() {
       {/* Pagina Header met zoekbalk en actieknop */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Klantenbeheer</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-slate-800">Klantenbeheer</h1>
+          <p className="text-sm text-slate-500">
             Beheer alle organisaties en klik door naar hun specifieke
             infrastructuur.
           </p>
@@ -149,22 +149,22 @@ function Klanten() {
       </div>
 
       {/* Zoekbalk & Stats Card */}
-      <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+      <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
         <div className="relative w-full sm:w-80">
-          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg" />
           <input
             type="text"
             placeholder="Zoek op klantnaam..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-slate-500 transition"
           />
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+        <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
           <FiUserCheck className="text-blue-600" />
           Totaal:{" "}
-          <span className="text-gray-900 font-bold">
+          <span className="text-slate-900 font-bold">
             {filteredCustomers.length}
           </span>{" "}
           klanten
@@ -172,36 +172,36 @@ function Klanten() {
       </div>
 
       {/* Klanten Tabel Card */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {filteredCustomers.length === 0 ? (
-          <div className="p-12 text-center text-gray-400">
+          <div className="p-12 text-center text-slate-400">
             Geen klanten gevonden.
           </div>
         ) : (
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-gray-200 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <tr className="bg-slate-300 border-b border-slate-300 text-xs font-semibold uppercase tracking-wider text-slate-500">
                 <th className="p-4">Klantnaam</th>
                 <th className="p-4">Aangemaakt op</th>
                 <th className="p-4 text-right">Acties</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 text-sm">
+            <tbody className="divide-y divide-slate-300 text-sm">
               {filteredCustomers.map((c) => (
                 <tr key={c.id} className="hover:bg-blue-50/30 transition group">
                   <td className="p-4">
                     {/* Het oogje staat nu vast aan de linkerkant, is altijd zichtbaar en kleurt mee bij hover */}
                     <Link
                       to={`/klanten/${c.id}`}
-                      className="inline-flex items-center gap-2.5 font-semibold text-gray-900 hover:text-blue-600 transition group/link"
+                      className="inline-flex items-center gap-2.5 font-semibold text-slate-900 hover:text-blue-600 transition group/link"
                     >
-                      <FiEye className="text-gray-400 group-hover/link:text-blue-600 text-base shrink-0 transition-colors" />
+                      <FiEye className="text-slate-400 group-hover/link:text-blue-600 text-base shrink-0 transition-colors" />
                       <span>{c.name}</span>
                     </Link>
                   </td>
-                  <td className="p-4 text-gray-500">
+                  <td className="p-4 text-slate-500">
                     <div className="flex items-center gap-2">
-                      <FiCalendar className="text-gray-400 shrink-0" />
+                      <FiCalendar className="text-slate-400 shrink-0" />
                       {new Date(c.created_at).toLocaleDateString("nl-BE", {
                         day: "2-digit",
                         month: "short",
@@ -213,7 +213,7 @@ function Klanten() {
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => openEditModal(c)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 transition cursor-pointer"
+                        className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition cursor-pointer"
                         title="Bewerken"
                       >
                         <FiEdit2 className="text-base" />
@@ -221,7 +221,7 @@ function Klanten() {
 
                       <button
                         onClick={() => setDeleteTarget(c)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-gray-100 transition cursor-pointer"
+                        className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-slate-100 transition cursor-pointer"
                         title="Verwijderen"
                       >
                         <FiTrash2 className="text-base" />
@@ -255,7 +255,7 @@ function Klanten() {
         onClose={() => setDeleteTarget(null)}
         title="Klant Verwijderen"
       >
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-600">
           Weet je zeker dat je <strong>{deleteTarget?.name}</strong> wilt
           verwijderen?
           <br />
@@ -267,7 +267,7 @@ function Klanten() {
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={() => setDeleteTarget(null)}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition cursor-pointer"
+            className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition cursor-pointer"
           >
             Annuleren
           </button>

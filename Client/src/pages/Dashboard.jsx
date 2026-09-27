@@ -28,6 +28,7 @@ import {
   FiFolder,
   FiExternalLink,
 } from "react-icons/fi";
+import { MdOutlineAddLocationAlt } from "react-icons/md";
 
 const KPI_ITEMS = [
   { key: "sites", label: "Sites", icon: FiMapPin },
@@ -364,9 +365,9 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 pb-12">
+      <div className="min-h-screen bg-slate-100 pb-12">
         <Header />
-        <div className="flex justify-center items-center h-64 text-gray-500 font-medium">
+        <div className="flex justify-center items-center h-64 text-slate-500 font-medium">
           Laden van klantgegevens...
         </div>
       </div>
@@ -375,7 +376,7 @@ export default function Dashboard() {
 
   if (error || !overview) {
     return (
-      <div className="min-h-screen bg-slate-50 pb-12">
+      <div className="min-h-screen bg-slate-100 pb-12">
         <Header />
         <div className="max-w-4xl mx-auto mt-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-medium text-center">
           Er is een fout opgetreden bij het laden van de klantgegevens.
@@ -395,28 +396,28 @@ export default function Dashboard() {
   const address = selectedSite ? formatAddress(selectedSite) : null;
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-12">
+    <div className="min-h-screen bg-slate-100 pb-12">
       <Header />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4 pt-2">
+        <nav className="flex items-center gap-2 text-sm text-slate-500 mb-4 pt-2">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 hover:text-gray-800 transition font-medium"
+            className="inline-flex items-center gap-1.5 hover:text-slate-800 transition font-medium"
           >
             <FiArrowLeft className="text-base" />
             Klanten
           </Link>
-          <FiChevronRight className="text-gray-300" />
-          <span className="text-gray-800 font-medium">{overview.name}</span>
+          <FiChevronRight className="text-slate-300" />
+          <span className="text-slate-800 font-medium">{overview.name}</span>
         </nav>
 
         <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-slate-900">
               {overview.name}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               Infrastructuur-overzicht
             </p>
           </div>
@@ -433,15 +434,15 @@ export default function Dashboard() {
           {KPI_ITEMS.map(({ key, label, icon: Icon }) => (
             <div
               key={key}
-              className="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-4 flex flex-col gap-1"
+              className="bg-white rounded-2xl border border-slate-300 shadow-md px-4 py-4 flex flex-col gap-1"
             >
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-slate-400">
                 <Icon className="text-base" />
                 <span className="text-xs font-medium uppercase tracking-wide">
                   {label}
                 </span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 tabular-nums">
+              <div className="text-2xl font-bold text-slate-900 tabular-nums">
                 {stats[key] ?? 0}
               </div>
             </div>
@@ -449,14 +450,14 @@ export default function Dashboard() {
         </div>
 
         {sites.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
-            <div className="mx-auto mb-4 w-12 h-12 rounded-2xl bg-slate-50 border border-gray-200 flex items-center justify-center text-gray-400">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
+            <div className="mx-auto mb-4 w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400">
               <FiMapPin className="text-xl" />
             </div>
-            <h2 className="text-lg font-semibold text-gray-800">
+            <h2 className="text-lg font-semibold text-slate-800">
               Nog geen sites
             </h2>
-            <p className="text-sm text-gray-500 mt-2 max-w-md mx-auto">
+            <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto">
               Er zijn nog geen vestigingen gekoppeld aan {overview.name}.
             </p>
             <button
@@ -469,22 +470,31 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4">
-            <aside className="bg-white rounded-2xl border border-gray-200 shadow-sm p-3 h-fit">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1 mb-2">
-                Sites
-              </p>
-              <div className="relative mb-2">
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <aside className="bg-white rounded-2xl border border-slate-300 shadow-sm p-6 h-fit">
+              <div className="flex items-center justify-between mb-3 border-slate-300 border-b mb-4">
+                <h3 className="uppercase text-bold font-semibold">Sites</h3>
+
+                <button
+                  type="button"
+                  onClick={openNewSite}
+                  className="rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer "
+                >
+                  <MdOutlineAddLocationAlt className="shrink-0 mr-4" />
+                </button>
+              </div>
+
+              <div className="relative mb-6">
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Zoek op naam of stad..."
-                  className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
+                  placeholder="Zoek sites op naam of stad..."
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300  rounded-sm text-sm focus:outline-none focus:border-blue-500"
                 />
               </div>
               {filteredSites.length === 0 ? (
-                <p className="text-sm text-gray-400 px-1 py-3">
+                <p className="text-sm text-slate-400 px-1 py-3">
                   Geen sites gevonden.
                 </p>
               ) : (
@@ -499,13 +509,13 @@ export default function Dashboard() {
                           className={`w-full text-left px-3 py-2.5 rounded-xl border transition cursor-pointer ${
                             active
                               ? "border-blue-200 bg-blue-50"
-                              : "border-transparent hover:bg-gray-50"
+                              : "border-transparent hover:bg-slate-50"
                           }`}
                         >
-                          <span className="block text-sm font-semibold text-gray-900">
+                          <span className="block text-sm font-semibold text-slate-900">
                             {site.name}
                           </span>
-                          <span className="mt-0.5 flex items-center justify-between gap-2 text-xs text-gray-500">
+                          <span className="mt-0.5 flex items-center justify-between gap-2 text-xs text-slate-500">
                             <span className="inline-flex items-center gap-1 truncate">
                               <FiMapPin className="shrink-0" />
                               {site.city || "Geen stad"}
@@ -523,15 +533,15 @@ export default function Dashboard() {
               )}
             </aside>
 
-            <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <section className="bg-white rounded-2xl border border-slate-300 shadow-sm p-6">
               {selectedSite ? (
                 <>
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div>
-                      <h2 className="text-lg font-semibold text-gray-900">
+                      <h2 className="text-lg font-semibold text-slate-900">
                         {selectedSite.name}
                       </h2>
-                      <p className="text-sm text-gray-500 mt-1 inline-flex items-start gap-1.5">
+                      <p className="text-sm text-slate-500 mt-1 inline-flex items-start gap-1.5">
                         <FiMapPin className="mt-0.5 shrink-0" />
                         {address || (
                           <span className="italic">Geen adres opgegeven</span>
@@ -541,14 +551,14 @@ export default function Dashboard() {
                     <div className="flex items-center gap-1">
                       <Link
                         to={`/klanten/${klantId}/patchplan?siteId=${selectedSite.id}`}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-100"
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-slate-100"
                       >
                         <FiBox className="text-base" /> Patchplan
                       </Link>
                       <button
                         type="button"
                         onClick={() => openEditSite(selectedSite)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 cursor-pointer"
+                        className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 cursor-pointer"
                         title="Bewerken"
                       >
                         <FiEdit2 />
@@ -556,7 +566,7 @@ export default function Dashboard() {
                       <button
                         type="button"
                         onClick={() => setDeleteTarget(selectedSite)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-gray-100 cursor-pointer"
+                        className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-slate-100 cursor-pointer"
                         title="Verwijderen"
                       >
                         <FiTrash2 />
@@ -564,7 +574,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="mt-6 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-gray-900">
+                    <h3 className="text-sm font-semibold text-slate-900">
                       Locaties
                     </h3>
                     <button
@@ -577,8 +587,8 @@ export default function Dashboard() {
                   </div>
 
                   {(selectedSite.locations ?? []).length === 0 ? (
-                    <div className="mt-3 border border-dashed border-gray-200 rounded-xl p-6 text-center">
-                      <p className="text-sm text-gray-400">
+                    <div className="mt-3 border border-dashed border-slate-200 rounded-xl p-6 text-center">
+                      <p className="text-sm text-slate-400">
                         Nog geen locaties voor deze site.
                       </p>
                       <button
@@ -594,17 +604,17 @@ export default function Dashboard() {
                       {selectedSite.locations.map((location) => (
                         <div
                           key={location.id}
-                          className="border border-gray-200 rounded-xl p-4 flex flex-col gap-2"
+                          className="border border-slate-200 rounded-xl p-4 flex flex-col gap-2"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-start gap-2 min-w-0">
-                              <FiFolder className="text-gray-400 mt-0.5 shrink-0" />
+                              <FiFolder className="text-slate-400 mt-0.5 shrink-0" />
                               <div className="min-w-0">
-                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                <p className="text-sm font-semibold text-slate-900 truncate">
                                   {location.name}
                                 </p>
                                 {location.description && (
-                                  <p className="text-xs text-gray-500 mt-0.5">
+                                  <p className="text-xs text-slate-500 mt-0.5">
                                     {location.description}
                                   </p>
                                 )}
@@ -614,15 +624,17 @@ export default function Dashboard() {
                               <button
                                 type="button"
                                 onClick={() => openEditLocation(location)}
-                                className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 cursor-pointer"
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 cursor-pointer"
                                 title="Bewerken"
                               >
                                 <FiEdit2 className="text-sm" />
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setDeleteLocationTarget(location)}
-                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-gray-100 cursor-pointer"
+                                onClick={() =>
+                                  setDeleteLocationTarget(location)
+                                }
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-slate-100 cursor-pointer"
                                 title="Verwijderen"
                               >
                                 <FiTrash2 className="text-sm" />
@@ -630,8 +642,8 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div className="mt-1 flex items-center justify-between">
-                            <p className="text-xs text-gray-400">
-                              {(location.racks?.length ?? 0)}{" "}
+                            <p className="text-xs text-slate-400">
+                              {location.racks?.length ?? 0}{" "}
                               {(location.racks?.length ?? 0) === 1
                                 ? "rack"
                                 : "racks"}
@@ -652,19 +664,20 @@ export default function Dashboard() {
                                 return (
                                   <li
                                     key={rack.id}
-                                    className="flex items-center gap-2 border border-gray-200 rounded-lg px-2.5 py-2 bg-slate-50/50"
+                                    className="flex items-center gap-2 border border-slate-200 rounded-lg px-2.5 py-2 bg-slate-100"
                                   >
-                                    <FiServer className="text-gray-400 shrink-0" />
+                                    <FiServer className="text-slate-400 shrink-0" />
                                     <div className="min-w-0 flex-1">
                                       <div className="flex items-center justify-between gap-2">
-                                        <span className="text-xs font-semibold text-gray-800 truncate">
+                                        <span className="text-xs font-semibold text-slate-800 truncate">
                                           {rack.name}
                                         </span>
-                                        <span className="text-[11px] text-gray-400 tabular-nums shrink-0">
-                                          {rack.occupied_u ?? 0}/{rack.height_u}U
+                                        <span className="text-[11px] text-slate-400 tabular-nums shrink-0">
+                                          {rack.occupied_u ?? 0}/{rack.height_u}
+                                          U
                                         </span>
                                       </div>
-                                      <div className="mt-1 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                      <div className="mt-1 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                                         <div
                                           className={`h-full rounded-full ${
                                             pct >= 90
@@ -685,7 +698,7 @@ export default function Dashboard() {
                                             `/klanten/${klantId}/racks/${rack.id}`,
                                           )
                                         }
-                                        className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 cursor-pointer"
+                                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 cursor-pointer"
                                         title="Openen"
                                       >
                                         <FiExternalLink className="text-sm" />
@@ -695,7 +708,7 @@ export default function Dashboard() {
                                         onClick={() =>
                                           openEditRack(rack, location.id)
                                         }
-                                        className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 cursor-pointer"
+                                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 cursor-pointer"
                                         title="Bewerken"
                                       >
                                         <FiEdit2 className="text-sm" />
@@ -705,7 +718,7 @@ export default function Dashboard() {
                                         onClick={() =>
                                           setDeleteRackTarget(rack)
                                         }
-                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-gray-100 cursor-pointer"
+                                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-slate-100 cursor-pointer"
                                         title="Verwijderen"
                                       >
                                         <FiTrash2 className="text-sm" />
@@ -722,7 +735,7 @@ export default function Dashboard() {
                   )}
                 </>
               ) : (
-                <p className="text-sm text-gray-400">Selecteer een site.</p>
+                <p className="text-sm text-slate-400">Selecteer een site.</p>
               )}
             </section>
           </div>
@@ -759,7 +772,7 @@ export default function Dashboard() {
         onClose={() => setDeleteTarget(null)}
         title="Site verwijderen"
       >
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-600">
           Weet je zeker dat je <strong>{deleteTarget?.name}</strong> wilt
           verwijderen?
           <span className="text-xs text-red-500 mt-2 block font-medium">
@@ -771,7 +784,7 @@ export default function Dashboard() {
           <button
             type="button"
             onClick={() => setDeleteTarget(null)}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+            className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
           >
             Annuleren
           </button>
@@ -814,19 +827,19 @@ export default function Dashboard() {
         onClose={() => setDeleteLocationTarget(null)}
         title="Locatie verwijderen"
       >
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-600">
           Weet je zeker dat je <strong>{deleteLocationTarget?.name}</strong>{" "}
           wilt verwijderen?
           <span className="text-xs text-red-500 mt-2 block font-medium">
-            Let op: alle racks, devices, patch panels en verbindingen onder
-            deze locatie gaan mee weg (CASCADE).
+            Let op: alle racks, devices, patch panels en verbindingen onder deze
+            locatie gaan mee weg (CASCADE).
           </span>
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
             onClick={() => setDeleteLocationTarget(null)}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+            className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
           >
             Annuleren
           </button>
@@ -875,19 +888,19 @@ export default function Dashboard() {
         onClose={() => setDeleteRackTarget(null)}
         title="Rack verwijderen"
       >
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-600">
           Weet je zeker dat je <strong>{deleteRackTarget?.name}</strong> wilt
           verwijderen?
           <span className="text-xs text-red-500 mt-2 block font-medium">
-            Let op: alle devices, patch panels en cable management in dit
-            rack gaan mee weg (CASCADE).
+            Let op: alle devices, patch panels en cable management in dit rack
+            gaan mee weg (CASCADE).
           </span>
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
             onClick={() => setDeleteRackTarget(null)}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+            className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
           >
             Annuleren
           </button>
