@@ -11,11 +11,11 @@ export default function RackItemDeleteModal({ config, crud }) {
       onClose={() => crud.setDeleteTarget(null)}
       title={`${config.label} verwijderen`}
     >
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-fg-muted">
         Weet je zeker dat je <strong>{target?.label}</strong> wilt
         verwijderen?
         {config.deleteWarning && (
-          <span className="text-xs text-red-500 mt-2 block font-medium">
+          <span className="text-xs text-destructive mt-2 block font-medium">
             {config.deleteWarning}
           </span>
         )}
@@ -24,7 +24,7 @@ export default function RackItemDeleteModal({ config, crud }) {
         <button
           type="button"
           onClick={() => crud.setDeleteTarget(null)}
-          className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+          className="px-4 py-2 rounded-xl text-sm font-medium text-fg-muted hover:bg-bg-subtle cursor-pointer"
         >
           Annuleren
         </button>
@@ -32,7 +32,7 @@ export default function RackItemDeleteModal({ config, crud }) {
           type="button"
           onClick={() => crud.deleteMutation.mutate(target.id)}
           disabled={crud.deleteMutation.isPending}
-          className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-50"
+          className="px-4 py-2 rounded-xl text-sm font-medium bg-destructive text-white hover:opacity-90 cursor-pointer disabled:opacity-50"
         >
           {crud.deleteMutation.isPending ? "Verwijderen..." : buttonLabel}
         </button>

@@ -37,10 +37,10 @@ export default function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center bg-brand-lightest">
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-brand-muted/30 w-full max-w-md ml-12">
-          <p className="text-red-600">Ongeldige of ontbrekende reset-link.</p>
-          <p className="text-slate-500 text-sm mt-2">
+      <div className="min-h-screen flex items-center bg-bg">
+        <div className="bg-card p-8 rounded-2xl shadow-[var(--shadow-border)] border border-brand-muted/30 w-full max-w-md ml-12">
+          <p className="text-destructive">Ongeldige of ontbrekende reset-link.</p>
+          <p className="text-fg-subtle text-sm mt-2">
             Vraag een beheerder om een nieuwe reset-link te genereren via het server-script.
           </p>
         </div>
@@ -49,9 +49,9 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center bg-brand-lightest">
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-brand-muted/30 w-full max-w-md ml-12">
-        <h1 className="text-2xl font-semibold text-slate-800 mb-6">Nieuw wachtwoord instellen</h1>
+    <div className="min-h-screen flex items-center bg-bg">
+      <div className="bg-card p-8 rounded-2xl shadow-[var(--shadow-border)] border border-brand-muted/30 w-full max-w-md ml-12">
+        <h1 className="text-2xl font-semibold text-fg mb-6">Nieuw wachtwoord instellen</h1>
 
         {success && (
           <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg mb-4 text-sm">
@@ -59,7 +59,7 @@ export default function ResetPassword() {
           </div>
         )}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg mb-4 text-sm">
+          <div className="bg-destructive/10 border border-destructive/40 text-destructive px-4 py-2 rounded-lg mb-4 text-sm">
             {error}
           </div>
         )}
@@ -67,26 +67,26 @@ export default function ResetPassword() {
         {!success && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Nieuw wachtwoord</label>
+              <label className="block text-sm text-fg-muted mb-1">Nieuw wachtwoord</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full px-3 py-2 rounded-lg bg-white text-slate-800 border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
+                className="w-full px-3 py-2 rounded-lg bg-card text-fg border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Bevestig wachtwoord</label>
+              <label className="block text-sm text-fg-muted mb-1">Bevestig wachtwoord</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full px-3 py-2 rounded-lg bg-white text-slate-800 border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
+                className="w-full px-3 py-2 rounded-lg bg-card text-fg border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
               />
             </div>
 

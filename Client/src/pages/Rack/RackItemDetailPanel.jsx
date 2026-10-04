@@ -1,5 +1,7 @@
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiX } from "react-icons/fi";
 import RackPortsSection from "./RackPortsSection";
+import { EquipmentFace } from "./equipment-face";
+import { faceKind } from "./rackElevation";
 
 const KIND_TITLES = {
   device: "Device",
@@ -7,13 +9,13 @@ const KIND_TITLES = {
   cable_management: "Cable management",
 };
 
-// Detailkaart voor het geselecteerde item in de rack: kop, bewerken/verwijderen-knoppen,
-// eigenschappen (afhankelijk van kind), en — voor device/patch_panel — de poorten-sectie.
+// Detailkaart voor het geselecteerde item: kleine visuele face + eigenschappen + poorten.
 export default function RackItemDetailPanel({
   selectedItem,
   deviceTypeMap,
   onEdit,
   onDeleteRequest,
+  onClose,
   selectedPorts,
   portForm,
   setPortForm,
@@ -23,43 +25,67 @@ export default function RackItemDetailPanel({
   bulkCreatePortsMutation,
 }) {
   const { kind, item } = selectedItem;
+  const typeName =
+    kind === "device" ? deviceTypeMap.get(item.device_type_id) : undefined;
+  const face = faceKind(kind, item, typeName);
 
   return (
-    <div className="w-full max-w-3xl mt-6 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.12em] text-slate-400 font-semibold">
+    <div
+      id="rack-item-detail"
+      className="w-full mt-0 scroll-mt-4 bg-card rounded-2xl border border-border p-5 shadow-[var(--shadow-border)]"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[11px] uppercase tracking-[0.12em] text-fg-subtle font-semibold">
             {KIND_TITLES[kind]}
           </p>
-          <h2 className="text-lg font-semibold text-slate-800">
-            {item.label}
-          </h2>
+          <h2 className="text-lg font-semibold text-fg truncate">{item.label}</h2>
         </div>
-
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => onEdit(selectedItem)}
-            className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 cursor-pointer"
+            className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-fg cursor-pointer"
           >
             <FiEdit2 className="text-xs" /> Bewerken
           </button>
           <button
             type="button"
             onClick={() => onDeleteRequest(selectedItem)}
-            className="inline-flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-700 cursor-pointer"
+            className="inline-flex items-center gap-1 text-sm font-medium text-destructive hover:text-destructive cursor-pointer"
           >
             <FiTrash2 className="text-xs" /> Verwijderen
           </button>
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center justify-center rounded-lg border border-border p-1.5 text-fg-subtle hover:text-fg hover:bg-bg-subtle cursor-pointer"
+              aria-label="Sluiten"
+            >
+              <FiX className="text-base" />
+            </button>
+          ) : null}
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-600">
+      {/* Zelfde face als in de rack, compact */}
+      <div className="detail-face-preview mt-4" aria-hidden="true">
+        <EquipmentFace
+          kind={kind}
+          item={item}
+          face={face}
+          selected
+          interactive={false}
+        />
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-fg-muted">
         <div>
-          <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+          <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
             Positie
           </span>
-          <span className="font-medium text-slate-800">
+          <span className="font-medium text-fg">
             {item.rack_position}U — {item.rack_units || 1}U
           </span>
         </div>
@@ -67,44 +93,38 @@ export default function RackItemDetailPanel({
         {kind === "device" && (
           <>
             <div>
-              <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Type
               </span>
-              <span className="font-medium text-slate-800">
+              <span className="font-medium text-fg">
                 {deviceTypeMap.get(item.device_type_id) || "Onbekend"}
               </span>
             </div>
             <div>
-              <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Fabrikant
               </span>
-              <span className="font-medium text-slate-800">
-                {item.manufacturer || "-"}
-              </span>
+              <span className="font-medium text-fg">{item.manufacturer || "-"}</span>
             </div>
             <div>
-              <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Model
               </span>
-              <span className="font-medium text-slate-800">
-                {item.model || "-"}
-              </span>
+              <span className="font-medium text-fg">{item.model || "-"}</span>
             </div>
             <div>
-              <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Serienummer
               </span>
-              <span className="font-medium text-slate-800">
+              <span className="font-medium text-fg">
                 {item.serial_number || "-"}
               </span>
             </div>
             <div className="sm:col-span-2">
-              <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 MAC-adres
               </span>
-              <span className="font-medium text-slate-800">
-                {item.mac_address || "-"}
-              </span>
+              <span className="font-medium text-fg">{item.mac_address || "-"}</span>
             </div>
           </>
         )}
@@ -112,61 +132,59 @@ export default function RackItemDetailPanel({
         {kind === "patch_panel" && (
           <>
             <div>
-              <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Type
               </span>
-              <span className="font-medium text-slate-800">
-                {item.type || "-"}
-              </span>
+              <span className="font-medium text-fg">{item.type || "-"}</span>
             </div>
             <div>
-              <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Aantal poorten
               </span>
-              <span className="font-medium text-slate-800">
-                {item.port_count || 0}
-              </span>
+              <span className="font-medium text-fg">{item.port_count || 0}</span>
             </div>
             <div>
-              <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Fabrikant
               </span>
-              <span className="font-medium text-slate-800">
-                {item.manufacturer || "-"}
-              </span>
+              <span className="font-medium text-fg">{item.manufacturer || "-"}</span>
             </div>
             <div>
-              <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Model
               </span>
-              <span className="font-medium text-slate-800">
-                {item.model || "-"}
-              </span>
+              <span className="font-medium text-fg">{item.model || "-"}</span>
             </div>
           </>
         )}
 
         {kind === "cable_management" && (
-          <div className="sm:col-span-2">
-            <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
-              Type
-            </span>
-            <span className="font-medium text-slate-800">
-              {item.type || "-"}
-            </span>
-          </div>
+          <>
+            <div>
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
+                Type
+              </span>
+              <span className="font-medium text-fg">{item.type || "-"}</span>
+            </div>
+            <div>
+              <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
+                Fabrikant
+              </span>
+              <span className="font-medium text-fg">{item.manufacturer || "-"}</span>
+            </div>
+          </>
         )}
 
-        {(item.notes || "") && (
+        {item.notes ? (
           <div className="sm:col-span-2">
-            <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400 mb-1">
-              Opmerking
+            <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
+              Notities
             </span>
-            <span className="font-medium text-slate-800 whitespace-pre-wrap">
+            <span className="font-medium text-fg whitespace-pre-wrap">
               {item.notes}
             </span>
           </div>
-        )}
+        ) : null}
       </div>
 
       {kind !== "cable_management" && (
@@ -174,7 +192,7 @@ export default function RackItemDetailPanel({
           selectedPorts={selectedPorts}
           portForm={portForm}
           setPortForm={setPortForm}
-          onBulkSubmit={onBulkPortSubmit}
+          onBulkPortSubmit={onBulkPortSubmit}
           updatePortMutation={updatePortMutation}
           deletePortMutation={deletePortMutation}
           bulkCreatePortsMutation={bulkCreatePortsMutation}

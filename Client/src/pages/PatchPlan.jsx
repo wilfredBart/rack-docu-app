@@ -22,25 +22,25 @@ function PatchPlan() {
 
         <thead className="text-left">
           <tr>
-            <th className="border p-2 bg-gray-100 " colSpan={3}>
+            <th className="border p-2 bg-bg-subtle " colSpan={3}>
               Van Device
             </th>
             <th
-              className="border p-2 bg-gray-200 border-l-4 border-l-gray-500"
+              className="border p-2 bg-bg-elevated border-l-4 border-l-border"
               colSpan={3}
             >
               Naar Device
             </th>
           </tr>
           <tr>
-            <th className="border p-2 bg-gray-50">Device naam</th>
-            <th className="border p-2 bg-gray-50">Poort</th>
-            <th className="border p-2 bg-gray-50">Status</th>
-            <th className="border p-2 bg-gray-100 border-l-4 border-l-gray-500">
+            <th className="border p-2 bg-bg-subtle">Device naam</th>
+            <th className="border p-2 bg-bg-subtle">Poort</th>
+            <th className="border p-2 bg-bg-subtle">Status</th>
+            <th className="border p-2 bg-bg-subtle border-l-4 border-l-border">
               Device naam
             </th>
-            <th className="border p-2 bg-gray-100">Poort</th>
-            <th className="border p-2 bg-gray-100">Status</th>
+            <th className="border p-2 bg-bg-subtle">Poort</th>
+            <th className="border p-2 bg-bg-subtle">Status</th>
           </tr>
         </thead>
 
@@ -51,7 +51,7 @@ function PatchPlan() {
               <input
                 type="text"
                 placeholder="leeg"
-                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-gray-400 p-1"
+                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-accent p-1"
                 value={VanDeviceNaam}
                 onChange={(e) => setVanDeviceNaam(e.target.value)}
               />
@@ -60,7 +60,7 @@ function PatchPlan() {
               <input
                 type="text"
                 placeholder="leeg"
-                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-gray-400 p-1"
+                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-accent p-1"
                 value={VanDevicePoort}
                 onChange={(e) => setVanDevicePoort(e.target.value)}
               />
@@ -73,7 +73,7 @@ function PatchPlan() {
                   className="sr-only peer"
                   onChange={(e) => setVanDeviceStatus(e.target.checked)}
                 />
-                <div className="absolute inset-0 bg-red-500 peer-checked:bg-green-500 rounded-full transition-colors duration-200"></div>
+                <div className="absolute inset-0 bg-led-fault peer-checked:bg-green-500 rounded-full transition-colors duration-200"></div>
 
                 <span className="absolute right-1.5 text-white text-[10px] font-bold peer-checked:opacity-0 opacity-100 transition-opacity">
                   OFF
@@ -83,7 +83,7 @@ function PatchPlan() {
                   ON
                 </span>
 
-                <div className="absolute left-1 peer-checked:left-8 w-5 h-5 bg-white rounded-full transition-all duration-200 shadow"></div>
+                <div className="absolute left-1 peer-checked:left-8 w-5 h-5 bg-card rounded-full transition-all duration-200 shadow"></div>
               </label>
             </td>
 
@@ -92,7 +92,7 @@ function PatchPlan() {
               <input
                 type="text"
                 placeholder="leeg"
-                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-gray-400 p-1"
+                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-accent p-1"
                 value={NaarDeviceNaam}
                 onChange={(e) => setNaarDeviceNaam(e.target.value)}
               />
@@ -101,7 +101,7 @@ function PatchPlan() {
               <input
                 type="text"
                 placeholder="leeg"
-                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-gray-400 p-1"
+                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-accent p-1"
                 value={NaarDevicePoort}
                 onChange={(e) => setNaarDevicePoort(e.target.value)}
               />
@@ -114,7 +114,7 @@ function PatchPlan() {
                   className="sr-only peer"
                   onChange={(e) => setNaarDeviceStatus(e.target.checked)}
                 />
-                <div className="absolute inset-0 bg-red-500 peer-checked:bg-green-500 rounded-full transition-colors duration-200"></div>
+                <div className="absolute inset-0 bg-led-fault peer-checked:bg-green-500 rounded-full transition-colors duration-200"></div>
 
                 <span className="absolute right-1.5 text-white text-[10px] font-bold peer-checked:opacity-0 opacity-100 transition-opacity">
                   OFF
@@ -124,7 +124,7 @@ function PatchPlan() {
                   ON
                 </span>
 
-                <div className="absolute left-1 peer-checked:left-8 w-5 h-5 bg-white rounded-full transition-all duration-200 shadow"></div>
+                <div className="absolute left-1 peer-checked:left-8 w-5 h-5 bg-card rounded-full transition-all duration-200 shadow"></div>
               </label>
             </td>
           </tr>

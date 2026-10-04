@@ -32,12 +32,12 @@ function Login({ setWantLogin }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col border border-gray-300 p-6 rounded-2xl bg-white shadow-xs"
+      className="flex flex-col border border-border p-6 rounded-2xl bg-card shadow-xs"
     >
       <div className="mb-4 flex flex-col">
         <label
           htmlFor="email"
-          className="block text-xs font-medium text-gray-700 mb-1"
+          className="block text-xs font-medium text-fg-muted mb-1"
         >
           Email:
         </label>
@@ -47,7 +47,7 @@ function Login({ setWantLogin }) {
           name="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500"
+          className="border border-border rounded-lg p-2 text-sm focus:outline-none focus:border-accent"
           required
         />
       </div>
@@ -55,7 +55,7 @@ function Login({ setWantLogin }) {
       <div className="mb-4 flex flex-col">
         <label
           htmlFor="password"
-          className="block text-xs font-medium text-gray-700 mb-1"
+          className="block text-xs font-medium text-fg-muted mb-1"
         >
           Wachtwoord:
         </label>
@@ -65,7 +65,7 @@ function Login({ setWantLogin }) {
           name="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500"
+          className="border border-border rounded-lg p-2 text-sm focus:outline-none focus:border-accent"
           required
         />
       </div>
@@ -73,16 +73,16 @@ function Login({ setWantLogin }) {
       <button
         type="submit"
         disabled={loginMutation.isPending}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition cursor-pointer disabled:opacity-50"
+        className="bg-accent text-accent-fg hover:opacity-90 px-4 py-2.5 rounded-xl font-medium text-sm transition cursor-pointer disabled:opacity-50"
       >
         {loginMutation.isPending ? "Inloggen..." : "Inloggen"}
       </button>
 
       <div className="mt-4 flex items-center justify-center text-sm">
-        <span className="text-gray-600">Nog geen account?</span>
+        <span className="text-fg-muted">Nog geen account?</span>
         <button
           type="button"
-          className="text-blue-600 font-medium underline cursor-pointer ml-1"
+          className="text-accent font-medium underline cursor-pointer ml-1"
           onClick={() => setWantLogin(false)}
         >
           Klik hier om te registreren

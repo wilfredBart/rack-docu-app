@@ -126,7 +126,7 @@ Niet blokkerend voor 1–3. Oppakken wanneer het pijn doet of net voor productie
 
 ## Hoe bijwerken
 
-Werkwijze per puntje (Claude of Grok):
+Werkwijze per puntje (Instructies voor AI):
 
 1. AI bouwt de code voor het puntje en levert die aan.
 2. AI werkt **deze ROADMAP.md** meteen mee bij:

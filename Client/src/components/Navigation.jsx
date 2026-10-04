@@ -4,12 +4,12 @@ function Navigation() {
   const linkStyle = ({ isActive }) =>
     `px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
       isActive
-        ? "bg-blue-600 text-white shadow-xs"
-        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+        ? "bg-accent text-accent-fg shadow-xs"
+        : "text-fg-muted hover:bg-bg-subtle hover:text-fg"
     }`;
 
   return (
-    <nav className="flex gap-2 p-1 bg-gray-50/80 rounded-xl border border-gray-100 w-fit">
+    <nav className="flex gap-2 p-1 bg-bg-subtle rounded-xl border border-border w-fit">
       <NavLink to="/" end className={linkStyle}>
         Klanten
       </NavLink>

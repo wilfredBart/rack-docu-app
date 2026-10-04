@@ -30,50 +30,50 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center bg-brand-lightest">
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-brand-muted/30 w-full max-w-md ml-12">
-        <h1 className="text-2xl font-semibold text-slate-800 mb-6">Account aanmaken</h1>
+    <div className="min-h-screen flex items-center bg-bg">
+      <div className="bg-card p-8 rounded-2xl shadow-[var(--shadow-border)] border border-brand-muted/30 w-full max-w-md ml-12">
+        <h1 className="text-2xl font-semibold text-fg mb-6">Account aanmaken</h1>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg mb-4 text-sm">
+          <div className="bg-destructive/10 border border-destructive/40 text-destructive px-4 py-2 rounded-lg mb-4 text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Naam</label>
+            <label className="block text-sm text-fg-muted mb-1">Naam</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded-lg bg-white text-slate-800 border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
+              className="w-full px-3 py-2 rounded-lg bg-card text-fg border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Email</label>
+            <label className="block text-sm text-fg-muted mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded-lg bg-white text-slate-800 border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
+              className="w-full px-3 py-2 rounded-lg bg-card text-fg border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Wachtwoord</label>
+            <label className="block text-sm text-fg-muted mb-1">Wachtwoord</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full px-3 py-2 rounded-lg bg-white text-slate-800 border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
+              className="w-full px-3 py-2 rounded-lg bg-card text-fg border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
             />
-            <p className="text-xs text-slate-400 mt-1">Minstens 8 karakters</p>
+            <p className="text-xs text-fg-subtle mt-1">Minstens 8 karakters</p>
           </div>
 
           <button
@@ -85,7 +85,7 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="text-slate-500 text-sm mt-4 text-center">
+        <p className="text-fg-subtle text-sm mt-4 text-center">
           Al een account? <Link to="/login" className="text-brand hover:underline">Log hier in</Link>
         </p>
       </div>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchRackWithContents } from "../../api/racks";
@@ -8,7 +8,7 @@ import { fetchPatchPanelWithPorts } from "../../api/patchPanels";
 import Header from "../../components/Header";
 import { FiArrowLeft, FiChevronRight, FiPlus } from "react-icons/fi";
 
-import { buildElevationRows } from "./rackElevation";
+import { buildElevationRows, usedU } from "./rackElevation";
 import { usePortAndTypeMutations } from "./usePortAndTypeMutations";
 import { deviceType, patchPanelType, cableType } from "./itemTypes/itemTypeConfig";
 import { useRackItemCRUD } from "./itemTypes/useRackItemCRUD";
@@ -96,6 +96,14 @@ export default function Rack() {
 
   const selectedPorts = selectedPortsQuery.data ?? [];
 
+  // Op small screens: detailpanel in beeld na selectie
+  useEffect(() => {
+    if (!selectedItem || typeof window === "undefined") return;
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    const el = document.getElementById("rack-item-detail");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [selectedItem?.kind, selectedItem?.item?.id]);
+
   const handleEditSelected = (item) => {
     crudByKind[item.kind].openEdit(item.item);
   };
@@ -140,44 +148,61 @@ export default function Rack() {
   const elevationRows = rack ? buildElevationRows(rack) : [];
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-12">
+    <div className="min-h-screen bg-bg pb-12">
       <Header />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4 pt-2">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <nav className="flex items-center gap-2 text-sm text-fg-subtle mb-4 pt-2">
           <Link
             to={`/klanten/${klantId}`}
-            className="inline-flex items-center gap-1.5 hover:text-gray-800 transition font-medium"
+            className="inline-flex items-center gap-1.5 hover:text-fg transition font-medium"
           >
             <FiArrowLeft className="text-base" />
             Terug
           </Link>
-          <FiChevronRight className="text-gray-300" />
-          <span className="text-gray-800 font-medium">
+          <FiChevronRight className="text-fg-subtle" />
+          <span className="text-fg font-medium">
             {isLoading ? "Laden..." : (rack?.name ?? "Rack")}
           </span>
         </nav>
 
         {isLoading ? (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center text-sm text-gray-400">
+          <div className="bg-card rounded-2xl border border-border p-8 text-center text-sm text-fg-subtle">
             Laden...
           </div>
         ) : !rack ? (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center text-sm text-gray-400">
+          <div className="bg-card rounded-2xl border border-border p-8 text-center text-sm text-fg-subtle">
             Rack niet gevonden.
           </div>
         ) : (
-          <div className="flex flex-col items-center">
-            <div className="mb-4 text-center">
-              <h1 className="text-lg font-semibold text-gray-900">
+          <div className="flex flex-col">
+            <div className="mb-4 text-center w-full">
+              <p className="text-[0.65rem] font-medium uppercase tracking-[0.18em] text-fg-subtle">
+                {rack.height_u}U
+              </p>
+              <h1 className="text-lg font-semibold text-fg tracking-tight">
                 {rack.name}
               </h1>
-              <p className="text-xs text-gray-400 mt-1">
-                {rack.height_u}U{rack.notes ? ` — ${rack.notes}` : ""}
+              <p className="mt-1 text-sm text-fg-muted">
+                {rack.notes || "—"}
               </p>
+              {(() => {
+                const used = usedU(rack);
+                const pct = Math.min(100, (used / rack.height_u) * 100);
+                return (
+                  <div className="mx-auto mt-3 flex max-w-xs items-center gap-2">
+                    <div className="occ-track flex-1">
+                      <div className="occ-fill" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="font-mono text-xs text-fg-subtle tabular-nums">
+                      {used}/{rack.height_u}U
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
 
-            <div className="w-full max-w-sm flex items-center justify-between mb-2 gap-2">
+            <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
               <form
                 onSubmit={handleAddType}
                 className="flex items-center gap-1.5"
@@ -187,12 +212,12 @@ export default function Rack() {
                   value={newTypeName}
                   onChange={(e) => setNewTypeName(e.target.value)}
                   placeholder="Nieuw type..."
-                  className="w-28 px-2 py-1 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500"
+                  className="w-32 px-2 py-1.5 border border-border rounded-lg text-xs bg-bg-subtle text-fg focus:outline-none focus:border-accent"
                 />
                 <button
                   type="submit"
                   disabled={createTypeMutation.isPending}
-                  className="text-xs font-medium text-gray-500 hover:text-gray-800 cursor-pointer disabled:opacity-50"
+                  className="text-xs font-medium text-fg-subtle hover:text-fg cursor-pointer disabled:opacity-50"
                 >
                   + Type
                 </button>
@@ -202,47 +227,67 @@ export default function Rack() {
                 <button
                   type="button"
                   onClick={deviceCRUD.openNew}
-                  className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 text-sm font-medium cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card cursor-pointer"
                 >
                   <FiPlus /> Device
                 </button>
                 <button
                   type="button"
                   onClick={patchPanelCRUD.openNew}
-                  className="flex items-center gap-1.5 text-amber-600 hover:text-amber-700 text-sm font-medium cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card cursor-pointer"
                 >
                   <FiPlus /> Patch
                 </button>
                 <button
                   type="button"
                   onClick={cableCRUD.openNew}
-                  className="flex items-center gap-1.5 text-violet-600 hover:text-violet-700 text-sm font-medium cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card cursor-pointer"
                 >
                   <FiPlus /> Cable
                 </button>
               </div>
             </div>
 
-            <RackElevationView
-              elevationRows={elevationRows}
-              onSelectItem={setSelectedItem}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] gap-6 items-start">
+              <div className="min-w-0 w-full px-0 sm:px-2">
+                <RackElevationView
+                  elevationRows={elevationRows}
+                  onSelectItem={setSelectedItem}
+                  selectedItem={selectedItem}
+                  deviceTypeMap={deviceTypeMap}
+                  rackName={rack.name}
+                  onAddAt={(kind) => crudByKind[kind].openNew()}
+                />
+              </div>
 
-            {selectedItem && (
-              <RackItemDetailPanel
-                selectedItem={selectedItem}
-                deviceTypeMap={deviceTypeMap}
-                onEdit={handleEditSelected}
-                onDeleteRequest={handleDeleteRequestSelected}
-                selectedPorts={selectedPorts}
-                portForm={portForm}
-                setPortForm={setPortForm}
-                onBulkPortSubmit={handleBulkPortSubmit}
-                updatePortMutation={updatePortMutation}
-                deletePortMutation={deletePortMutation}
-                bulkCreatePortsMutation={bulkCreatePortsMutation}
-              />
-            )}
+              <aside className="min-w-0 w-full lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+                {selectedItem ? (
+                  <RackItemDetailPanel
+                    selectedItem={selectedItem}
+                    deviceTypeMap={deviceTypeMap}
+                    onEdit={handleEditSelected}
+                    onDeleteRequest={handleDeleteRequestSelected}
+                    onClose={() => setSelectedItem(null)}
+                    selectedPorts={selectedPorts}
+                    portForm={portForm}
+                    setPortForm={setPortForm}
+                    onBulkPortSubmit={handleBulkPortSubmit}
+                    updatePortMutation={updatePortMutation}
+                    deletePortMutation={deletePortMutation}
+                    bulkCreatePortsMutation={bulkCreatePortsMutation}
+                  />
+                ) : (
+                  <div className="hidden lg:block rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center">
+                    <p className="text-sm font-medium text-fg-muted">
+                      Selecteer een device in de rack
+                    </p>
+                    <p className="mt-1 text-xs text-fg-subtle">
+                      Details en poorten verschijnen hier.
+                    </p>
+                  </div>
+                )}
+              </aside>
+            </div>
           </div>
         )}
       </div>

@@ -11,24 +11,24 @@ export default function RackPortsSection({
   bulkCreatePortsMutation,
 }) {
   return (
-    <div className="mt-6 border-t border-slate-200 pt-5">
+    <div className="mt-6 border-t border-border pt-5">
       <div className="flex items-center justify-between gap-3 mb-3">
-        <h3 className="text-sm font-semibold text-slate-800">Poorten</h3>
-        <span className="text-xs text-slate-400">
+        <h3 className="text-sm font-semibold text-fg">Poorten</h3>
+        <span className="text-xs text-fg-subtle">
           {selectedPorts.length} totaal
         </span>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
         {selectedPorts.length === 0 ? (
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-fg-subtle">
             Geen poorten aangemaakt.
           </span>
         ) : (
           selectedPorts.map((port) => (
             <div
               key={port.id}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-700"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-bg-subtle px-2.5 py-1.5 text-xs text-fg-muted"
             >
               <span>{port.name}</span>
               <button
@@ -45,14 +45,14 @@ export default function RackPortsSection({
                     speed: port.speed || "",
                   });
                 }}
-                className="text-blue-600 hover:text-blue-700 cursor-pointer"
+                className="text-accent hover:text-fg cursor-pointer"
               >
                 Hernoem
               </button>
               <button
                 type="button"
                 onClick={() => deletePortMutation.mutate(port.id)}
-                className="text-red-600 hover:text-red-700 cursor-pointer"
+                className="text-destructive hover:text-destructive cursor-pointer"
               >
                 Verwijder
               </button>
@@ -63,9 +63,9 @@ export default function RackPortsSection({
 
       <form
         onSubmit={onBulkSubmit}
-        className="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3"
+        className="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-xl border border-border bg-bg-subtle p-3"
       >
-        <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600">
+        <label className="flex flex-col gap-1 text-[11px] font-medium text-fg-muted">
           Aantal
           <input
             type="number"
@@ -77,11 +77,11 @@ export default function RackPortsSection({
                 count: Number(e.target.value) || 1,
               }))
             }
-            className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-800 bg-white"
+            className="rounded-lg border border-border px-2.5 py-2 text-sm text-fg bg-card"
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600">
+        <label className="flex flex-col gap-1 text-[11px] font-medium text-fg-muted">
           Prefix
           <input
             type="text"
@@ -89,11 +89,11 @@ export default function RackPortsSection({
             onChange={(e) =>
               setPortForm((prev) => ({ ...prev, prefix: e.target.value }))
             }
-            className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-800 bg-white"
+            className="rounded-lg border border-border px-2.5 py-2 text-sm text-fg bg-card"
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600">
+        <label className="flex flex-col gap-1 text-[11px] font-medium text-fg-muted">
           Type
           <input
             type="text"
@@ -101,11 +101,11 @@ export default function RackPortsSection({
             onChange={(e) =>
               setPortForm((prev) => ({ ...prev, port_type: e.target.value }))
             }
-            className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-800 bg-white"
+            className="rounded-lg border border-border px-2.5 py-2 text-sm text-fg bg-card"
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600">
+        <label className="flex flex-col gap-1 text-[11px] font-medium text-fg-muted">
           Snelheid
           <input
             type="text"
@@ -113,7 +113,7 @@ export default function RackPortsSection({
             onChange={(e) =>
               setPortForm((prev) => ({ ...prev, speed: e.target.value }))
             }
-            className="rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-800 bg-white"
+            className="rounded-lg border border-border px-2.5 py-2 text-sm text-fg bg-card"
           />
         </label>
 
@@ -121,7 +121,7 @@ export default function RackPortsSection({
           <button
             type="submit"
             disabled={bulkCreatePortsMutation.isPending}
-            className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium cursor-pointer disabled:opacity-50"
+            className="rounded-lg bg-accent text-accent-fg hover:opacity-90 px-4 py-2 text-sm font-medium cursor-pointer disabled:opacity-50"
           >
             {bulkCreatePortsMutation.isPending
               ? "Aanmaken..."

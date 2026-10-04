@@ -105,9 +105,9 @@ function Klanten() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-bg">
         <Header />
-        <div className="flex justify-center items-center h-64 text-slate-500 font-medium">
+        <div className="flex justify-center items-center h-64 text-fg-subtle font-medium">
           Klanten inladen...
         </div>
       </div>
@@ -116,9 +116,9 @@ function Klanten() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-bg">
         <Header />
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-medium">
+        <div className="p-4 bg-destructive/10 border border-destructive/40 rounded-xl text-destructive font-medium">
           Er ging iets mis bij het ophalen van de klanten. Controleer de
           API-verbinding.
         </div>
@@ -127,14 +127,14 @@ function Klanten() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-12">
+    <div className="min-h-screen bg-bg pb-12">
       <Header />
 
       {/* Pagina Header met zoekbalk en actieknop */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Klantenbeheer</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-fg">Klantenbeheer</h1>
+          <p className="text-sm text-fg-subtle">
             Beheer alle organisaties en klik door naar hun specifieke
             infrastructuur.
           </p>
@@ -142,7 +142,7 @@ function Klanten() {
 
         <button
           onClick={openNewModal}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition shadow-sm cursor-pointer"
+          className="flex items-center gap-2 bg-accent text-accent-fg hover:opacity-90 px-4 py-2.5 rounded-xl font-medium text-sm transition shadow-[var(--shadow-border)] cursor-pointer"
         >
           <FiPlus className="text-lg" /> Nieuwe klant
         </button>
@@ -151,20 +151,20 @@ function Klanten() {
       {/* Zoekbalk & Stats Card */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
         <div className="relative w-full sm:w-80">
-          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg" />
+          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-fg-subtle text-lg" />
           <input
             type="text"
             placeholder="Zoek op klantnaam..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-slate-500 transition"
+            className="w-full pl-10 pr-4 py-2 bg-bg-subtle border border-border rounded-xl text-sm text-fg focus:outline-none focus:border-accent transition"
           />
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-          <FiUserCheck className="text-blue-600" />
+        <div className="flex items-center gap-2 text-sm text-fg-subtle font-medium">
+          <FiUserCheck className="text-accent" />
           Totaal:{" "}
-          <span className="text-slate-900 font-bold">
+          <span className="text-fg font-bold">
             {filteredCustomers.length}
           </span>{" "}
           klanten
@@ -172,36 +172,36 @@ function Klanten() {
       </div>
 
       {/* Klanten Tabel Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] overflow-hidden">
         {filteredCustomers.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">
+          <div className="p-12 text-center text-fg-subtle">
             Geen klanten gevonden.
           </div>
         ) : (
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-300 border-b border-slate-300 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <tr className="bg-bg-subtle border-b border-border text-xs font-semibold uppercase tracking-wider text-fg-subtle">
                 <th className="p-4">Klantnaam</th>
                 <th className="p-4">Aangemaakt op</th>
                 <th className="p-4 text-right">Acties</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-300 text-sm">
+            <tbody className="divide-y divide-border text-sm">
               {filteredCustomers.map((c) => (
-                <tr key={c.id} className="hover:bg-blue-50/30 transition group">
+                <tr key={c.id} className="hover:bg-bg-subtle transition group">
                   <td className="p-4">
                     {/* Het oogje staat nu vast aan de linkerkant, is altijd zichtbaar en kleurt mee bij hover */}
                     <Link
                       to={`/klanten/${c.id}`}
-                      className="inline-flex items-center gap-2.5 font-semibold text-slate-900 hover:text-blue-600 transition group/link"
+                      className="inline-flex items-center gap-2.5 font-semibold text-fg hover:text-accent transition group/link"
                     >
-                      <FiEye className="text-slate-400 group-hover/link:text-blue-600 text-base shrink-0 transition-colors" />
+                      <FiEye className="text-fg-subtle group-hover/link:text-accent text-base shrink-0 transition-colors" />
                       <span>{c.name}</span>
                     </Link>
                   </td>
-                  <td className="p-4 text-slate-500">
+                  <td className="p-4 text-fg-subtle">
                     <div className="flex items-center gap-2">
-                      <FiCalendar className="text-slate-400 shrink-0" />
+                      <FiCalendar className="text-fg-subtle shrink-0" />
                       {new Date(c.created_at).toLocaleDateString("nl-BE", {
                         day: "2-digit",
                         month: "short",
@@ -213,7 +213,7 @@ function Klanten() {
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => openEditModal(c)}
-                        className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition cursor-pointer"
+                        className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle transition cursor-pointer"
                         title="Bewerken"
                       >
                         <FiEdit2 className="text-base" />
@@ -221,7 +221,7 @@ function Klanten() {
 
                       <button
                         onClick={() => setDeleteTarget(c)}
-                        className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-slate-100 transition cursor-pointer"
+                        className="p-2 rounded-lg text-fg-subtle hover:text-destructive hover:bg-bg-subtle transition cursor-pointer"
                         title="Verwijderen"
                       >
                         <FiTrash2 className="text-base" />
@@ -255,11 +255,11 @@ function Klanten() {
         onClose={() => setDeleteTarget(null)}
         title="Klant Verwijderen"
       >
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-fg-muted">
           Weet je zeker dat je <strong>{deleteTarget?.name}</strong> wilt
           verwijderen?
           <br />
-          <span className="text-xs text-red-500 mt-1 block font-medium">
+          <span className="text-xs text-destructive mt-1 block font-medium">
             Let op: Alle bijbehorende sites, locaties en racks worden ook gewist
             (CASCADE).
           </span>
@@ -267,14 +267,14 @@ function Klanten() {
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={() => setDeleteTarget(null)}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+            className="px-4 py-2 rounded-xl text-sm font-medium text-fg-muted hover:bg-bg-subtle transition cursor-pointer"
           >
             Annuleren
           </button>
           <button
             onClick={() => deleteMutation.mutate(deleteTarget.id)}
             disabled={deleteMutation.isPending}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 rounded-xl text-sm font-medium bg-destructive text-white hover:opacity-90 transition cursor-pointer disabled:opacity-50"
           >
             {deleteMutation.isPending ? "Verwijderen..." : "Klant Verwijderen"}
           </button>

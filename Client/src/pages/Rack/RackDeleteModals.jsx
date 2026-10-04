@@ -24,10 +24,10 @@ export default function RackDeleteModals({
         onClose={closeDeleteDevice}
         title="Device verwijderen"
       >
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-fg-muted">
           Weet je zeker dat je <strong>{deleteDeviceTarget?.label}</strong>{" "}
           wilt verwijderen?
-          <span className="text-xs text-red-500 mt-2 block font-medium">
+          <span className="text-xs text-destructive mt-2 block font-medium">
             Let op: de poorten van dit device gaan mee weg (CASCADE).
           </span>
         </p>
@@ -35,7 +35,7 @@ export default function RackDeleteModals({
           <button
             type="button"
             onClick={closeDeleteDevice}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+            className="px-4 py-2 rounded-xl text-sm font-medium text-fg-muted hover:bg-bg-subtle cursor-pointer"
           >
             Annuleren
           </button>
@@ -43,7 +43,7 @@ export default function RackDeleteModals({
             type="button"
             onClick={confirmDeleteDevice}
             disabled={deleteDevicePending}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 rounded-xl text-sm font-medium bg-destructive text-white hover:opacity-90 cursor-pointer disabled:opacity-50"
           >
             {deleteDevicePending ? "Verwijderen..." : "Device verwijderen"}
           </button>
@@ -55,10 +55,10 @@ export default function RackDeleteModals({
         onClose={closeDeletePatchPanel}
         title="Patch panel verwijderen"
       >
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-fg-muted">
           Weet je zeker dat je{" "}
           <strong>{deletePatchPanelTarget?.label}</strong> wilt verwijderen?
-          <span className="text-xs text-red-500 mt-2 block font-medium">
+          <span className="text-xs text-destructive mt-2 block font-medium">
             Let op: de poorten van dit patch panel gaan mee weg.
           </span>
         </p>
@@ -66,7 +66,7 @@ export default function RackDeleteModals({
           <button
             type="button"
             onClick={closeDeletePatchPanel}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+            className="px-4 py-2 rounded-xl text-sm font-medium text-fg-muted hover:bg-bg-subtle cursor-pointer"
           >
             Annuleren
           </button>
@@ -74,7 +74,7 @@ export default function RackDeleteModals({
             type="button"
             onClick={confirmDeletePatchPanel}
             disabled={deletePatchPanelPending}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 rounded-xl text-sm font-medium bg-destructive text-white hover:opacity-90 cursor-pointer disabled:opacity-50"
           >
             {deletePatchPanelPending
               ? "Verwijderen..."
@@ -88,7 +88,7 @@ export default function RackDeleteModals({
         onClose={closeDeleteCable}
         title="Cable management item verwijderen"
       >
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-fg-muted">
           Weet je zeker dat je <strong>{deleteCableTarget?.label}</strong>{" "}
           wilt verwijderen?
         </p>
@@ -96,7 +96,7 @@ export default function RackDeleteModals({
           <button
             type="button"
             onClick={closeDeleteCable}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 cursor-pointer"
+            className="px-4 py-2 rounded-xl text-sm font-medium text-fg-muted hover:bg-bg-subtle cursor-pointer"
           >
             Annuleren
           </button>
@@ -104,7 +104,7 @@ export default function RackDeleteModals({
             type="button"
             onClick={confirmDeleteCable}
             disabled={deleteCablePending}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 rounded-xl text-sm font-medium bg-destructive text-white hover:opacity-90 cursor-pointer disabled:opacity-50"
           >
             {deleteCablePending ? "Verwijderen..." : "Item verwijderen"}
           </button>

@@ -13,7 +13,7 @@ import Rack from "./pages/Rack";
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastContainer position="bottom-right" autoClose={2000} />
+      <ToastContainer position="bottom-right" autoClose={2000} theme="dark" />
       <div className="container mx-auto px-4">
         <Routes>
           <Route path="/auth" element={<Auth />} />

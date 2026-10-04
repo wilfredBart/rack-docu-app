@@ -1,40 +1,20 @@
-@import "tailwindcss";
+/* Exacte 19" rack-cabinet look.
+   Zelfstandig: tokens hangen op .rack-stage, dus jouw slate-50 pagina blijft.
+   Importeer vanuit RackElevationView.jsx (al gedaan). */
 
-@theme {
-  --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+.rack-stage {
+  --u-h: 2.125rem;
+  --rail-w: 1.15rem;
+  --u-col: 1.55rem;
+  --pdu-w: 0.7rem;
+  --ear-w: 0.85rem;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-
-  --color-bg: #090b0d;
-  --color-bg-elevated: #12151a;
-  --color-bg-subtle: #1a1e24;
-  --color-fg: #e8eaed;
-  --color-fg-muted: #9aa3ad;
-  --color-fg-subtle: #6d757e;
-  --color-border: rgb(232 234 237 / 0.12);
-  --color-border-strong: rgb(232 234 237 / 0.22);
-  --color-accent: #c9d0d8;
-  --color-accent-fg: #090b0d;
-  --color-primary: #c9d0d8;
-  --color-primary-foreground: #090b0d;
-  --color-card: #12151a;
-  --color-card-foreground: #e8eaed;
-  --color-muted: #1a1e24;
-  --color-muted-foreground: #9aa3ad;
-  --color-popover: #161a20;
-  --color-popover-foreground: #e8eaed;
-  --color-secondary: #1a1e24;
-  --color-secondary-foreground: #e8eaed;
-  --color-destructive: #c45b5b;
-  --color-input: rgb(232 234 237 / 0.14);
-  --color-ring: #c9d0d8;
-  --color-background: #090b0d;
-  --color-foreground: #e8eaed;
-
   --color-led-power: #5ee0a0;
   --color-led-activity: #d4a24a;
   --color-led-fault: #d26565;
   --color-led-link: #6ec8e0;
-
   --color-rack-shell: #14171c;
   --color-rack-shell-edge: #2a3038;
   --color-rack-void: #07080a;
@@ -44,93 +24,19 @@
   --color-equip-face: #1c222a;
   --color-equip-face-hi: #2a323c;
   --color-equip-label: #d7dce2;
-
-  --color-brand-lightest: #090b0d;
-  --color-brand-light: #12151a;
-  --color-brand-muted: #6d757e;
-  --color-brand: #c9d0d8;
-  --color-brand-dark: #9aa3ad;
-
-  --radius-xs: 0.25rem;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius: 0.75rem;
-
-  --shadow-border:
-    0 0 0 1px rgb(232 234 237 / 0.08),
-    0 1px 2px -1px rgb(0 0 0 / 0.45),
-    0 8px 24px -12px rgb(0 0 0 / 0.55);
-}
-
-@layer base {
-  * {
-    border-color: var(--color-border);
-  }
-
-  html,
-  body {
-    background: var(--color-bg);
-    color: var(--color-fg);
-    font-family: var(--font-sans);
-    min-height: 100%;
-  }
-
-  body {
-    background-image:
-      radial-gradient(1200px 600px at 50% -10%, rgb(255 255 255 / 0.035), transparent 55%),
-      linear-gradient(180deg, #0c0e12 0%, var(--color-bg) 28%);
-  }
-
-  button:not(:disabled),
-  [role="button"]:not(:disabled) {
-    cursor: pointer;
-  }
-}
-
-/* ─── 19" rack cabinet ─── */
-
-.rack-stage {
-  --u-h: 2.45rem;
-  --rail-w: 0.85rem;
-  --u-col: 1.2rem;
-  --pdu-w: 0.5rem;
-  --ear-w: 0.85rem;
+  --color-accent: #c9d0d8;
   perspective: 1800px;
-  width: min(100%, 42rem);
-  margin-inline: auto;
-  flex-shrink: 0;
-}
-
-@media (min-width: 480px) {
-  .rack-stage {
-    --u-h: 2.55rem;
-    --rail-w: 1.05rem;
-    --u-col: 1.4rem;
-    --pdu-w: 0.6rem;
-  }
 }
 
 @media (min-width: 640px) {
   .rack-stage {
-    --u-h: 2.7rem;
-    --rail-w: 1.2rem;
-    --u-col: 1.55rem;
-    --pdu-w: 0.7rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .rack-stage {
-    --u-h: 2.85rem;
+    --u-h: 2.25rem;
   }
 }
 
 .rack-cabinet {
   position: relative;
-  width: 100%;
-  min-width: 0;
+  width: min(100%, 28rem);
   margin-inline: auto;
   border-radius: 10px 10px 8px 8px;
   background:
@@ -193,7 +99,7 @@
 .rack-body {
   display: flex;
   padding: 0.2rem 0.35rem 0.15rem;
-  max-height: min(74vh, 52rem);
+  max-height: min(48vh, 30rem);
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -784,80 +690,37 @@
   transition: width 250ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.stagger-in > * {
-  animation: rise-in 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.stagger-in > *:nth-child(1) {
-  animation-delay: 0ms;
-}
-.stagger-in > *:nth-child(2) {
-  animation-delay: 40ms;
-}
-.stagger-in > *:nth-child(3) {
-  animation-delay: 80ms;
-}
-.stagger-in > *:nth-child(4) {
-  animation-delay: 120ms;
+
+/* empty-slot add menu (geen Radix) */
+.rack-empty-menu {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 4px);
+  min-width: 11rem;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  background: #161a20;
+  color: #e8eaed;
+  border: 1px solid rgb(232 234 237 / 0.14);
+  box-shadow: 0 12px 32px -12px rgb(0 0 0 / 0.7);
 }
 
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-    filter: blur(2px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-    filter: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stagger-in > * {
-    animation: none;
-  }
-  .occ-fill {
-    transition: none;
-  }
-}
-
-
-/* Compact device face in detail panel (same visuals, smaller U-height) */
-.detail-face-preview {
-  --u-h: 1.55rem;
-  --rail-w: 0.55rem;
-  --u-col: 0.9rem;
-  --pdu-w: 0.35rem;
-  --ear-w: 0.5rem;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --color-led-power: #5ee0a0;
-  --color-led-activity: #d4a24a;
-  --color-led-fault: #d26565;
-  --color-led-link: #6ec8e0;
-  --color-rack-shell: #14171c;
-  --color-rack-shell-edge: #2a3038;
-  --color-rack-void: #07080a;
-  --color-rack-rail: #3a414b;
-  --color-rack-rail-dark: #1c2128;
-  --color-rack-hole: #050607;
-  --color-equip-face: #1c222a;
-  --color-equip-face-hi: #2a323c;
-  --color-equip-label: #d7dce2;
-  --color-accent: #c9d0d8;
+.rack-empty-menu button {
+  display: block;
   width: 100%;
-  max-width: 22rem;
-  margin-inline: auto;
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.75rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
 }
-.detail-face-preview .equip {
-  cursor: default;
-  pointer-events: none;
+
+.rack-empty-menu button:hover {
+  background: rgb(255 255 255 / 0.08);
 }
-.detail-face-preview .equip.is-preview {
-  width: 100%;
-}
-@media (min-width: 640px) {
-  .detail-face-preview {
-    --u-h: 1.75rem;
-  }
-}
+
