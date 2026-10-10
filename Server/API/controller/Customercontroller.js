@@ -54,6 +54,21 @@ const customerController = {
   },
 
   /**
+   * GET /customers/:id/patchplans
+   * Lijst van alle patchplannen (devices + panels), inclusief lege.
+   */
+  async listPatchPlans(req, res, next) {
+    try {
+      const customer = await customerModel.getById(req.params.id);
+      if (!customer) throw new ApiError(404, 'Klant niet gevonden');
+      const plans = await customerModel.listPatchPlans(req.params.id);
+      res.json(plans);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
    * POST /customers
    */
   async create(req, res, next) {

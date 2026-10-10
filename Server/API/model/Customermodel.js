@@ -169,6 +169,63 @@ const customerModel = {
       sites: nestOverviewRows(rows),
     };
   },
+
+  /**
+   * Alle patchplannen van een klant: devices + patch panels met poort-/connection-tellingen.
+   * Inclusief lege plannen (0 connections). Titel = label.
+   */
+  async listPatchPlans(customerId) {
+    const [rows] = await pool.query(
+      `(
+         SELECT
+           'device' AS kind,
+           d.id,
+           d.label,
+           d.rack_id,
+           r.name AS rack_name,
+           loc.id AS location_id,
+           loc.name AS location_name,
+           s.id AS site_id,
+           s.name AS site_name,
+           (SELECT COUNT(*) FROM ports p WHERE p.device_id = d.id) AS port_count,
+           (SELECT COUNT(DISTINCT c.id)
+              FROM ports p
+              JOIN connections c ON c.from_port_id = p.id OR c.to_port_id = p.id
+             WHERE p.device_id = d.id) AS connected_count
+         FROM devices d
+         JOIN racks r ON r.id = d.rack_id
+         JOIN locations loc ON loc.id = r.location_id
+         JOIN sites s ON s.id = loc.site_id
+         WHERE s.customer_id = ?
+       )
+       UNION ALL
+       (
+         SELECT
+           'patch_panel' AS kind,
+           pp.id,
+           pp.label,
+           pp.rack_id,
+           r.name AS rack_name,
+           loc.id AS location_id,
+           loc.name AS location_name,
+           s.id AS site_id,
+           s.name AS site_name,
+           (SELECT COUNT(*) FROM ports p WHERE p.patch_panel_id = pp.id) AS port_count,
+           (SELECT COUNT(DISTINCT c.id)
+              FROM ports p
+              JOIN connections c ON c.from_port_id = p.id OR c.to_port_id = p.id
+             WHERE p.patch_panel_id = pp.id) AS connected_count
+         FROM patch_panels pp
+         JOIN racks r ON r.id = pp.rack_id
+         JOIN locations loc ON loc.id = r.location_id
+         JOIN sites s ON s.id = loc.site_id
+         WHERE s.customer_id = ?
+       )
+       ORDER BY site_name ASC, rack_name ASC, kind ASC, label ASC`,
+      [customerId, customerId]
+    );
+    return rows;
+  },
 };
 
 function nestOverviewRows(rows) {

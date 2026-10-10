@@ -1,20 +1,21 @@
-// Vaste VLAN-kleuren. De sleutel wordt opgeslagen in vlans.color (zie Server vlanController).
-// De eigenlijke tinten staan als --color-vlan-<sleutel> in index.css.
-export const VLAN_COLORS = [
-  { key: "indigo", label: "Indigo" },
-  { key: "violet", label: "Violet" },
-  { key: "orchid", label: "Orchidee" },
-  { key: "pink", label: "Roze" },
-  { key: "sky", label: "Hemelsblauw" },
-  { key: "sand", label: "Zand" },
-  { key: "slate", label: "Leisteen" },
-  { key: "mauve", label: "Mauve" },
-];
+// VLAN-kleur: vrije hex (color picker). Oude palette-sleutels blijven leesbaar.
+const LEGACY = {
+  indigo: "#7c8cf8",
+  violet: "#b48cf2",
+  orchid: "#cf7fe0",
+  pink: "#e07ab8",
+  sky: "#5aa0f0",
+  sand: "#cbb98f",
+  slate: "#8fa3b8",
+  mauve: "#b98aa6",
+};
 
-export function vlanColor(key) {
-  return VLAN_COLORS.some((c) => c.key === key)
-    ? `var(--color-vlan-${key})`
-    : "var(--color-fg-subtle)";
+/** Resolves opgeslagen kleur naar een CSS-kleur (hex of legacy key). */
+export function vlanColor(color) {
+  if (!color) return "var(--color-fg-subtle)";
+  if (typeof color === "string" && color.startsWith("#")) return color;
+  if (typeof color === "string" && color.startsWith("rgb")) return color;
+  return LEGACY[color] || "var(--color-fg-subtle)";
 }
 
 export function vlanLabel(vlan) {

@@ -73,6 +73,25 @@ function FormModal({
                 required={field.required}
                 className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
               />
+            ) : field.type === "color" ? (
+              <div className="flex items-center gap-3">
+                <input
+                  id={field.name}
+                  type="color"
+                  value={values[field.name] || "#6366f1"}
+                  onChange={(e) => handleChange(field.name, e.target.value)}
+                  required={field.required}
+                  className="h-10 w-14 cursor-pointer rounded-lg border border-border bg-bg-subtle p-1"
+                />
+                <input
+                  type="text"
+                  value={values[field.name] || ""}
+                  onChange={(e) => handleChange(field.name, e.target.value)}
+                  placeholder="#6366f1"
+                  pattern="^#[0-9A-Fa-f]{6}$"
+                  className="flex-1 px-3 py-2 border border-border rounded-lg text-sm font-mono bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+                />
+              </div>
             ) : (
               <input
                 id={field.name}

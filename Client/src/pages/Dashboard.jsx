@@ -24,6 +24,7 @@ import {
   FiEdit2,
   FiTrash2,
   FiExternalLink,
+  FiTag,
 } from "react-icons/fi";
 
 // KPI's = boom die hieronder zichtbaar is (sites → locaties → racks).
@@ -740,6 +741,33 @@ export default function Dashboard() {
             </section>
           </div>
         )}
+
+        {/* VLAN beheer — beheer vanuit het klanten-dashboard */}
+        <section className="mt-8 bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] p-6">
+          <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
+            <h3 className="text-sm font-semibold text-fg inline-flex items-center gap-2">
+              <FiTag className="text-base text-fg-subtle" />
+              VLAN beheer
+            </h3>
+            <Link
+              to={`/klanten/${klantId}/vlans`}
+              className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle"
+              title="VLAN beheer openen"
+            >
+              <FiExternalLink />
+            </Link>
+          </div>
+          <p className="text-sm text-fg-subtle">
+            Definieer VLAN&apos;s met een eigen kleur. Op het patchplan krijgt de
+            VLAN-kolom diezelfde tekstkleur.
+          </p>
+          <Link
+            to={`/klanten/${klantId}/vlans`}
+            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-fg"
+          >
+            Open VLAN beheer
+          </Link>
+        </section>
       </div>
 
       <FormModal

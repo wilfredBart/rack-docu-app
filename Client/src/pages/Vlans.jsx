@@ -6,26 +6,43 @@ import { FiArrowLeft, FiChevronRight, FiEdit2, FiPlus, FiTrash2 } from "react-ic
 import Header from "../components/Header";
 import FormModal from "../components/UI/FormModal";
 import { fetchVlans, createVlan, updateVlan, deleteVlan } from "../api/vlans";
-import { VLAN_COLORS, vlanColor } from "./PatchPlan/vlanColors";
+import { vlanColor } from "./PatchPlan/vlanColors";
 
 const FIELDS = [
-  { name: "vlan_number", label: "VLAN-nummer", type: "number", placeholder: "bijv. 20", required: true },
-  { name: "name", label: "Naam", type: "text", placeholder: "bijv. Kantoor", required: true },
+  {
+    name: "vlan_number",
+    label: "VLAN-nummer",
+    type: "number",
+    placeholder: "bijv. 20",
+    required: true,
+  },
+  {
+    name: "name",
+    label: "Naam",
+    type: "text",
+    placeholder: "bijv. Kantoor",
+    required: true,
+  },
   {
     name: "color",
     label: "Kleur",
-    type: "select",
+    type: "color",
     required: true,
-    options: VLAN_COLORS.map((c) => ({ value: c.key, label: c.label })),
+    hint: "Kies een kleur; die verschijnt in overzichten en op het patchplan.",
   },
-  { name: "description", label: "Omschrijving", type: "textarea", placeholder: "bijv. 10.20.0.0/24, werkplekken" },
+  {
+    name: "description",
+    label: "Omschrijving",
+    type: "textarea",
+    placeholder: "bijv. 10.20.0.0/24, werkplekken",
+  },
 ];
 
-// Route: /klanten/:klantId/vlans — VLAN-definities per klant (nummer, naam, kleur).
+// Route: /klanten/:klantId/vlans — bereikbaar via klanten-dashboard (VLAN beheer).
 export default function Vlans() {
   const { klantId } = useParams();
   const queryClient = useQueryClient();
-  const [editing, setEditing] = useState(null); // null = dicht, {} = nieuw, vlan = bewerken
+  const [editing, setEditing] = useState(null);
 
   const { data: vlans = [], isLoading } = useQuery({
     queryKey: ["vlans", klantId],
@@ -69,20 +86,35 @@ export default function Vlans() {
     onError,
   });
 
-  // Stabiel object: FormModal reset zijn velden telkens initialValues van identiteit wisselt.
   const initialValues = useMemo(
     () =>
       editing?.id
-        ? { ...editing, description: editing.description ?? "" }
-        : { vlan_number: "", name: "", color: "indigo", description: "" },
+        ? {
+            ...editing,
+            color: vlanColor(editing.color).startsWith("#")
+              ? vlanColor(editing.color)
+              : "#6366f1",
+            description: editing.description ?? "",
+          }
+        : {
+            vlan_number: "",
+            name: "",
+            color: "#6366f1",
+            description: "",
+          },
     [editing],
   );
 
   const handleDelete = (vlan) => {
-    const used = Number(vlan.port_count) > 0
-      ? `\n${vlan.port_count} poort(en) gebruiken deze VLAN en worden "zonder VLAN".`
-      : "";
-    if (window.confirm(`VLAN ${vlan.vlan_number} (${vlan.name}) verwijderen?${used}`)) {
+    const used =
+      Number(vlan.port_count) > 0
+        ? `\n${vlan.port_count} poort(en) gebruiken deze VLAN en worden "zonder VLAN".`
+        : "";
+    if (
+      window.confirm(
+        `VLAN ${vlan.vlan_number} (${vlan.name}) verwijderen?${used}`,
+      )
+    ) {
       deleteMutation.mutate(vlan.id);
     }
   };
@@ -98,27 +130,29 @@ export default function Vlans() {
             className="inline-flex items-center gap-1.5 hover:text-fg transition font-medium"
           >
             <FiArrowLeft className="text-base" />
-            Terug
+            Dashboard
           </Link>
           <FiChevronRight className="text-fg-subtle" />
-          <span className="text-fg font-medium">VLAN&apos;s</span>
+          <span className="text-fg font-medium">VLAN beheer</span>
         </nav>
 
-        <div className="mb-6 flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-bold text-fg">VLAN&apos;s</h1>
-            <p className="text-sm text-fg-subtle mt-1">
-              Eén definitie per klant. De VLAN stel je in per poort van een
-              device; patch panels erven ze via de verbinding.
-            </p>
+        <div className="mb-6">
+          <div className="flex items-center justify-between gap-3 border-b border-border pb-2 mb-2">
+            <h1 className="text-2xl font-bold text-fg">VLAN beheer</h1>
+            <button
+              type="button"
+              onClick={() => setEditing({})}
+              className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
+              title="Nieuwe VLAN"
+            >
+              <FiPlus />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setEditing({})}
-            className="flex shrink-0 items-center gap-2 bg-accent text-accent-fg hover:opacity-90 px-4 py-2.5 rounded-xl font-medium text-sm cursor-pointer"
-          >
-            <FiPlus /> Nieuwe VLAN
-          </button>
+          <p className="text-sm text-fg-subtle">
+            Definieer VLAN&apos;s per klant. Kleur kies je zelf; die zie je terug
+            in dit overzicht en op het patchplan. Toewijzing gebeurt per
+            device-poort.
+          </p>
         </div>
 
         {isLoading ? (
@@ -127,7 +161,14 @@ export default function Vlans() {
           </div>
         ) : vlans.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center text-sm text-fg-subtle">
-            Nog geen VLAN&apos;s voor deze klant.
+            <p>Nog geen VLAN&apos;s voor deze klant.</p>
+            <button
+              type="button"
+              onClick={() => setEditing({})}
+              className="mt-3 inline-flex items-center gap-1.5 text-accent hover:text-fg text-sm font-medium cursor-pointer"
+            >
+              <FiPlus /> Eerste VLAN toevoegen
+            </button>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-[var(--shadow-border)]">
@@ -137,46 +178,66 @@ export default function Vlans() {
                   <th className="p-3 font-medium">Kleur</th>
                   <th className="p-3 font-medium">VLAN</th>
                   <th className="p-3 font-medium">Naam</th>
-                  <th className="p-3 font-medium hidden sm:table-cell">Omschrijving</th>
+                  <th className="p-3 font-medium hidden sm:table-cell">
+                    Omschrijving
+                  </th>
                   <th className="p-3 font-medium text-right">Poorten</th>
                   <th className="p-3" />
                 </tr>
               </thead>
               <tbody>
-                {vlans.map((v) => (
-                  <tr key={v.id} className="border-t border-border">
-                    <td className="p-3">
-                      <span
-                        className="block h-1.5 w-8 rounded-full"
-                        style={{ background: vlanColor(v.color) }}
-                      />
-                    </td>
-                    <td className="p-3 font-mono text-fg">{v.vlan_number}</td>
-                    <td className="p-3 font-medium text-fg">{v.name}</td>
-                    <td className="p-3 text-fg-muted hidden sm:table-cell">{v.description}</td>
-                    <td className="p-3 text-right font-mono text-fg-muted">{v.port_count}</td>
-                    <td className="p-3">
-                      <div className="flex justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setEditing(v)}
-                          className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
-                          title="Bewerken"
-                        >
-                          <FiEdit2 />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(v)}
-                          className="p-2 rounded-lg text-fg-subtle hover:text-destructive hover:bg-bg-subtle cursor-pointer"
-                          title="Verwijderen"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {vlans.map((v) => {
+                  const c = vlanColor(v.color);
+                  return (
+                    <tr key={v.id} className="border-t border-border">
+                      <td className="p-3">
+                        <span className="inline-flex items-center gap-2">
+                          <span
+                            className="block h-5 w-5 rounded-md border border-border shrink-0"
+                            style={{ background: c }}
+                            title={c}
+                          />
+                          <span
+                            className="text-xs font-mono hidden sm:inline"
+                            style={{ color: c }}
+                          >
+                            {c}
+                          </span>
+                        </span>
+                      </td>
+                      <td className="p-3 font-mono text-fg">{v.vlan_number}</td>
+                      <td className="p-3 font-medium" style={{ color: c }}>
+                        {v.name}
+                      </td>
+                      <td className="p-3 text-fg-muted hidden sm:table-cell">
+                        {v.description}
+                      </td>
+                      <td className="p-3 text-right font-mono text-fg-muted">
+                        {v.port_count}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setEditing(v)}
+                            className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
+                            title="Bewerken"
+                          >
+                            <FiEdit2 />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(v)}
+                            className="p-2 rounded-lg text-fg-subtle hover:text-destructive hover:bg-bg-subtle cursor-pointer"
+                            title="Verwijderen"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -189,7 +250,9 @@ export default function Vlans() {
         title={editing?.id ? "VLAN bewerken" : "Nieuwe VLAN"}
         fields={FIELDS}
         initialValues={initialValues}
-        onSubmit={(values) => saveMutation.mutate({ ...values, id: editing?.id })}
+        onSubmit={(values) =>
+          saveMutation.mutate({ ...values, id: editing?.id })
+        }
         isSubmitting={saveMutation.isPending}
       />
     </div>

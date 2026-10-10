@@ -1,5 +1,6 @@
 import ApiError from '../../middleware/ApiError.js';
 import patchPanelModel from '../model/patchPanelModel.js';
+import portModel from '../model/portModel.js';
 import { assertValidRackSlot } from '../model/rackSlotModel.js';
 
 const patchPanelController = {
@@ -75,7 +76,21 @@ const patchPanelController = {
         notes,
       });
 
-      res.status(201).json(patchPanel);
+      // Poorten meteen aanmaken → leeg patchplan is meteen bruikbaar.
+      const n = Number(port_count);
+      if (n > 0) {
+        await portModel.bulkCreate({
+          patchPanelId: patchPanel.id,
+          count: n,
+          prefix: 'Port ',
+          startNumber: 1,
+          portType: 'RJ45',
+          speed: '',
+        });
+      }
+
+      const withPorts = await patchPanelModel.getWithPorts(patchPanel.id);
+      res.status(201).json(withPorts);
     } catch (err) {
       next(err);
     }

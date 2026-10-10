@@ -27,6 +27,13 @@ export function getDeviceFields(deviceTypes) {
       type: "number",
       required: true,
     },
+    {
+      name: "port_count",
+      label: "Aantal poorten",
+      type: "number",
+      required: true,
+      hint: "Maakt meteen een leeg patchplan met deze poorten.",
+    },
     { name: "manufacturer", label: "Fabrikant", type: "text" },
     { name: "model", label: "Model", type: "text" },
     { name: "serial_number", label: "Serienummer", type: "text" },

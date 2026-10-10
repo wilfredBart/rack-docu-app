@@ -1,5 +1,6 @@
 import ApiError from '../../middleware/ApiError.js';
 import deviceModel from '../model/deviceModel.js';
+import portModel from '../model/portModel.js';
 import { assertValidRackSlot, moveRackItem } from '../model/rackSlotModel.js';
 
 const deviceController = {
@@ -64,6 +65,7 @@ const deviceController = {
         rack_position,
         rack_units,
         notes,
+        port_count,
       } = req.body;
 
       if (!rack_id) throw new ApiError(400, 'rack_id is verplicht');
@@ -92,7 +94,21 @@ const deviceController = {
         notes,
       });
 
-      res.status(201).json(device);
+      // Patchplan-shell: poorten meteen aanmaken als port_count is meegegeven.
+      const n = Number(port_count);
+      if (n > 0) {
+        await portModel.bulkCreate({
+          deviceId: device.id,
+          count: n,
+          prefix: 'Port ',
+          startNumber: 1,
+          portType: 'RJ45',
+          speed: '',
+        });
+      }
+
+      const withPorts = await deviceModel.getWithPorts(device.id);
+      res.status(201).json(withPorts);
     } catch (err) {
       next(err);
     }

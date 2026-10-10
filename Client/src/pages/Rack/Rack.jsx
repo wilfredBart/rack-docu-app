@@ -11,7 +11,6 @@ import Modal from "../../components/UI/Modal";
 import {
   FiArrowLeft,
   FiChevronRight,
-  FiTag,
   FiBox,
   FiHardDrive,
   FiGrid,
@@ -281,12 +280,6 @@ export default function Rack() {
               </form>
 
               <div className="flex items-center gap-2 flex-wrap">
-                <Link
-                  to={`/klanten/${klantId}/vlans`}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card"
-                >
-                  <FiTag /> VLAN&apos;s
-                </Link>
                 <Link
                   to={
                     rack?.site_id

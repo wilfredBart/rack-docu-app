@@ -1,9 +1,9 @@
 import ApiError from '../../middleware/ApiError.js';
 import vlanModel from '../model/vlanModel.js';
 
-// Vaste kleurensleutels (zelfde lijst als Client/src/pages/PatchPlan/vlanColors.js).
-// Bewust geen LED-tinten (groen/amber/rood/cyaan): die zijn gereserveerd voor status.
-export const VLAN_COLORS = ['indigo', 'violet', 'orchid', 'pink', 'sky', 'sand', 'slate', 'mauve'];
+// Kleur = vrije hex van de color picker (#RRGGBB). Legacy palette-sleutels blijven geldig.
+const LEGACY_COLORS = ['indigo', 'violet', 'orchid', 'pink', 'sky', 'sand', 'slate', 'mauve'];
+const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
 
 function parseBody(body) {
   const vlanNumber = Number(body.vlan_number);
@@ -12,9 +12,14 @@ function parseBody(body) {
   }
   if (!body.name || !String(body.name).trim()) throw new ApiError(400, 'Naam is verplicht');
 
-  const color = body.color ?? 'indigo';
-  if (!VLAN_COLORS.includes(color)) {
-    throw new ApiError(400, `color moet een van deze waarden zijn: ${VLAN_COLORS.join(', ')}`);
+  const raw = body.color != null ? String(body.color).trim() : '#6366f1';
+  let color = raw;
+  if (HEX_RE.test(raw)) {
+    color = raw.toLowerCase();
+  } else if (LEGACY_COLORS.includes(raw)) {
+    color = raw; // bestaande data
+  } else {
+    throw new ApiError(400, 'color moet een hex-kleur zijn (#RRGGBB)');
   }
 
   return {

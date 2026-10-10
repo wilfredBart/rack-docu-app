@@ -31,3 +31,7 @@ export const fetchCustomerById = (id) =>
 // GET klant-overview (stats + sites → locations → racks)
 export const fetchCustomerOverview = (id) =>
   api.get(`/customers/${id}/overview`).then((res) => res.data);
+
+// GET alle patchplannen (devices + panels), inclusief lege
+export const fetchCustomerPatchPlans = (id) =>
+  api.get(`/customers/${id}/patchplans`).then((res) => res.data);
