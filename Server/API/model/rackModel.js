@@ -21,7 +21,13 @@ const rackModel = {
   },
 
   async getById(id) {
-    const [rows] = await pool.query('SELECT * FROM racks WHERE id = ?', [id]);
+    const [rows] = await pool.query(
+      `SELECT racks.*, locations.site_id
+       FROM racks
+       LEFT JOIN locations ON locations.id = racks.location_id
+       WHERE racks.id = ?`,
+      [id]
+    );
     return rows[0];
   },
 

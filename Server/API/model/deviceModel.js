@@ -115,6 +115,77 @@ const deviceModel = {
 
     return { ...device, ports };
   },
+
+  /**
+   * Patchplan van één device: elke poort met (indien gepatcht) connection,
+   * de andere kant, en de VLAN van deze device-poort (access/trunk native).
+   */
+  async getPatchPlan(id) {
+    const device = await this.getById(id);
+    if (!device) return null;
+
+    const [rows] = await pool.query(
+      `SELECT
+          p.id, p.name, p.port_type, p.speed, p.port_mode,
+          c.id AS connection_id, c.cable_label, c.cable_type, c.status,
+          op.id AS other_port_id, op.name AS other_port_name, op.port_mode AS other_port_mode,
+          COALESCE(od.label, opp.label) AS other_endpoint_label,
+          v.id AS vlan_id, v.vlan_number, v.name AS vlan_name, v.color AS vlan_color
+       FROM ports p
+       LEFT JOIN connections c ON c.from_port_id = p.id OR c.to_port_id = p.id
+       LEFT JOIN ports op ON op.id = IF(c.from_port_id = p.id, c.to_port_id, c.from_port_id)
+       LEFT JOIN devices od ON op.device_id = od.id
+       LEFT JOIN patch_panels opp ON op.patch_panel_id = opp.id
+       LEFT JOIN vlans v ON v.id = p.vlan_id
+       WHERE p.device_id = ?
+       ORDER BY p.id ASC, c.id ASC`,
+      [id]
+    );
+
+    const seen = new Set();
+    const ports = [];
+    for (const r of rows) {
+      if (seen.has(r.id)) continue;
+      seen.add(r.id);
+      ports.push({
+        id: r.id,
+        name: r.name,
+        port_type: r.port_type,
+        speed: r.speed,
+        port_mode: r.port_mode,
+        connection: r.connection_id
+          ? {
+              id: r.connection_id,
+              status: r.status,
+              cable_label: r.cable_label,
+              cable_type: r.cable_type,
+              other_port_id: r.other_port_id,
+              other_port_name: r.other_port_name,
+              other_port_mode: r.other_port_mode,
+              other_endpoint_label: r.other_endpoint_label,
+              vlan: r.vlan_id
+                ? {
+                    id: r.vlan_id,
+                    vlan_number: r.vlan_number,
+                    name: r.vlan_name,
+                    color: r.vlan_color,
+                  }
+                : null,
+            }
+          : null,
+        vlan: r.vlan_id
+          ? {
+              id: r.vlan_id,
+              vlan_number: r.vlan_number,
+              name: r.vlan_name,
+              color: r.vlan_color,
+            }
+          : null,
+      });
+    }
+
+    return { ...device, ports };
+  },
 };
 
 export default deviceModel;

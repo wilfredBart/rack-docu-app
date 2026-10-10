@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchRackWithContents } from "../../api/racks";
@@ -7,16 +7,49 @@ import { fetchDeviceTypes } from "../../api/deviceTypes";
 import { fetchPatchPanelWithPorts } from "../../api/patchPanels";
 import { fetchVlans } from "../../api/vlans";
 import Header from "../../components/Header";
-import { FiArrowLeft, FiChevronRight, FiPlus } from "react-icons/fi";
+import Modal from "../../components/UI/Modal";
+import {
+  FiArrowLeft,
+  FiChevronRight,
+  FiTag,
+  FiBox,
+  FiHardDrive,
+  FiGrid,
+  FiLayers,
+} from "react-icons/fi";
 
-import { buildElevationRows, usedU } from "./rackElevation";
+import { buildElevationRows, freeBlockAt, usedU } from "./rackElevation";
 import { usePortAndTypeMutations } from "./usePortAndTypeMutations";
 import { deviceType, patchPanelType, cableType } from "./itemTypes/itemTypeConfig";
 import { useRackItemCRUD } from "./itemTypes/useRackItemCRUD";
 import RackItemFormModal from "./itemTypes/RackItemFormModal";
 import RackItemDeleteModal from "./itemTypes/RackItemDeleteModal";
 import RackElevationView from "./RackElevationView";
-import RackItemDetailPanel from "./RackItemDetailPanel";
+import RackItemDetailPanel, {
+  RackItemDetailHeader,
+  RackItemDetailActions,
+} from "./RackItemDetailPanel";
+
+const ADD_KIND_OPTIONS = [
+  {
+    kind: "device",
+    label: "Device",
+    description: "Switch, firewall, server, …",
+    icon: FiHardDrive,
+  },
+  {
+    kind: "patch_panel",
+    label: "Patch panel",
+    description: "Patchpaneel met poorten",
+    icon: FiGrid,
+  },
+  {
+    kind: "cable_management",
+    label: "Cable management",
+    description: "Brush / fingers / organizer",
+    icon: FiLayers,
+  },
+];
 
 export default function Rack() {
   const { klantId, rackId } = useParams();
@@ -34,6 +67,8 @@ export default function Rack() {
   });
 
   const [selectedItem, setSelectedItem] = useState(null);
+  // null = dicht; number = U waarop gebruiker wil toevoegen (keuze-modal open)
+  const [addAtU, setAddAtU] = useState(null);
   const [newTypeName, setNewTypeName] = useState("");
   const [portForm, setPortForm] = useState({
     count: 24,
@@ -105,14 +140,6 @@ export default function Rack() {
     enabled: !!klantId,
   });
 
-  // Op small screens: detailpanel in beeld na selectie
-  useEffect(() => {
-    if (!selectedItem || typeof window === "undefined") return;
-    if (window.matchMedia("(min-width: 1024px)").matches) return;
-    const el = document.getElementById("rack-item-detail");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [selectedItem?.kind, selectedItem?.item?.id]);
-
   const handleEditSelected = (item) => {
     crudByKind[item.kind].openEdit(item.item);
   };
@@ -126,6 +153,27 @@ export default function Rack() {
     if (newTypeName.trim()) {
       createTypeMutation.mutate(newTypeName.trim());
     }
+  };
+
+  const handleEmptyClick = (u) => {
+    setAddAtU(u);
+  };
+
+  const handleChooseKind = (kind) => {
+    if (addAtU == null || !rack) return;
+    const block = freeBlockAt(rack, addAtU);
+    if (!block) {
+      setAddAtU(null);
+      return;
+    }
+    crudByKind[kind].openNewAt({
+      rack_position: addAtU,
+      rack_units: 1,
+      maxUnits: block.size,
+      blockLo: block.lo,
+      blockHi: block.hi,
+    });
+    setAddAtU(null);
   };
 
   const handleBulkPortSubmit = (e) => {
@@ -232,77 +280,118 @@ export default function Rack() {
                 </button>
               </form>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={deviceCRUD.openNew}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card cursor-pointer"
+              <div className="flex items-center gap-2 flex-wrap">
+                <Link
+                  to={`/klanten/${klantId}/vlans`}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card"
                 >
-                  <FiPlus /> Device
-                </button>
-                <button
-                  type="button"
-                  onClick={patchPanelCRUD.openNew}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card cursor-pointer"
+                  <FiTag /> VLAN&apos;s
+                </Link>
+                <Link
+                  to={
+                    rack?.site_id
+                      ? `/klanten/${klantId}/patchplan?siteId=${rack.site_id}&rackId=${rackId}`
+                      : `/klanten/${klantId}/patchplan?rackId=${rackId}`
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card"
                 >
-                  <FiPlus /> Patch
-                </button>
-                <button
-                  type="button"
-                  onClick={cableCRUD.openNew}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card cursor-pointer"
-                >
-                  <FiPlus /> Cable
-                </button>
+                  <FiBox /> Patchplan
+                </Link>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] gap-6 items-start">
-              <div className="min-w-0 w-full px-0 sm:px-2">
-                <RackElevationView
-                  elevationRows={elevationRows}
-                  onSelectItem={setSelectedItem}
-                  selectedItem={selectedItem}
-                  deviceTypeMap={deviceTypeMap}
-                  rackName={rack.name}
-                  onAddAt={(kind) => crudByKind[kind].openNew()}
-                />
-              </div>
-
-              <aside className="min-w-0 w-full lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
-                {selectedItem ? (
-                  <RackItemDetailPanel
-                    selectedItem={selectedItem}
-                    deviceTypeMap={deviceTypeMap}
-                    onEdit={handleEditSelected}
-                    onDeleteRequest={handleDeleteRequestSelected}
-                    onClose={() => setSelectedItem(null)}
-                    selectedPorts={selectedPorts}
-                    portForm={portForm}
-                    setPortForm={setPortForm}
-                    onBulkPortSubmit={handleBulkPortSubmit}
-                    updatePortMutation={updatePortMutation}
-                    deletePortMutation={deletePortMutation}
-                    bulkCreatePortsMutation={bulkCreatePortsMutation}
-                    vlans={vlans}
-                    klantId={klantId}
-                    assignVlanMutation={assignVlanMutation}
-                  />
-                ) : (
-                  <div className="hidden lg:block rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center">
-                    <p className="text-sm font-medium text-fg-muted">
-                      Selecteer een device in de rack
-                    </p>
-                    <p className="mt-1 text-xs text-fg-subtle">
-                      Details en poorten verschijnen hier.
-                    </p>
-                  </div>
-                )}
-              </aside>
+            <div className="w-full px-0 sm:px-2 flex justify-center">
+              <RackElevationView
+                elevationRows={elevationRows}
+                onSelectItem={setSelectedItem}
+                selectedItem={selectedItem}
+                deviceTypeMap={deviceTypeMap}
+                rackName={rack.name}
+                rack={rack}
+                onEmptyClick={handleEmptyClick}
+                onMoveItem={(kind, item, newStart) => {
+                  crudByKind[kind].move(item.id, newStart);
+                }}
+              />
             </div>
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={!!selectedItem}
+        onClose={() => setSelectedItem(null)}
+        size="full"
+        title={
+          selectedItem ? (
+            <RackItemDetailHeader selectedItem={selectedItem} />
+          ) : (
+            "Details"
+          )
+        }
+        headerExtra={
+          selectedItem ? (
+            <RackItemDetailActions
+              selectedItem={selectedItem}
+              onEdit={handleEditSelected}
+              onDeleteRequest={handleDeleteRequestSelected}
+              klantId={klantId}
+              siteId={rack?.site_id}
+              rackId={rackId}
+            />
+          ) : null
+        }
+      >
+        {selectedItem ? (
+          <RackItemDetailPanel
+            selectedItem={selectedItem}
+            deviceTypeMap={deviceTypeMap}
+            selectedPorts={selectedPorts}
+            portForm={portForm}
+            setPortForm={setPortForm}
+            onBulkPortSubmit={handleBulkPortSubmit}
+            updatePortMutation={updatePortMutation}
+            deletePortMutation={deletePortMutation}
+            bulkCreatePortsMutation={bulkCreatePortsMutation}
+            vlans={vlans}
+            klantId={klantId}
+            assignVlanMutation={assignVlanMutation}
+          />
+        ) : null}
+      </Modal>
+
+      <Modal
+        isOpen={addAtU != null}
+        onClose={() => setAddAtU(null)}
+        title={addAtU != null ? `Toevoegen op U${addAtU}` : "Toevoegen"}
+      >
+        <p className="text-sm text-fg-subtle mb-4">
+          Kies wat je op deze lege unit wilt plaatsen. Daarna vul je de details
+          in.
+        </p>
+        <div className="flex flex-col gap-2">
+          {ADD_KIND_OPTIONS.map(({ kind, label, description, icon: Icon }) => (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => handleChooseKind(kind)}
+              className="flex items-start gap-3 w-full text-left rounded-xl border border-border bg-bg-subtle hover:bg-card hover:border-accent/40 px-4 py-3 transition cursor-pointer"
+            >
+              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-fg-muted">
+                <Icon className="text-lg" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-fg">
+                  {label}
+                </span>
+                <span className="block text-xs text-fg-subtle mt-0.5">
+                  {description}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </Modal>
 
       <RackItemFormModal
         config={deviceType}

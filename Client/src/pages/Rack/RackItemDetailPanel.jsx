@@ -1,7 +1,6 @@
-import { FiEdit2, FiTrash2, FiX } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import { FiEdit2, FiTrash2, FiBox } from "react-icons/fi";
 import RackPortsSection from "./RackPortsSection";
-import { EquipmentFace } from "./equipment-face";
-import { faceKind } from "./rackElevation";
 
 const KIND_TITLES = {
   device: "Device",
@@ -9,13 +8,11 @@ const KIND_TITLES = {
   cable_management: "Cable management",
 };
 
-// Detailkaart voor het geselecteerde item: kleine visuele face + eigenschappen + poorten.
+// Inhoud van de detail-modal: eigenschappen + poorten (geen face-preview).
+// Header/titel + acties zitten in de Modal (via title / headerExtra).
 export default function RackItemDetailPanel({
   selectedItem,
   deviceTypeMap,
-  onEdit,
-  onDeleteRequest,
-  onClose,
   selectedPorts,
   portForm,
   setPortForm,
@@ -28,62 +25,10 @@ export default function RackItemDetailPanel({
   assignVlanMutation,
 }) {
   const { kind, item } = selectedItem;
-  const typeName =
-    kind === "device" ? deviceTypeMap.get(item.device_type_id) : undefined;
-  const face = faceKind(kind, item, typeName);
 
   return (
-    <div
-      id="rack-item-detail"
-      className="w-full mt-0 scroll-mt-4 bg-card rounded-2xl border border-border p-5 shadow-[var(--shadow-border)]"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-[0.12em] text-fg-subtle font-semibold">
-            {KIND_TITLES[kind]}
-          </p>
-          <h2 className="text-lg font-semibold text-fg truncate">{item.label}</h2>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => onEdit(selectedItem)}
-            className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-fg cursor-pointer"
-          >
-            <FiEdit2 className="text-xs" /> Bewerken
-          </button>
-          <button
-            type="button"
-            onClick={() => onDeleteRequest(selectedItem)}
-            className="inline-flex items-center gap-1 text-sm font-medium text-destructive hover:text-destructive cursor-pointer"
-          >
-            <FiTrash2 className="text-xs" /> Verwijderen
-          </button>
-          {onClose ? (
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex items-center justify-center rounded-lg border border-border p-1.5 text-fg-subtle hover:text-fg hover:bg-bg-subtle cursor-pointer"
-              aria-label="Sluiten"
-            >
-              <FiX className="text-base" />
-            </button>
-          ) : null}
-        </div>
-      </div>
-
-      {/* Zelfde face als in de rack, compact */}
-      <div className="detail-face-preview mt-4" aria-hidden="true">
-        <EquipmentFace
-          kind={kind}
-          item={item}
-          face={face}
-          selected
-          interactive={false}
-        />
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-fg-muted">
+    <div id="rack-item-detail" className="w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-fg-muted">
         <div>
           <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
             Positie
@@ -107,7 +52,9 @@ export default function RackItemDetailPanel({
               <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Fabrikant
               </span>
-              <span className="font-medium text-fg">{item.manufacturer || "-"}</span>
+              <span className="font-medium text-fg">
+                {item.manufacturer || "-"}
+              </span>
             </div>
             <div>
               <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
@@ -127,7 +74,9 @@ export default function RackItemDetailPanel({
               <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 MAC-adres
               </span>
-              <span className="font-medium text-fg">{item.mac_address || "-"}</span>
+              <span className="font-medium text-fg">
+                {item.mac_address || "-"}
+              </span>
             </div>
           </>
         )}
@@ -144,13 +93,17 @@ export default function RackItemDetailPanel({
               <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Aantal poorten
               </span>
-              <span className="font-medium text-fg">{item.port_count || 0}</span>
+              <span className="font-medium text-fg">
+                {item.port_count || 0}
+              </span>
             </div>
             <div>
               <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Fabrikant
               </span>
-              <span className="font-medium text-fg">{item.manufacturer || "-"}</span>
+              <span className="font-medium text-fg">
+                {item.manufacturer || "-"}
+              </span>
             </div>
             <div>
               <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
@@ -173,7 +126,9 @@ export default function RackItemDetailPanel({
               <span className="block text-[11px] uppercase tracking-[0.12em] text-fg-subtle mb-1">
                 Fabrikant
               </span>
-              <span className="font-medium text-fg">{item.manufacturer || "-"}</span>
+              <span className="font-medium text-fg">
+                {item.manufacturer || "-"}
+              </span>
             </div>
           </>
         )}
@@ -205,5 +160,71 @@ export default function RackItemDetailPanel({
         />
       )}
     </div>
+  );
+}
+
+/** Titelblok voor in de Modal-header. */
+export function RackItemDetailHeader({ selectedItem }) {
+  const { kind, item } = selectedItem;
+  return (
+    <div className="min-w-0">
+      <p className="text-[11px] uppercase tracking-[0.12em] text-fg-subtle font-semibold">
+        {KIND_TITLES[kind]}
+      </p>
+      <h2 className="text-lg font-bold text-fg truncate leading-tight">
+        {item.label}
+      </h2>
+    </div>
+  );
+}
+
+export function RackItemDetailActions({
+  selectedItem,
+  onEdit,
+  onDeleteRequest,
+  klantId,
+  siteId,
+  rackId,
+}) {
+  const { kind, item } = selectedItem;
+
+  const patchplanTo = (() => {
+    if (!klantId || (kind !== "device" && kind !== "patch_panel")) return null;
+    const params = new URLSearchParams();
+    if (siteId) params.set("siteId", String(siteId));
+    if (rackId) params.set("rackId", String(rackId));
+    if (kind === "patch_panel") params.set("panel", String(item.id));
+    if (kind === "device") params.set("device", String(item.id));
+    return `/klanten/${klantId}/patchplan?${params.toString()}`;
+  })();
+
+  return (
+    <>
+      {patchplanTo ? (
+        <Link
+          to={patchplanTo}
+          className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle"
+          title="Patchplan"
+        >
+          <FiBox />
+        </Link>
+      ) : null}
+      <button
+        type="button"
+        onClick={() => onEdit(selectedItem)}
+        className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
+        title="Bewerken"
+      >
+        <FiEdit2 />
+      </button>
+      <button
+        type="button"
+        onClick={() => onDeleteRequest(selectedItem)}
+        className="p-2 rounded-lg text-fg-subtle hover:text-destructive hover:bg-bg-subtle cursor-pointer"
+        title="Verwijderen"
+      >
+        <FiTrash2 />
+      </button>
+    </>
   );
 }

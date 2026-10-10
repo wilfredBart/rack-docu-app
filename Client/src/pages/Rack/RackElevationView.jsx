@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useCallback, useRef, useState } from "react";
 import { FiPlus } from "react-icons/fi";
 import {
   DndContext,
@@ -24,99 +23,25 @@ function UStack({ from, to }) {
   );
 }
 
-// Het keuzemenu wordt via een portal op document.body getekend (position: fixed).
-// Binnen de rack zelf wordt het afgesneden: .rack-bay heeft overflow: hidden en
-// .rack-body scrolt, en de rij is maar 1U hoog.
-const MENU_FLIP_THRESHOLD = 140; // px ruimte onder de knop die nodig is om omlaag te openen
-
-function EmptyRow({ u, onAddAt }) {
-  const buttonRef = useRef(null);
-  const [menuPos, setMenuPos] = useState(null); // { left, top, up } of null = dicht
-  const open = menuPos !== null;
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const close = () => setMenuPos(null);
-    window.addEventListener("click", close);
-    window.addEventListener("resize", close);
-    window.addEventListener("scroll", close, true); // capture: ook scroll in .rack-body
-    return () => {
-      window.removeEventListener("click", close);
-      window.removeEventListener("resize", close);
-      window.removeEventListener("scroll", close, true);
-    };
-  }, [open]);
-
-  const toggleMenu = (e) => {
-    e.stopPropagation();
-    if (open) {
-      setMenuPos(null);
-      return;
-    }
-    const rect = buttonRef.current.getBoundingClientRect();
-    const up = rect.bottom + MENU_FLIP_THRESHOLD > window.innerHeight;
-    setMenuPos({
-      left: rect.left + rect.width / 2,
-      top: up ? rect.top - 4 : rect.bottom + 4,
-      up,
-    });
-  };
-
-  const choose = (kind) => {
-    onAddAt(kind, u);
-    setMenuPos(null);
-  };
-
+// Lege U: klik opent een modal (in Rack.jsx) om type te kiezen — geen inline menu
+// in de 1U-rij (dat liep visueel mis door overflow / portal-styling).
+function EmptyRow({ u, onEmptyClick }) {
   return (
     <div className="rack-row">
       <UStack from={u} to={u} />
       <div className="rack-rail" />
       <div className="rack-bay">
-        {onAddAt ? (
-          <div style={{ position: "relative", height: "100%" }}>
-            <button
-              ref={buttonRef}
-              type="button"
-              className="rack-empty"
-              aria-label={`Lege U${u}, item toevoegen`}
-              onClick={toggleMenu}
-            >
-              <span className="rack-empty-hint">
-                <FiPlus style={{ width: 12, height: 12 }} />
-              </span>
-            </button>
-            {open
-              ? createPortal(
-                  <div
-                    className="rack-empty-menu"
-                    style={{
-                      position: "fixed",
-                      zIndex: 50,
-                      left: menuPos.left,
-                      top: menuPos.top,
-                      transform: menuPos.up
-                        ? "translate(-50%, -100%)"
-                        : "translateX(-50%)",
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button type="button" onClick={() => choose("device")}>
-                      Device op U{u}
-                    </button>
-                    <button type="button" onClick={() => choose("patch_panel")}>
-                      Patch panel op U{u}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => choose("cable_management")}
-                    >
-                      Cable mgmt op U{u}
-                    </button>
-                  </div>,
-                  document.body,
-                )
-              : null}
-          </div>
+        {onEmptyClick ? (
+          <button
+            type="button"
+            className="rack-empty"
+            aria-label={`Lege U${u}, item toevoegen`}
+            onClick={() => onEmptyClick(u)}
+          >
+            <span className="rack-empty-hint">
+              <FiPlus style={{ width: 12, height: 12 }} />
+            </span>
+          </button>
         ) : (
           <div className="rack-empty" />
         )}
@@ -185,7 +110,7 @@ function ItemRow({ row, selected, typeName, onSelectItem, preview, draggable }) 
  * Visuele 19" rack. Bestaande props blijven werken:
  *   elevationRows, onSelectItem
  * Optioneel (aanbevolen):
- *   rackName, selectedItem, deviceTypeMap, onAddAt(kind, u)
+ *   rackName, selectedItem, deviceTypeMap, onEmptyClick(u)
  * Drag & drop (verticaal verplaatsen binnen de rack), alle drie nodig:
  *   rack            - rack-object met height_u + devices/patch_panels/cable_management
  *   onMoveItem(kind, item, newStart)  - wordt enkel aangeroepen bij een geldige drop
@@ -197,7 +122,7 @@ export default function RackElevationView({
   selectedItem = null,
   deviceTypeMap,
   rackName,
-  onAddAt,
+  onEmptyClick,
   rack,
   onMoveItem,
   onInvalidDrop,
@@ -317,7 +242,11 @@ export default function RackElevationView({
             <div className="rack-elevation" ref={elevationRef}>
               {elevationRows.map((row) =>
                 row.type === "empty" ? (
-                  <EmptyRow key={`u-${row.u}`} u={row.u} onAddAt={onAddAt} />
+                  <EmptyRow
+                    key={`u-${row.u}`}
+                    u={row.u}
+                    onEmptyClick={onEmptyClick}
+                  />
                 ) : (
                   <ItemRow
                     key={`${row.kind}-${row.item.id}`}

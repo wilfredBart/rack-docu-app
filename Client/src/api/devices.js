@@ -13,6 +13,10 @@ export const fetchDeviceById = (id) =>
 export const fetchDeviceWithPorts = (id) =>
   api.get(`/devices/${id}/ports`).then((res) => res.data);
 
+// Poorten + connection + VLAN van één device (engineer patchplan).
+export const fetchDevicePatchPlan = (id) =>
+  api.get(`/devices/${id}/patchplan`).then((res) => res.data);
+
 export const createDevice = async (data) => {
   const response = await api.post("/devices", data);
   return response.data;

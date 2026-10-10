@@ -99,9 +99,11 @@ Backend connection-CRUD bestaat al (`/connections`: list, get, create, update, d
 
 Doel: op de rack een item aanklikken → direct het patchplan van **dat** item.
 
-- [ ] **3A.1** Vanuit rack-detail (device of patch panel): actie “Patchplan” / klik → navigatie naar patchplan gefilterd op dat item  
-  - Voorstel route: `/klanten/:klantId/patchplan?siteId=&panel=` of `?device=` (device-view kan later; start met panel)
-- [ ] **3A.2** Patchplan-pagina: als je vanuit een specifiek panel/device komt, dat item meteen selecteren (geen “kies eerst een site”-dead end)
+- [x] **3A.1** Vanuit rack-detail (device of patch panel): knop “Patchplan” → navigatie  
+  - Panel: `/klanten/:klantId/patchplan?siteId=&panel=&rackId=`  
+  - Device: `/klanten/:klantId/patchplan?device=&siteId=&rackId=`  
+  - Backend: `GET /devices/:id/patchplan` + `site_id` op rack-contents
+- [x] **3A.2** Patchplan-pagina: panel of device direct openen zonder site-dead-end; breadcrumb terug naar rack als `rackId` meegegeven is
 - [ ] **3A.3** (Optioneel) Mini-overzicht van verbindingen in het rack-detailpaneel zelf (zonder de pagina te verlaten)
 
 ### 3B — Verbindingen beheren
@@ -201,6 +203,7 @@ Niet commitment, wel vastgelegd zodat ze niet vergeten raken.
 | 2026-09–10 | 2b / 2.9 | (codebase) | VLAN-migratie, VLAN-pagina, port VLAN/mode, patchplan read-only UI (face + cards + status) |
 | 2026-10-10 | 1.8 + 2.10 | Grok + Wilfred | Dashboard: dubbele site-knop weg, add-site icoon zoals edit/delete; VLAN/Patchplan van dashboard naar rack-knoppen |
 | 2026-10-10 | roadmap | Grok + Wilfred | ROADMAP volledig bijgewerkt: productprincipes, fase 2b VLAN, fase 3 herwerkt (3A engineer / 3B connections / 3C baas-tabel+print), fase 5 ideeën |
+| 2026-10-10 | 3A.1–3A.2 | Grok | Engineer-flow: Patchplan-knop op rack-detail (device + panel); `GET /devices/:id/patchplan`; `site_id` op rack; patchplan-pagina opent panel/device direct + terug naar rack |
 
 ---
 

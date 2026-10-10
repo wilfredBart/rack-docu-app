@@ -33,6 +33,20 @@ const deviceController = {
   },
 
   /**
+   * GET /devices/:id/patchplan
+   * Poorten + connection + VLAN van dit device (engineer-view).
+   */
+  async getPatchPlan(req, res, next) {
+    try {
+      const plan = await deviceModel.getPatchPlan(req.params.id);
+      if (!plan) throw new ApiError(404, 'Device niet gevonden');
+      res.json(plan);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
    * POST /devices
    * Valideert nu ook of de opgegeven rack-positie geldig/vrij is,
    * over devices, patch_panels EN cable_management heen.
