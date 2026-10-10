@@ -130,22 +130,23 @@ function Klanten() {
     <div className="min-h-screen bg-bg pb-12">
       <Header />
 
-      {/* Pagina Header met zoekbalk en actieknop */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
+      {/* Pagina Header — + knop zelfde stijl als dashboard (sites/locaties) */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between gap-3 border-b border-border pb-2 mb-2">
           <h1 className="text-2xl font-bold text-fg">Klantenbeheer</h1>
-          <p className="text-sm text-fg-subtle">
-            Beheer alle organisaties en klik door naar hun specifieke
-            infrastructuur.
-          </p>
+          <button
+            type="button"
+            onClick={openNewModal}
+            className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
+            title="Nieuwe klant"
+          >
+            <FiPlus />
+          </button>
         </div>
-
-        <button
-          onClick={openNewModal}
-          className="flex items-center gap-2 bg-accent text-accent-fg hover:opacity-90 px-4 py-2.5 rounded-xl font-medium text-sm transition shadow-[var(--shadow-border)] cursor-pointer"
-        >
-          <FiPlus className="text-lg" /> Nieuwe klant
-        </button>
+        <p className="text-sm text-fg-subtle mt-1">
+          Beheer alle organisaties en klik door naar hun specifieke
+          infrastructuur.
+        </p>
       </div>
 
       {/* Zoekbalk & Stats Card */}

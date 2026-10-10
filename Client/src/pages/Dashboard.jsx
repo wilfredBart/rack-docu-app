@@ -18,25 +18,20 @@ import {
   FiChevronRight,
   FiMapPin,
   FiServer,
-  FiHardDrive,
   FiGrid,
-  FiBox,
   FiSearch,
   FiPlus,
   FiEdit2,
   FiTrash2,
-  FiFolder,
   FiExternalLink,
-  FiTag,
 } from "react-icons/fi";
-import { MdOutlineAddLocationAlt } from "react-icons/md";
 
+// KPI's = boom die hieronder zichtbaar is (sites → locaties → racks).
+// Devices / patch panels zitten in de rack-view, niet in dit overzicht.
 const KPI_ITEMS = [
   { key: "sites", label: "Sites", icon: FiMapPin },
   { key: "locations", label: "Locaties", icon: FiGrid },
   { key: "racks", label: "Racks", icon: FiServer },
-  { key: "devices", label: "Devices", icon: FiHardDrive },
-  { key: "patch_panels", label: "Patch panels", icon: FiBox },
 ];
 
 const SITE_FIELDS = [
@@ -413,33 +408,16 @@ export default function Dashboard() {
           <span className="text-fg font-medium">{overview.name}</span>
         </nav>
 
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-bold text-fg">
-              {overview.name}
-            </h1>
-            <p className="text-sm text-fg-subtle mt-1">
-              Infrastructuur-overzicht
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              to={`/klanten/${klantId}/vlans`}
-              className="flex items-center gap-2 border border-border bg-bg-subtle text-fg-muted hover:text-fg px-4 py-2.5 rounded-xl font-medium text-sm"
-            >
-              <FiTag /> VLAN&apos;s
-            </Link>
-            <button
-              type="button"
-              onClick={openNewSite}
-              className="flex items-center gap-2 bg-accent text-accent-fg hover:opacity-90 px-4 py-2.5 rounded-xl font-medium text-sm cursor-pointer"
-            >
-              <FiPlus /> Nieuwe site
-            </button>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-fg">
+            {overview.name}
+          </h1>
+          <p className="text-sm text-fg-subtle mt-1">
+            Infrastructuur-overzicht
+          </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
           {KPI_ITEMS.map(({ key, label, icon: Icon }) => (
             <div
               key={key}
@@ -478,17 +456,21 @@ export default function Dashboard() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4">
-            <aside className="bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] p-6 h-fit">
-              <div className="flex items-center justify-between mb-3 border-border border-b mb-4">
-                <h3 className="uppercase text-bold font-semibold">Sites</h3>
-
+          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 md:items-stretch">
+            {/* Aside minstens zo hoog als site-detail; mag hoger als de sitelijst langer is. */}
+            <aside className="bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] p-6 h-full min-h-full flex flex-col">
+              <div className="flex items-center justify-between border-b border-border pb-2 mb-4">
+                <h3 className="uppercase text-bold font-semibold inline-flex items-center gap-2">
+                  <FiMapPin className="text-base text-fg-subtle" />
+                  Sites
+                </h3>
                 <button
                   type="button"
                   onClick={openNewSite}
-                  className="rounded-lg text-fg-subtle hover:text-fg hover:bg-bg-subtle cursor-pointer "
+                  className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
+                  title="Nieuwe site"
                 >
-                  <MdOutlineAddLocationAlt className="shrink-0 mr-4" />
+                  <FiPlus />
                 </button>
               </div>
 
@@ -558,12 +540,6 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Link
-                        to={`/klanten/${klantId}/patchplan?siteId=${selectedSite.id}`}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-fg-muted hover:text-accent hover:bg-bg-subtle"
-                      >
-                        <FiBox className="text-base" /> Patchplan
-                      </Link>
                       <button
                         type="button"
                         onClick={() => openEditSite(selectedSite)}
@@ -582,16 +558,18 @@ export default function Dashboard() {
                       </button>
                     </div>
                   </div>
-                  <div className="mt-6 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-fg">
+                  <div className="mt-6 flex items-center justify-between border-b border-border pb-2 mb-3">
+                    <h3 className="text-sm font-semibold text-fg inline-flex items-center gap-2">
+                      <FiGrid className="text-base text-fg-subtle" />
                       Locaties
                     </h3>
                     <button
                       type="button"
                       onClick={openNewLocation}
-                      className="flex items-center gap-1.5 text-accent hover:text-fg text-sm font-medium cursor-pointer"
+                      className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
+                      title="Nieuwe locatie"
                     >
-                      <FiPlus /> Nieuwe locatie
+                      <FiPlus />
                     </button>
                   </div>
 
@@ -617,7 +595,7 @@ export default function Dashboard() {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-start gap-2 min-w-0">
-                              <FiFolder className="text-fg-subtle mt-0.5 shrink-0" />
+                              <FiGrid className="text-fg-subtle mt-0.5 shrink-0" />
                               <div className="min-w-0">
                                 <p className="text-sm font-semibold text-fg truncate">
                                   {location.name}
@@ -650,23 +628,36 @@ export default function Dashboard() {
                               </button>
                             </div>
                           </div>
-                          <div className="mt-1 flex items-center justify-between">
-                            <p className="text-xs text-fg-subtle">
-                              {location.racks?.length ?? 0}{" "}
-                              {(location.racks?.length ?? 0) === 1
-                                ? "rack"
-                                : "racks"}
-                            </p>
+                          <div className="mt-1 flex items-center justify-between border-b border-border pb-1.5 mb-1.5">
+                            <h4 className="text-xs font-semibold text-fg inline-flex items-center gap-1.5">
+                              <FiServer className="text-sm text-fg-subtle" />
+                              Racks
+                            </h4>
                             <button
                               type="button"
                               onClick={() => openNewRack(location.id)}
-                              className="flex items-center gap-1 text-xs font-medium text-accent hover:text-fg cursor-pointer"
+                              className="p-1.5 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
+                              title="Nieuwe rack"
                             >
-                              <FiPlus className="text-xs" /> Rack
+                              <FiPlus className="text-sm" />
                             </button>
                           </div>
 
-                          {(location.racks?.length ?? 0) > 0 && (
+                          {(location.racks?.length ?? 0) === 0 ? (
+                            <div className="mt-1 border border-dashed border-border rounded-lg p-4 text-center">
+                              <p className="text-xs text-fg-subtle">
+                                Nog geen racks voor deze locatie.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => openNewRack(location.id)}
+                                className="mt-2 inline-flex items-center gap-1.5 text-accent hover:text-fg text-xs font-medium cursor-pointer"
+                              >
+                                <FiPlus className="text-xs" /> Eerste rack
+                                toevoegen
+                              </button>
+                            </div>
+                          ) : (
                             <ul className="flex flex-col gap-1.5 mt-1">
                               {location.racks.map((rack) => {
                                 const pct = occupancyPercent(rack);
