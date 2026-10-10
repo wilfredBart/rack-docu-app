@@ -8,6 +8,7 @@ router.get('/', authenticate, portController.list);
 router.get('/:id', authenticate, portController.getOne);
 router.post('/bulk', authenticate, portController.bulkCreate);
 router.post('/', authenticate, portController.create);
+router.put('/vlan', authenticate, portController.bulkSetVlan);
 router.put('/:id', authenticate, portController.update);
 router.delete('/bulk', authenticate, portController.bulkRemove);
 router.delete('/:id', authenticate, portController.remove);

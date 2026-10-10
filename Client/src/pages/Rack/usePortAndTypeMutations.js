@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { createDeviceType } from "../../api/deviceTypes";
-import { bulkCreatePorts, updatePort, deletePort } from "../../api/ports";
+import { bulkCreatePorts, updatePort, deletePort, assignVlan } from "../../api/ports";
 
 // Device-types en poorten volgen niet het device/patch-panel/cable-patroon
 // (geen edit, geen rack-positie), dus die horen niet thuis in useRackItemCRUD.
@@ -73,10 +73,25 @@ export function usePortAndTypeMutations({ selectedItem, invalidateRack, setNewTy
     },
   });
 
+  // VLAN (en modus) van één of meerdere device-poorten instellen of wissen.
+  const assignVlanMutation = useMutation({
+    mutationFn: assignVlan,
+    onSuccess: () => {
+      invalidateSelectedPorts();
+      queryClient.invalidateQueries({ queryKey: ["vlans"] });
+      queryClient.invalidateQueries({ queryKey: ["patchplan"] });
+      toast.success("VLAN bijgewerkt");
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Fout bij instellen van VLAN");
+    },
+  });
+
   return {
     createTypeMutation,
     bulkCreatePortsMutation,
     updatePortMutation,
     deletePortMutation,
+    assignVlanMutation,
   };
 }

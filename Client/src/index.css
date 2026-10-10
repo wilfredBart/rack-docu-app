@@ -35,6 +35,16 @@
   --color-led-fault: #d26565;
   --color-led-link: #6ec8e0;
 
+  /* VLAN-palet: vaste sleutels, bewust niet groen/amber/rood/cyaan (die betekenen status) */
+  --color-vlan-indigo: #7c8cf8;
+  --color-vlan-violet: #b48cf2;
+  --color-vlan-orchid: #cf7fe0;
+  --color-vlan-pink: #e07ab8;
+  --color-vlan-sky: #5aa0f0;
+  --color-vlan-sand: #cbb98f;
+  --color-vlan-slate: #8fa3b8;
+  --color-vlan-mauve: #b98aa6;
+
   --color-rack-shell: #14171c;
   --color-rack-shell-edge: #2a3038;
   --color-rack-void: #07080a;

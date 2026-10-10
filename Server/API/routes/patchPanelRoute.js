@@ -7,6 +7,7 @@ const router = express.Router();
 router.get('/', authenticate, patchPanelController.list);
 router.get('/:id', authenticate, patchPanelController.getOne);
 router.get('/:id/ports', authenticate, patchPanelController.getOneWithPorts);
+router.get('/:id/patchplan', authenticate, patchPanelController.getPatchPlan);
 router.post('/', authenticate, patchPanelController.create);
 router.put('/:id', authenticate, patchPanelController.update);
 router.delete('/:id', authenticate, patchPanelController.remove);

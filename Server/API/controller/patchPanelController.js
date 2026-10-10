@@ -5,7 +5,7 @@ import { assertValidRackSlot } from '../model/rackSlotModel.js';
 const patchPanelController = {
   async list(req, res, next) {
     try {
-      const patchPanels = await patchPanelModel.getAll({ rackId: req.query.rack_id });
+      const patchPanels = await patchPanelModel.getAll({ rackId: req.query.rack_id, siteId: req.query.site_id });
       res.json(patchPanels);
     } catch (err) {
       next(err);
@@ -27,6 +27,20 @@ const patchPanelController = {
       const patchPanel = await patchPanelModel.getWithPorts(req.params.id);
       if (!patchPanel) throw new ApiError(404, 'Patch panel niet gevonden');
       res.json(patchPanel);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * GET /patch-panels/:id/patchplan
+   * Poorten + connection + VLAN (afgeleid van de andere kant) voor de patchplan-pagina.
+   */
+  async getPatchPlan(req, res, next) {
+    try {
+      const plan = await patchPanelModel.getPatchPlan(req.params.id);
+      if (!plan) throw new ApiError(404, 'Patch panel niet gevonden');
+      res.json(plan);
     } catch (err) {
       next(err);
     }

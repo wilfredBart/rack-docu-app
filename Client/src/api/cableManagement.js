@@ -24,3 +24,9 @@ export const deleteCableManagementItem = async (id) => {
   const response = await api.delete(`/cable-management/${id}`);
   return response.data;
 };
+
+// Verplaatst enkel de positie (drag & drop in de rack-view).
+export const moveCableManagementItem = async ({ id, rack_position }) => {
+  const response = await api.patch(`/cable-management/${id}/position`, { rack_position });
+  return response.data;
+};

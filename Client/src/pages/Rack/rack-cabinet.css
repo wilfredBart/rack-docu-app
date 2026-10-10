@@ -693,11 +693,8 @@
 
 /* empty-slot add menu (geen Radix) */
 .rack-empty-menu {
-  position: absolute;
-  z-index: 20;
-  left: 50%;
-  top: 100%;
-  transform: translate(-50%, 4px);
+  position: fixed; /* via portal op document.body; left/top/transform komen inline uit EmptyRow */
+  z-index: 50;
   min-width: 11rem;
   padding: 0.25rem;
   border-radius: 0.5rem;

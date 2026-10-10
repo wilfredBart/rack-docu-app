@@ -1,5 +1,30 @@
 import ApiError from '../../middleware/ApiError.js';
 import portModel from '../model/portModel.js';
+import vlanModel from '../model/vlanModel.js';
+
+const PORT_MODES = ['access', 'trunk'];
+
+/**
+ * Controleert of deze poorten de VLAN mogen krijgen:
+ * enkel device-poorten, en enkel een VLAN van dezelfde klant.
+ */
+async function assertVlanAllowed(ports, vlanId) {
+  const vlan = await vlanModel.getById(vlanId);
+  if (!vlan) throw new ApiError(404, 'VLAN niet gevonden');
+
+  const customerByDevice = new Map();
+  for (const port of ports) {
+    if (!port.device_id) {
+      throw new ApiError(400, 'Een VLAN kan enkel op een device-poort ingesteld worden (patch panel-poorten erven via de connection)');
+    }
+    if (!customerByDevice.has(port.device_id)) {
+      customerByDevice.set(port.device_id, await vlanModel.getCustomerIdForDevice(port.device_id));
+    }
+    if (customerByDevice.get(port.device_id) !== vlan.customer_id) {
+      throw new ApiError(400, 'Deze VLAN hoort bij een andere klant');
+    }
+  }
+}
 
 const portController = {
   /**
@@ -109,11 +134,52 @@ const portController = {
       const existing = await portModel.getById(req.params.id);
       if (!existing) throw new ApiError(404, 'Port niet gevonden');
 
-      const { name, port_type, speed } = req.body;
+      const { name, port_type, speed, port_mode, vlan_id } = req.body;
       if (!name || !name.trim()) throw new ApiError(400, 'Naam is verplicht');
+      if (port_mode && !PORT_MODES.includes(port_mode)) {
+        throw new ApiError(400, `port_mode moet ${PORT_MODES.join(' of ')} zijn`);
+      }
+      if (vlan_id) await assertVlanAllowed([existing], vlan_id);
 
-      const port = await portModel.update(req.params.id, { name, portType: port_type, speed });
+      const port = await portModel.update(req.params.id, {
+        name,
+        portType: port_type,
+        speed,
+        portMode: port_mode,
+        vlanId: vlan_id,
+      });
       res.json(port);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * PUT /ports/vlan
+   * Body: { port_ids: [1, 2, 3], vlan_id: 4, port_mode: "access" }
+   * vlan_id: null wist de VLAN van die poorten. port_mode default "access".
+   */
+  async bulkSetVlan(req, res, next) {
+    try {
+      const { port_ids, vlan_id, port_mode } = req.body;
+
+      if (!Array.isArray(port_ids) || port_ids.length === 0) {
+        throw new ApiError(400, 'port_ids is verplicht (lijst met poort-id\'s)');
+      }
+      if (port_ids.length > 500) throw new ApiError(400, 'Maximum 500 poorten in één keer');
+      if (port_mode && !PORT_MODES.includes(port_mode)) {
+        throw new ApiError(400, `port_mode moet ${PORT_MODES.join(' of ')} zijn`);
+      }
+
+      const ports = await portModel.getByIds(port_ids);
+      if (ports.length !== new Set(port_ids).size) throw new ApiError(404, 'Een of meer poorten bestaan niet');
+      if (vlan_id) await assertVlanAllowed(ports, vlan_id);
+
+      const updated = await portModel.bulkSetVlan(port_ids, {
+        vlanId: vlan_id ?? null,
+        portMode: vlan_id ? (port_mode ?? 'access') : null,
+      });
+      res.json({ message: `${updated} poort(en) bijgewerkt`, updated });
     } catch (err) {
       next(err);
     }

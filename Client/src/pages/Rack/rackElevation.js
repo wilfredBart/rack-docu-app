@@ -40,6 +40,53 @@ export function buildElevationRows(rack) {
   return rows;
 }
 
+// Set van alle bezette U's (devices + patch panels + cable management).
+// excludeKind/excludeId: negeer één item (handig bij verplaatsen, zodat een item
+// zichzelf niet als obstakel ziet).
+function takenUnits(rack, { excludeKind, excludeId } = {}) {
+  const taken = new Set();
+  const add = (kind, item) => {
+    if (kind === excludeKind && item.id === excludeId) return;
+    const { start, topU } = occupiedUnits(item);
+    for (let n = start; n <= topU; n += 1) taken.add(n);
+  };
+  (rack.devices ?? []).forEach((d) => add("device", d));
+  (rack.patch_panels ?? []).forEach((p) => add("patch_panel", p));
+  (rack.cable_management ?? []).forEach((c) => add("cable_management", c));
+  return taken;
+}
+
+// Aantal aaneengesloten vrije U's vanaf positie `u`, omhoog gerekend (U1 = onderaan).
+export function maxFitAt(rack, u, exclude) {
+  const taken = takenUnits(rack, exclude);
+  let free = 0;
+  for (let n = u; n <= rack.height_u && !taken.has(n); n += 1) free += 1;
+  return free;
+}
+
+// Het volledige vrije blok rond U `u`, in beide richtingen: { lo, hi, size } of null
+// als `u` zelf bezet is. Zo kan een device van 3U ook geplaatst worden als de
+// aangeklikte U net onder een ander item zit.
+export function freeBlockAt(rack, u, exclude) {
+  const taken = takenUnits(rack, exclude);
+  if (taken.has(u)) return null;
+  let lo = u;
+  while (lo > 1 && !taken.has(lo - 1)) lo -= 1;
+  let hi = u;
+  while (hi < rack.height_u && !taken.has(hi + 1)) hi += 1;
+  return { lo, hi, size: hi - lo + 1 };
+}
+
+// Past een item van `units` U met onderste U `start` hier? (binnen de rack en zonder overlap)
+export function canPlaceAt(rack, start, units, exclude) {
+  if (start < 1 || start + units - 1 > rack.height_u) return false;
+  const taken = takenUnits(rack, exclude);
+  for (let n = start; n < start + units; n += 1) {
+    if (taken.has(n)) return false;
+  }
+  return true;
+}
+
 export function usedU(rack) {
   let used = 0;
   const add = (item) => {

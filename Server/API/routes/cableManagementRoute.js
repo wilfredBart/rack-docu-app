@@ -8,6 +8,7 @@ router.get('/', authenticate, cableManagementController.list);
 router.get('/:id', authenticate, cableManagementController.getOne);
 router.post('/', authenticate, cableManagementController.create);
 router.put('/:id', authenticate, cableManagementController.update);
+router.patch('/:id/position', authenticate, cableManagementController.move);
 router.delete('/:id', authenticate, cableManagementController.remove);
 
 export default router;

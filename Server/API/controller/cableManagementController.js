@@ -1,6 +1,6 @@
 import ApiError from '../../middleware/ApiError.js';
 import cableManagementModel from '../model/cableManagementModel.js';
-import { assertValidRackSlot } from '../model/rackSlotModel.js';
+import { assertValidRackSlot, moveRackItem } from '../model/rackSlotModel.js';
 
 const cableManagementController = {
   async list(req, res, next) {
@@ -78,6 +78,19 @@ const cableManagementController = {
         notes,
       });
 
+      res.json(item);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * PATCH /{id}/position
+   * Body: { rack_position }. Verplaatst enkel de positie (drag & drop in de rack-view).
+   */
+  async move(req, res, next) {
+    try {
+      const item = await moveRackItem('cable_management', req.params.id, req.body.rack_position);
       res.json(item);
     } catch (err) {
       next(err);

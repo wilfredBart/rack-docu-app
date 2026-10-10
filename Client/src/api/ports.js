@@ -29,3 +29,14 @@ export const deletePort = async (id) => {
   const response = await api.delete(`/ports/${id}`);
   return response.data;
 };
+
+// VLAN (en modus) van één of meerdere device-poorten tegelijk instellen.
+// vlanId = null wist de VLAN.
+export const assignVlan = async ({ portIds, vlanId, portMode }) => {
+  const response = await api.put("/ports/vlan", {
+    port_ids: portIds,
+    vlan_id: vlanId,
+    port_mode: portMode,
+  });
+  return response.data;
+};

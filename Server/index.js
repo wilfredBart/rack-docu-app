@@ -14,6 +14,7 @@ import patchPanelsRoute from './API/routes/patchPanelRoute.js';
 import cableManagementRoute from './API/routes/cableManagementRoute.js';
 import portsRoute from './API/routes/portRoute.js';
 import connectionsRoute from './API/routes/connectionRoute.js';
+import vlansRoute from './API/routes/vlanRoute.js';
 
 import errorHandler from './middleware/errorHandler.js';
 import notFoundHandler from './middleware/notFoundHandler.js';
@@ -58,6 +59,7 @@ app.use('/patch-panels', patchPanelsRoute);
 app.use('/cable-management', cableManagementRoute);
 app.use('/ports', portsRoute);
 app.use('/connections', connectionsRoute);
+app.use('/vlans', vlansRoute);
 
 app.use(notFoundHandler); // vangt onbekende routes op
 app.use(errorHandler);    // vangt alle errors op — altijd als laatste!

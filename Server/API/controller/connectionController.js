@@ -1,6 +1,14 @@
 import ApiError from '../../middleware/ApiError.js';
 import connectionModel from '../model/connectionModel.js';
 
+const STATUSES = ['actief', 'niet_getest', 'defect'];
+
+function assertStatus(status) {
+  if (status && !STATUSES.includes(status)) {
+    throw new ApiError(400, `status moet een van deze waarden zijn: ${STATUSES.join(', ')}`);
+  }
+}
+
 const connectionController = {
   /**
    * GET /connections
@@ -34,19 +42,21 @@ const connectionController = {
    */
   async create(req, res, next) {
     try {
-      const { from_port_id, to_port_id, cable_label, cable_type } = req.body;
+      const { from_port_id, to_port_id, cable_label, cable_type, status } = req.body;
 
       if (!from_port_id) throw new ApiError(400, 'from_port_id is verplicht');
       if (!to_port_id) throw new ApiError(400, 'to_port_id is verplicht');
       if (from_port_id === to_port_id) {
         throw new ApiError(400, 'from_port_id en to_port_id mogen niet gelijk zijn');
       }
+      assertStatus(status);
 
       const connection = await connectionModel.create({
         fromPortId: from_port_id,
         toPortId: to_port_id,
         cableLabel: cable_label,
         cableType: cable_type,
+        status,
       });
 
       res.status(201).json(connection);
@@ -57,7 +67,7 @@ const connectionController = {
 
   /**
    * PUT /connections/:id
-   * Enkel cable_label/cable_type aanpasbaar — from/to_port_id niet,
+   * Enkel cable_label/cable_type/status aanpasbaar — from/to_port_id niet,
    * daarvoor verwijder je de connection en maak je een nieuwe.
    */
   async update(req, res, next) {
@@ -65,11 +75,13 @@ const connectionController = {
       const existing = await connectionModel.getById(req.params.id);
       if (!existing) throw new ApiError(404, 'Connection niet gevonden');
 
-      const { cable_label, cable_type } = req.body;
+      const { cable_label, cable_type, status } = req.body;
+      assertStatus(status);
 
       const connection = await connectionModel.update(req.params.id, {
         cableLabel: cable_label,
         cableType: cable_type,
+        status,
       });
 
       res.json(connection);

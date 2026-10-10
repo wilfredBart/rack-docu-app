@@ -1,13 +1,15 @@
-import { createDevice, updateDevice, deleteDevice } from "../../../api/devices";
+import { createDevice, updateDevice, deleteDevice, moveDevice } from "../../../api/devices";
 import {
   createPatchPanel,
   updatePatchPanel,
   deletePatchPanel,
+  movePatchPanel,
 } from "../../../api/patchPanels";
 import {
   createCableManagementItem,
   updateCableManagementItem,
   deleteCableManagementItem,
+  moveCableManagementItem,
 } from "../../../api/cableManagement";
 import { getDeviceFields, patchPanelFields, cableFields } from "../rackFormFields";
 
@@ -19,7 +21,13 @@ export const deviceType = {
   kind: "device",
   label: "Device",
   title: { new: "Nieuw device", edit: "Device bewerken" },
-  api: { create: createDevice, update: updateDevice, delete: deleteDevice },
+  contentsKey: "devices",
+  api: {
+    create: createDevice,
+    update: updateDevice,
+    delete: deleteDevice,
+    move: moveDevice,
+  },
   getFields: (deviceTypes) => getDeviceFields(deviceTypes),
   toInitialValues: (item) =>
     item
@@ -61,12 +69,14 @@ export const deviceType = {
 
 export const patchPanelType = {
   kind: "patch_panel",
+  contentsKey: "patch_panels",
   label: "Patch panel",
   title: { new: "Nieuw patch panel", edit: "Patch panel bewerken" },
   api: {
     create: createPatchPanel,
     update: updatePatchPanel,
     delete: deletePatchPanel,
+    move: movePatchPanel,
   },
   getFields: () => patchPanelFields,
   toInitialValues: (item) =>
@@ -106,6 +116,7 @@ export const patchPanelType = {
 
 export const cableType = {
   kind: "cable_management",
+  contentsKey: "cable_management",
   label: "Cable management item",
   title: {
     new: "Nieuw cable management item",
@@ -115,6 +126,7 @@ export const cableType = {
     create: createCableManagementItem,
     update: updateCableManagementItem,
     delete: deleteCableManagementItem,
+    move: moveCableManagementItem,
   },
   // Kortere knoptekst dan het volle label — bewust zo in de originele UI.
   deleteButtonLabel: "Item verwijderen",

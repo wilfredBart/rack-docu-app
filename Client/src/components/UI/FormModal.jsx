@@ -81,8 +81,14 @@ function FormModal({
                 onChange={(e) => handleChange(field.name, e.target.value)}
                 placeholder={field.placeholder || ""}
                 required={field.required}
+                min={field.min}
+                max={field.max}
                 className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
               />
+            )}
+
+            {field.hint && (
+              <p className="text-xs text-fg-subtle">{field.hint}</p>
             )}
           </div>
         ))}

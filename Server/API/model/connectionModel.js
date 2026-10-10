@@ -57,19 +57,22 @@ const connectionModel = {
     return rows[0];
   },
 
-  async create({ fromPortId, toPortId, cableLabel, cableType }) {
+  async create({ fromPortId, toPortId, cableLabel, cableType, status }) {
     const [result] = await pool.query(
-      `INSERT INTO connections (from_port_id, to_port_id, cable_label, cable_type)
-       VALUES (?, ?, ?, ?)`,
-      [fromPortId, toPortId, cableLabel, cableType]
+      `INSERT INTO connections (from_port_id, to_port_id, cable_label, cable_type, status)
+       VALUES (?, ?, ?, ?, ?)`,
+      [fromPortId, toPortId, cableLabel, cableType, status ?? 'niet_getest']
     );
     return this.getById(result.insertId);
   },
 
-  async update(id, { cableLabel, cableType }) {
+  /**
+   * status is optioneel: undefined/null laat de huidige status staan.
+   */
+  async update(id, { cableLabel, cableType, status }) {
     await pool.query(
-      'UPDATE connections SET cable_label = ?, cable_type = ? WHERE id = ?',
-      [cableLabel, cableType, id]
+      'UPDATE connections SET cable_label = ?, cable_type = ?, status = COALESCE(?, status) WHERE id = ?',
+      [cableLabel, cableType, status ?? null, id]
     );
     return this.getById(id);
   },

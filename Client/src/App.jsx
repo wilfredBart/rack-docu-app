@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Klanten from "./pages/Klanten";
 import Dashboard from "./pages/Dashboard";
 import PatchPlan from "./pages/PatchPlan";
+import Vlans from "./pages/Vlans";
 import Rack from "./pages/Rack";
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
             <Route path="/klanten/:klantId" element={<Dashboard />} />
             <Route path="/klanten/:klantId/racks/:rackId" element={<Rack />} />
             <Route path="/klanten/:klantId/patchplan" element={<PatchPlan />} />
+            <Route path="/klanten/:klantId/vlans" element={<Vlans />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

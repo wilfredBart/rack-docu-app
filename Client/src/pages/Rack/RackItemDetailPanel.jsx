@@ -23,6 +23,9 @@ export default function RackItemDetailPanel({
   updatePortMutation,
   deletePortMutation,
   bulkCreatePortsMutation,
+  vlans,
+  klantId,
+  assignVlanMutation,
 }) {
   const { kind, item } = selectedItem;
   const typeName =
@@ -196,6 +199,9 @@ export default function RackItemDetailPanel({
           updatePortMutation={updatePortMutation}
           deletePortMutation={deletePortMutation}
           bulkCreatePortsMutation={bulkCreatePortsMutation}
+          vlans={vlans}
+          klantId={klantId}
+          assignVlanMutation={assignVlanMutation}
         />
       )}
     </div>

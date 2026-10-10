@@ -1,0 +1,287 @@
+/* Patchplan: visuele laag (patchpaneel, LED's, kabelkaarten). Tokens komen uit index.css. */
+
+[data-s="on"] { --s: var(--color-led-power); }
+[data-s="warn"] { --s: var(--color-led-activity); }
+[data-s="bad"] { --s: var(--color-led-fault); }
+
+/* patchpaneel + legende als één blok */
+.pp-unit {
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--color-rack-shell-edge);
+  box-shadow: 0 24px 50px -24px #000;
+}
+.pp-panel {
+  position: relative;
+  padding: 14px 26px;
+  background: linear-gradient(#1c2128, var(--color-rack-shell));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+.pp-panel::before,
+.pp-panel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  background:
+    radial-gradient(circle 3px at 50% 50%, var(--color-rack-hole) 96%, transparent) 0 0 / 16px 38px repeat-y,
+    var(--color-rack-shell-edge);
+}
+.pp-panel::before { left: 0; }
+.pp-panel::after { right: 0; }
+.pp-ph {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-fg-muted);
+}
+.pp-ph b { color: var(--color-fg); font-weight: 500; }
+
+.pp-ports {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 4px;
+  counter-reset: p;
+}
+.pp-port {
+  counter-increment: p;
+  position: relative;
+  display: block;
+  margin-top: 11px;
+  aspect-ratio: 1 / 1.1;
+  background: var(--color-rack-hole);
+  border: 1px solid var(--color-rack-shell-edge);
+  border-radius: 3px 3px 2px 2px;
+  box-shadow: inset 0 -3px 0 var(--v, var(--color-rack-rail-dark));
+}
+.pp-port[data-s]:not([data-s="free"]) {
+  border-color: color-mix(in srgb, var(--v, var(--color-rack-shell-edge)) 45%, var(--color-rack-shell-edge));
+}
+.pp-port::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: var(--s, #242a31);
+  box-shadow: 0 0 7px 1px var(--s, transparent);
+}
+.pp-port::after {
+  content: counter(p);
+  position: absolute;
+  inset: 0 0 3px;
+  display: grid;
+  place-items: center;
+  font: 500 8px var(--font-mono);
+  color: var(--v, var(--color-fg-subtle));
+}
+.pp-port[data-s="warn"]::before { animation: pp-blink 1.3s steps(2, jump-none) infinite; }
+.pp-port[data-s="bad"]::before { animation: pp-blink 2.6s steps(2, jump-none) infinite; }
+@keyframes pp-blink { 50% { opacity: 0.25; } }
+
+.pp-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px 18px 14px;
+  background: #0e1115;
+  border-top: 1px solid var(--color-rack-shell-edge);
+  font-size: 14px;
+  color: var(--color-fg-muted);
+}
+.pp-lrow { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.pp-lrow span { display: inline-flex; align-items: center; gap: 8px; }
+.pp-lrow span::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--s, #3a414b);
+  box-shadow: 0 0 8px var(--s, transparent);
+}
+.pp-lrow.pp-vl { padding-top: 10px; border-top: 1px solid var(--color-border); }
+.pp-lrow.pp-vl span::before {
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--v);
+  box-shadow: none;
+}
+
+/* filterchips */
+.pp-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 14px -16px 0;
+  padding: 2px 16px;
+  scrollbar-width: none;
+}
+.pp-chip {
+  flex: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  color: var(--color-fg-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+.pp-chip[aria-pressed="true"] {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  border-color: transparent;
+  font-weight: 500;
+}
+.pp-chip em { font-style: normal; font-family: var(--font-mono); font-size: 12px; margin-left: 6px; opacity: 0.7; }
+.pp-chip[data-v]::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 4px;
+  border-radius: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+  background: var(--v);
+}
+
+/* kaarten */
+.pp-colhead { display: none; }
+.pp-list { display: grid; gap: 12px; margin-top: 16px; }
+.pp-card {
+  --pp-cab: #59616b;
+  position: relative;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+}
+.pp-card[data-s="bad"] {
+  border-color: rgb(210 101 101 / 0.45);
+  background: linear-gradient(90deg, rgb(210 101 101 / 0.09), var(--color-bg-elevated) 65%);
+}
+.pp-end { display: flex; align-items: center; gap: 12px; }
+.pp-end::before {
+  content: "";
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid var(--v, var(--color-rack-rail));
+  background: var(--color-rack-hole);
+  box-shadow: 0 0 12px -2px var(--v, transparent), inset 0 0 6px -2px var(--v, transparent);
+}
+.pp-n { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.pp-n b { font-weight: 600; font-size: 17px; overflow-wrap: anywhere; }
+.pp-n code { font: 500 13px var(--font-mono); color: var(--color-fg-muted); }
+.pp-cable {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 62px;
+  margin-left: 8px;
+  padding-left: 30px;
+}
+.pp-cable::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 2px;
+  background: linear-gradient(var(--v, var(--pp-cab)), var(--pp-cab) 30% 70%, var(--v, var(--pp-cab)));
+}
+.pp-cl {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font: 400 12.5px var(--font-mono);
+  color: var(--color-fg-muted);
+}
+.pp-vt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.07);
+  background: color-mix(in srgb, var(--v, #fff) 18%, transparent);
+  color: var(--color-fg);
+  font: 500 13px var(--font-sans);
+}
+.pp-vt::before {
+  content: "";
+  width: 10px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--v, var(--color-fg-subtle));
+}
+.pp-st {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px 5px 9px;
+  border-radius: 999px;
+  background: var(--color-bg-subtle);
+  font-size: 13px;
+  font-weight: 500;
+}
+.pp-st::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--s);
+  box-shadow: 0 0 8px var(--s);
+}
+.pp-card[data-s="free"] { border-style: dashed; background: transparent; }
+.pp-card[data-s="free"] .pp-n b { color: var(--color-fg-subtle); font-weight: 400; font-style: italic; }
+.pp-card[data-s="free"] .pp-end::before { box-shadow: none; border-style: dashed; }
+.pp-card[data-s="free"] .pp-cable::before { background: repeating-linear-gradient(#4a525c 0 5px, transparent 5px 10px); }
+.pp-card[data-s="free"] .pp-st { background: transparent; border: 1px solid var(--color-border); color: var(--color-fg-subtle); }
+.pp-card[data-s="free"] .pp-st::before { background: #3a414b; box-shadow: none; }
+
+@media (min-width: 760px) {
+  .pp-colhead,
+  .pp-card {
+    display: grid;
+    grid-template-columns: 1fr minmax(190px, 1.1fr) 1fr 140px;
+    gap: 0 10px;
+    align-items: center;
+  }
+  .pp-colhead { margin-top: 20px; padding: 0 20px; color: var(--color-fg-subtle); font-size: 14px; }
+  .pp-colhead span:last-child { justify-self: end; }
+  .pp-list { margin-top: 8px; }
+  .pp-card { padding: 18px 20px; }
+  .pp-cable { min-height: 0; margin: 0; padding: 0; justify-content: center; }
+  .pp-cable::before {
+    left: 0;
+    right: 0;
+    top: 50%;
+    bottom: auto;
+    width: auto;
+    height: 4px;
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, var(--v, var(--pp-cab)), var(--pp-cab) 30% 70%, var(--v, var(--pp-cab)));
+  }
+  .pp-card[data-s="free"] .pp-cable::before { background: repeating-linear-gradient(90deg, #4a525c 0 5px, transparent 5px 10px); }
+  .pp-cl { position: relative; align-items: center; padding: 6px 14px; background: var(--color-bg-elevated); border-radius: 8px; }
+  .pp-card[data-s="free"] .pp-cl { background: var(--color-bg); }
+  .pp-st { position: static; justify-self: end; }
+  .pp-chips { margin: 14px 0 0; padding: 2px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pp-port::before { animation: none !important; }
+}

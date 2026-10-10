@@ -1,6 +1,15 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { FiPlus } from "react-icons/fi";
-import { faceKind, occupiedUnits } from "./rackElevation";
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  useDraggable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { canPlaceAt, faceKind, occupiedUnits } from "./rackElevation";
 import { EquipmentFace } from "./equipment-face";
 
 function UStack({ from, to }) {
@@ -15,15 +24,48 @@ function UStack({ from, to }) {
   );
 }
 
+// Het keuzemenu wordt via een portal op document.body getekend (position: fixed).
+// Binnen de rack zelf wordt het afgesneden: .rack-bay heeft overflow: hidden en
+// .rack-body scrolt, en de rij is maar 1U hoog.
+const MENU_FLIP_THRESHOLD = 140; // px ruimte onder de knop die nodig is om omlaag te openen
+
 function EmptyRow({ u, onAddAt }) {
-  const [open, setOpen] = useState(false);
+  const buttonRef = useRef(null);
+  const [menuPos, setMenuPos] = useState(null); // { left, top, up } of null = dicht
+  const open = menuPos !== null;
 
   useEffect(() => {
     if (!open) return undefined;
-    const close = () => setOpen(false);
+    const close = () => setMenuPos(null);
     window.addEventListener("click", close);
-    return () => window.removeEventListener("click", close);
+    window.addEventListener("resize", close);
+    window.addEventListener("scroll", close, true); // capture: ook scroll in .rack-body
+    return () => {
+      window.removeEventListener("click", close);
+      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", close, true);
+    };
   }, [open]);
+
+  const toggleMenu = (e) => {
+    e.stopPropagation();
+    if (open) {
+      setMenuPos(null);
+      return;
+    }
+    const rect = buttonRef.current.getBoundingClientRect();
+    const up = rect.bottom + MENU_FLIP_THRESHOLD > window.innerHeight;
+    setMenuPos({
+      left: rect.left + rect.width / 2,
+      top: up ? rect.top - 4 : rect.bottom + 4,
+      up,
+    });
+  };
+
+  const choose = (kind) => {
+    onAddAt(kind, u);
+    setMenuPos(null);
+  };
 
   return (
     <div className="rack-row">
@@ -33,52 +75,47 @@ function EmptyRow({ u, onAddAt }) {
         {onAddAt ? (
           <div style={{ position: "relative", height: "100%" }}>
             <button
+              ref={buttonRef}
               type="button"
               className="rack-empty"
               aria-label={`Lege U${u}, item toevoegen`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen((v) => !v);
-              }}
+              onClick={toggleMenu}
             >
               <span className="rack-empty-hint">
                 <FiPlus style={{ width: 12, height: 12 }} />
               </span>
             </button>
-            {open ? (
-              <div
-                className="rack-empty-menu"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    onAddAt("device", u);
-                    setOpen(false);
-                  }}
-                >
-                  Device op U{u}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onAddAt("patch_panel", u);
-                    setOpen(false);
-                  }}
-                >
-                  Patch panel op U{u}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onAddAt("cable_management", u);
-                    setOpen(false);
-                  }}
-                >
-                  Cable mgmt op U{u}
-                </button>
-              </div>
-            ) : null}
+            {open
+              ? createPortal(
+                  <div
+                    className="rack-empty-menu"
+                    style={{
+                      position: "fixed",
+                      zIndex: 50,
+                      left: menuPos.left,
+                      top: menuPos.top,
+                      transform: menuPos.up
+                        ? "translate(-50%, -100%)"
+                        : "translateX(-50%)",
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button type="button" onClick={() => choose("device")}>
+                      Device op U{u}
+                    </button>
+                    <button type="button" onClick={() => choose("patch_panel")}>
+                      Patch panel op U{u}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => choose("cable_management")}
+                    >
+                      Cable mgmt op U{u}
+                    </button>
+                  </div>,
+                  document.body,
+                )
+              : null}
           </div>
         ) : (
           <div className="rack-empty" />
@@ -91,15 +128,42 @@ function EmptyRow({ u, onAddAt }) {
   );
 }
 
-function ItemRow({ row, selected, typeName, onSelectItem }) {
-  const { start, topU, units } = occupiedUnits(row.item);
+// Aantal U's (negatief = omhoog) waarmee het item verschuift, geklemd binnen de rack.
+function snapUnits(ctx, rawY) {
+  if (!ctx) return 0;
+  return Math.max(ctx.minDu, Math.min(ctx.maxDu, Math.round(rawY / ctx.unitH)));
+}
+
+function ItemRow({ row, selected, typeName, onSelectItem, preview, draggable }) {
+  const { topU, start, units } = occupiedUnits(row.item);
   const face = faceKind(row.kind, row.item, typeName);
+  const { setNodeRef, listeners, transform, isDragging } = useDraggable({
+    id: `${row.kind}-${row.item.id}`,
+    data: { kind: row.kind, item: row.item },
+    disabled: !draggable,
+  });
+
+  // Tijdens het slepen tonen de U-nummers van het item de doelpositie.
+  const shift = isDragging ? (preview?.du ?? 0) : 0;
+  const style = { ["--units"]: String(units) };
+  if (isDragging) {
+    style.transform = `translate3d(0, ${transform?.y ?? 0}px, 0)`;
+    style.position = "relative";
+    style.zIndex = 30;
+    style.outline = `2px solid ${preview?.valid === false ? "#d26565" : "#5ee0a0"}`;
+    style.outlineOffset = "-2px";
+    style.boxShadow = "0 10px 24px -8px rgb(0 0 0 / 0.7)";
+    style.cursor = "grabbing";
+  }
+
   return (
     <div
+      ref={setNodeRef}
+      {...listeners}
       className="rack-row is-item"
-      style={{ ["--units"]: String(units) }}
+      style={style}
     >
-      <UStack from={topU} to={start} />
+      <UStack from={topU - shift} to={start - shift} />
       <div className="rack-rail" />
       <div className="rack-bay">
         <EquipmentFace
@@ -111,7 +175,7 @@ function ItemRow({ row, selected, typeName, onSelectItem }) {
         />
       </div>
       <div className="rack-rail" />
-      <UStack from={topU} to={start} />
+      <UStack from={topU - shift} to={start - shift} />
       <div className="rack-pdu" />
     </div>
   );
@@ -122,6 +186,10 @@ function ItemRow({ row, selected, typeName, onSelectItem }) {
  *   elevationRows, onSelectItem
  * Optioneel (aanbevolen):
  *   rackName, selectedItem, deviceTypeMap, onAddAt(kind, u)
+ * Drag & drop (verticaal verplaatsen binnen de rack), alle drie nodig:
+ *   rack            - rack-object met height_u + devices/patch_panels/cable_management
+ *   onMoveItem(kind, item, newStart)  - wordt enkel aangeroepen bij een geldige drop
+ *   onInvalidDrop() - optioneel, bij een drop op bezette/ongeldige U's
  */
 export default function RackElevationView({
   elevationRows,
@@ -130,7 +198,28 @@ export default function RackElevationView({
   deviceTypeMap,
   rackName,
   onAddAt,
+  rack,
+  onMoveItem,
+  onInvalidDrop,
 }) {
+  const elevationRef = useRef(null);
+  const dragCtx = useRef(null);
+  const [preview, setPreview] = useState(null); // { id, valid } tijdens het slepen
+  const canDrag = Boolean(rack && onMoveItem);
+
+  // Muis: pas slepen na 6px (zo blijft klikken om te selecteren werken).
+  // Touch: lang indrukken (250ms), anders blokkeert slepen het scrollen.
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+  );
+
+  // Alleen verticaal bewegen, en snappen op hele U's binnen de rack.
+  const snapModifier = useCallback(({ transform }) => {
+    const ctx = dragCtx.current;
+    return { ...transform, x: 0, y: ctx ? snapUnits(ctx, transform.y) * ctx.unitH : 0 };
+  }, []);
+
   const typeNameOf = (row) => {
     if (row.kind !== "device" || !deviceTypeMap) return undefined;
     return deviceTypeMap.get(row.item.device_type_id);
@@ -138,6 +227,69 @@ export default function RackElevationView({
 
   const isSelected = (row) =>
     selectedItem?.kind === row.kind && selectedItem?.item?.id === row.item.id;
+
+  const handleDragStart = ({ active }) => {
+    const { kind, item } = active.data.current;
+    const { start, topU, units } = occupiedUnits(item);
+    const unitH =
+      elevationRef.current.getBoundingClientRect().height / rack.height_u;
+    dragCtx.current = {
+      kind,
+      item,
+      start,
+      units,
+      unitH,
+      minDu: -(rack.height_u - topU), // hoogstens tot de bovenkant van de rack
+      maxDu: start - 1, // hoogstens tot U1
+    };
+    setPreview({ id: active.id, valid: true, du: 0 });
+  };
+
+  const newStartFor = (rawY) => {
+    const ctx = dragCtx.current;
+    const du = snapUnits(ctx, rawY);
+    return { du, newStart: ctx.start - du };
+  };
+
+  const handleDragMove = ({ delta }) => {
+    const ctx = dragCtx.current;
+    if (!ctx) return;
+    const { du, newStart } = newStartFor(delta.y);
+    const valid =
+      du === 0 ||
+      canPlaceAt(rack, newStart, ctx.units, {
+        excludeKind: ctx.kind,
+        excludeId: ctx.item.id,
+      });
+    setPreview((p) =>
+      p && p.valid === valid && p.du === du ? p : p && { ...p, valid, du },
+    );
+  };
+
+  const handleDragEnd = ({ delta }) => {
+    const ctx = dragCtx.current;
+    dragCtx.current = null;
+    setPreview(null);
+    if (!ctx) return;
+    const du = snapUnits(ctx, delta.y);
+    if (du === 0) return;
+    const newStart = ctx.start - du;
+    if (
+      canPlaceAt(rack, newStart, ctx.units, {
+        excludeKind: ctx.kind,
+        excludeId: ctx.item.id,
+      })
+    ) {
+      onMoveItem(ctx.kind, ctx.item, newStart);
+    } else {
+      onInvalidDrop?.();
+    }
+  };
+
+  const handleDragCancel = () => {
+    dragCtx.current = null;
+    setPreview(null);
+  };
 
   return (
     <div
@@ -154,21 +306,32 @@ export default function RackElevationView({
           <div className="rack-nameplate">{rackName || "RACK"}</div>
         </div>
         <div className="rack-body">
-          <div className="rack-elevation">
-            {elevationRows.map((row) =>
-              row.type === "empty" ? (
-                <EmptyRow key={`u-${row.u}`} u={row.u} onAddAt={onAddAt} />
-              ) : (
-                <ItemRow
-                  key={`${row.kind}-${row.item.id}`}
-                  row={row}
-                  selected={isSelected(row)}
-                  typeName={typeNameOf(row)}
-                  onSelectItem={onSelectItem}
-                />
-              ),
-            )}
-          </div>
+          <DndContext
+            sensors={sensors}
+            modifiers={[snapModifier]}
+            onDragStart={handleDragStart}
+            onDragMove={handleDragMove}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            <div className="rack-elevation" ref={elevationRef}>
+              {elevationRows.map((row) =>
+                row.type === "empty" ? (
+                  <EmptyRow key={`u-${row.u}`} u={row.u} onAddAt={onAddAt} />
+                ) : (
+                  <ItemRow
+                    key={`${row.kind}-${row.item.id}`}
+                    row={row}
+                    selected={isSelected(row)}
+                    typeName={typeNameOf(row)}
+                    onSelectItem={onSelectItem}
+                    preview={preview}
+                    draggable={canDrag}
+                  />
+                ),
+              )}
+            </div>
+          </DndContext>
         </div>
         <div className="rack-plinth">
           <span className="rack-foot" />

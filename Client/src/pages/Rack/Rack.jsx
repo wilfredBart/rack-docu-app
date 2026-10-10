@@ -5,6 +5,7 @@ import { fetchRackWithContents } from "../../api/racks";
 import { fetchDeviceWithPorts } from "../../api/devices";
 import { fetchDeviceTypes } from "../../api/deviceTypes";
 import { fetchPatchPanelWithPorts } from "../../api/patchPanels";
+import { fetchVlans } from "../../api/vlans";
 import Header from "../../components/Header";
 import { FiArrowLeft, FiChevronRight, FiPlus } from "react-icons/fi";
 
@@ -62,6 +63,7 @@ export default function Rack() {
     bulkCreatePortsMutation,
     updatePortMutation,
     deletePortMutation,
+    assignVlanMutation,
   } = usePortAndTypeMutations({
     selectedItem,
     invalidateRack,
@@ -95,6 +97,13 @@ export default function Rack() {
   });
 
   const selectedPorts = selectedPortsQuery.data ?? [];
+
+  // VLAN's van deze klant, voor de VLAN-keuze per poort.
+  const { data: vlans = [] } = useQuery({
+    queryKey: ["vlans", klantId],
+    queryFn: () => fetchVlans(klantId),
+    enabled: !!klantId,
+  });
 
   // Op small screens: detailpanel in beeld na selectie
   useEffect(() => {
@@ -275,6 +284,9 @@ export default function Rack() {
                     updatePortMutation={updatePortMutation}
                     deletePortMutation={deletePortMutation}
                     bulkCreatePortsMutation={bulkCreatePortsMutation}
+                    vlans={vlans}
+                    klantId={klantId}
+                    assignVlanMutation={assignVlanMutation}
                   />
                 ) : (
                   <div className="hidden lg:block rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center">

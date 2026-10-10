@@ -27,6 +27,7 @@ import {
   FiTrash2,
   FiFolder,
   FiExternalLink,
+  FiTag,
 } from "react-icons/fi";
 import { MdOutlineAddLocationAlt } from "react-icons/md";
 
@@ -421,13 +422,21 @@ export default function Dashboard() {
               Infrastructuur-overzicht
             </p>
           </div>
-          <button
-            type="button"
-            onClick={openNewSite}
-            className="flex items-center gap-2 bg-accent text-accent-fg hover:opacity-90 px-4 py-2.5 rounded-xl font-medium text-sm cursor-pointer"
-          >
-            <FiPlus /> Nieuwe site
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              to={`/klanten/${klantId}/vlans`}
+              className="flex items-center gap-2 border border-border bg-bg-subtle text-fg-muted hover:text-fg px-4 py-2.5 rounded-xl font-medium text-sm"
+            >
+              <FiTag /> VLAN&apos;s
+            </Link>
+            <button
+              type="button"
+              onClick={openNewSite}
+              className="flex items-center gap-2 bg-accent text-accent-fg hover:opacity-90 px-4 py-2.5 rounded-xl font-medium text-sm cursor-pointer"
+            >
+              <FiPlus /> Nieuwe site
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">

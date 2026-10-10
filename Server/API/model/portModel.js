@@ -68,12 +68,42 @@ const portModel = {
     return rows;
   },
 
-  async update(id, { name, portType, speed }) {
-    await pool.query(
-      'UPDATE ports SET name = ?, port_type = ?, speed = ? WHERE id = ?',
-      [name, portType, speed, id]
-    );
+  async getByIds(ids) {
+    const [rows] = await pool.query('SELECT * FROM ports WHERE id IN (?)', [ids]);
+    return rows;
+  },
+
+  /**
+   * portMode en vlanId zijn optioneel: undefined = ongewijzigd laten
+   * (zo blijft hernoemen werken zonder de VLAN te wissen), null = wissen.
+   */
+  async update(id, { name, portType, speed, portMode, vlanId }) {
+    const sets = ['name = ?', 'port_type = ?', 'speed = ?'];
+    const params = [name, portType, speed];
+
+    if (portMode !== undefined) {
+      sets.push('port_mode = ?');
+      params.push(portMode);
+    }
+    if (vlanId !== undefined) {
+      sets.push('vlan_id = ?');
+      params.push(vlanId);
+    }
+
+    await pool.query(`UPDATE ports SET ${sets.join(', ')} WHERE id = ?`, [...params, id]);
     return this.getById(id);
+  },
+
+  /**
+   * Zet in één keer de VLAN (en modus) van meerdere poorten, bv. poort 1 t/m 12 → VLAN 20.
+   * vlanId = null wist de VLAN. Enkel device-poorten: patch panel-poorten erven via connections.
+   */
+  async bulkSetVlan(portIds, { vlanId, portMode }) {
+    const [result] = await pool.query(
+      'UPDATE ports SET vlan_id = ?, port_mode = ? WHERE id IN (?) AND device_id IS NOT NULL',
+      [vlanId, portMode, portIds]
+    );
+    return result.affectedRows;
   },
 
   /**

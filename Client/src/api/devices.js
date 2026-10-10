@@ -27,3 +27,9 @@ export const deleteDevice = async (id) => {
   const response = await api.delete(`/devices/${id}`);
   return response.data;
 };
+
+// Verplaatst enkel de positie (drag & drop in de rack-view).
+export const moveDevice = async ({ id, rack_position }) => {
+  const response = await api.patch(`/devices/${id}/position`, { rack_position });
+  return response.data;
+};

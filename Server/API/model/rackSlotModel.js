@@ -74,3 +74,44 @@ export async function assertValidRackSlot({ rackId, position, units, excludeType
     }
   }
 }
+
+// Vaste whitelist: de tabelnaam komt nooit uit user-input.
+const MOVABLE_TABLES = {
+  device: 'devices',
+  patch_panel: 'patch_panels',
+  cable_management: 'cable_management',
+};
+
+/**
+ * Verplaatst één item (device, patch panel of cable management) naar een nieuwe
+ * start-U binnen hetzelfde rack. Hoogte (rack_units) en alle andere velden blijven
+ * ongewijzigd; het item sluit zichzelf uit bij de overlap-check.
+ *
+ * @param {'device'|'patch_panel'|'cable_management'} type
+ * @param {number|string} id
+ * @param {number|string} position - nieuwe rack_position (onderste U van het item)
+ * @returns {Promise<Object>} het bijgewerkte item
+ */
+export async function moveRackItem(type, id, position) {
+  const table = MOVABLE_TABLES[type];
+  if (!table) throw new ApiError(400, 'Onbekend item-type');
+
+  const [rows] = await pool.query(
+    `SELECT id, rack_id, rack_units FROM ${table} WHERE id = ?`,
+    [id]
+  );
+  const existing = rows[0];
+  if (!existing) throw new ApiError(404, 'Item niet gevonden');
+
+  await assertValidRackSlot({
+    rackId: existing.rack_id,
+    position,
+    units: existing.rack_units ?? 1,
+    excludeType: type,
+    excludeId: existing.id,
+  });
+
+  await pool.query(`UPDATE ${table} SET rack_position = ? WHERE id = ?`, [Number(position), id]);
+  const [updated] = await pool.query(`SELECT * FROM ${table} WHERE id = ?`, [id]);
+  return updated[0];
+}
