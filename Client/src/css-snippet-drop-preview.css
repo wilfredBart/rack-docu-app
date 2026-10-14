@@ -1,0 +1,51 @@
+/* ─── Drop-preview tijdens drag & drop (toevoegen aan Client/src/index.css) ─── */
+/* Plak dit blok ná de bestaande .rack-empty:hover-regels (rond regel ~388).     */
+
+.rack-empty.is-drop-valid {
+  background:
+    linear-gradient(
+      180deg,
+      rgb(94 224 160 / 0.22),
+      rgb(94 224 160 / 0.12) 40%,
+      rgb(94 224 160 / 0.18)
+    ) !important;
+  box-shadow:
+    inset 0 0 0 1px rgb(94 224 160 / 0.55),
+    inset 0 0 12px rgb(94 224 160 / 0.15);
+}
+
+.rack-empty.is-drop-valid::after {
+  opacity: 1;
+  border-color: rgb(94 224 160 / 0.45);
+  border-style: solid;
+  background: rgb(94 224 160 / 0.06);
+}
+
+.rack-empty.is-drop-invalid {
+  background:
+    linear-gradient(
+      180deg,
+      rgb(210 101 101 / 0.22),
+      rgb(210 101 101 / 0.12) 40%,
+      rgb(210 101 101 / 0.18)
+    ) !important;
+  box-shadow:
+    inset 0 0 0 1px rgb(210 101 101 / 0.55),
+    inset 0 0 12px rgb(210 101 101 / 0.15);
+}
+
+.rack-empty.is-drop-invalid::after {
+  opacity: 1;
+  border-color: rgb(210 101 101 / 0.45);
+  border-style: solid;
+  background: rgb(210 101 101 / 0.06);
+}
+
+/* Aaneengesloten drop-zone: geen dubbele randen tussen U's in dezelfde zone */
+.rack-row:has(.rack-empty.is-drop-valid) + .rack-row:has(.rack-empty.is-drop-valid) .rack-empty.is-drop-valid,
+.rack-row:has(.rack-empty.is-drop-invalid) + .rack-row:has(.rack-empty.is-drop-invalid) .rack-empty.is-drop-invalid {
+  box-shadow:
+    inset 1px 0 0 rgb(0 0 0 / 0),
+    inset -1px 0 0 rgb(0 0 0 / 0),
+    inset 0 -1px 0 rgb(255 255 255 / 0.04);
+}

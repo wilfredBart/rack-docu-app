@@ -25,7 +25,15 @@ function UStack({ from, to }) {
 
 // Lege U: klik opent een modal (in Rack.jsx) om type te kiezen — geen inline menu
 // in de 1U-rij (dat liep visueel mis door overflow / portal-styling).
-function EmptyRow({ u, onEmptyClick }) {
+// dropHint: null | "valid" | "invalid" — highlight tijdens drag over deze U.
+function EmptyRow({ u, onEmptyClick, dropHint }) {
+  const emptyClass =
+    dropHint === "valid"
+      ? "rack-empty is-drop-valid"
+      : dropHint === "invalid"
+        ? "rack-empty is-drop-invalid"
+        : "rack-empty";
+
   return (
     <div className="rack-row">
       <UStack from={u} to={u} />
@@ -34,7 +42,7 @@ function EmptyRow({ u, onEmptyClick }) {
         {onEmptyClick ? (
           <button
             type="button"
-            className="rack-empty"
+            className={emptyClass}
             aria-label={`Lege U${u}, item toevoegen`}
             onClick={() => onEmptyClick(u)}
           >
@@ -43,7 +51,7 @@ function EmptyRow({ u, onEmptyClick }) {
             </span>
           </button>
         ) : (
-          <div className="rack-empty" />
+          <div className={emptyClass} />
         )}
       </div>
       <div className="rack-rail" />
@@ -129,7 +137,8 @@ export default function RackElevationView({
 }) {
   const elevationRef = useRef(null);
   const dragCtx = useRef(null);
-  const [preview, setPreview] = useState(null); // { id, valid } tijdens het slepen
+  // { id, valid, du, newStart, units } tijdens het slepen
+  const [preview, setPreview] = useState(null);
   const canDrag = Boolean(rack && onMoveItem);
 
   // Muis: pas slepen na 6px (zo blijft klikken om te selecteren werken).
@@ -167,7 +176,13 @@ export default function RackElevationView({
       minDu: -(rack.height_u - topU), // hoogstens tot de bovenkant van de rack
       maxDu: start - 1, // hoogstens tot U1
     };
-    setPreview({ id: active.id, valid: true, du: 0 });
+    setPreview({
+      id: active.id,
+      valid: true,
+      du: 0,
+      newStart: start,
+      units,
+    });
   };
 
   const newStartFor = (rawY) => {
@@ -187,7 +202,12 @@ export default function RackElevationView({
         excludeId: ctx.item.id,
       });
     setPreview((p) =>
-      p && p.valid === valid && p.du === du ? p : p && { ...p, valid, du },
+      p &&
+      p.valid === valid &&
+      p.du === du &&
+      p.newStart === newStart
+        ? p
+        : p && { ...p, valid, du, newStart, units: ctx.units },
     );
   };
 
@@ -214,6 +234,16 @@ export default function RackElevationView({
   const handleDragCancel = () => {
     dragCtx.current = null;
     setPreview(null);
+  };
+
+  // Drop-zone highlight: welke lege U's vallen in de doelrange van het gesleepte item?
+  // Alleen tonen als er echt verplaatst wordt (du !== 0).
+  const dropHintForU = (u) => {
+    if (!preview || preview.du === 0) return null;
+    const lo = preview.newStart;
+    const hi = preview.newStart + preview.units - 1;
+    if (u < lo || u > hi) return null;
+    return preview.valid ? "valid" : "invalid";
   };
 
   return (
@@ -246,6 +276,7 @@ export default function RackElevationView({
                     key={`u-${row.u}`}
                     u={row.u}
                     onEmptyClick={onEmptyClick}
+                    dropHint={dropHintForU(row.u)}
                   />
                 ) : (
                   <ItemRow

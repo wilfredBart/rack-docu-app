@@ -7,7 +7,9 @@ import FormModal from "../../../components/UI/FormModal";
 // { rack_position: 12, rack_units: 1, maxUnits: 3 }. maxUnits wordt als max op het
 // "Aantal U"-veld gezet; toPayload() pikt enkel expliciete velden, dus maxUnits
 // belandt nooit in de API-call.
-export default function RackItemFormModal({ config, crud, fieldsContext }) {
+//
+// fieldExtras (optioneel): { [fieldName]: ReactNode } — extra UI onder een veld
+export default function RackItemFormModal({ config, crud, fieldsContext, fieldExtras }) {
   const maxUnits = crud.prefill?.maxUnits;
   const { blockLo, blockHi } = crud.prefill ?? {};
 
@@ -38,6 +40,7 @@ export default function RackItemFormModal({ config, crud, fieldsContext }) {
       }}
       onSubmit={crud.submit}
       isSubmitting={crud.isSubmitting}
+      fieldExtras={fieldExtras}
     />
   );
 }

@@ -2,7 +2,7 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 
 /**
  * @param {"md"|"full"} [size="md"]
- *   md   — compact dialoog (formulieren)
+ *   md   — compact dialoog (formulieren), max-height + scroll
  *   full — (bijna) fullscreen, handig op gsm/iPad voor detailviews
  */
 function Modal({ isOpen, onClose, title, children, size = "md", headerExtra }) {
@@ -11,12 +11,17 @@ function Modal({ isOpen, onClose, title, children, size = "md", headerExtra }) {
   const panelClass =
     size === "full"
       ? "bg-card shadow-[var(--shadow-border)] w-full h-[100dvh] max-h-[100dvh] rounded-none sm:h-auto sm:max-h-[min(92vh,56rem)] sm:max-w-2xl sm:rounded-xl flex flex-col transform transition-all"
-      : "bg-card rounded-xl shadow-[var(--shadow-border)] w-full max-w-md p-6 transform transition-all";
+      : "bg-card rounded-xl shadow-[var(--shadow-border)] w-full max-w-md max-h-[min(90vh,40rem)] flex flex-col transform transition-all";
 
   const bodyClass =
     size === "full"
-      ? "flex-1 overflow-y-auto px-4 sm:px-6 pb-6 pt-1"
-      : "";
+      ? "flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-6 pt-1"
+      : "flex-1 min-h-0 overflow-y-auto px-6 pb-6";
+
+  const headerClass =
+    size === "full"
+      ? "px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-border"
+      : "px-6 pt-6 pb-3 border-b border-border";
 
   return (
     <div
@@ -35,11 +40,7 @@ function Modal({ isOpen, onClose, title, children, size = "md", headerExtra }) {
         aria-modal="true"
       >
         <div
-          className={`flex justify-between items-center gap-3 shrink-0 ${
-            size === "full"
-              ? "px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-border"
-              : "mb-5 pb-3 border-b border-border"
-          }`}
+          className={`flex justify-between items-center gap-3 shrink-0 ${headerClass}`}
         >
           <div className="min-w-0 flex-1">
             {typeof title === "string" ? (

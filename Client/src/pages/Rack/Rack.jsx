@@ -203,6 +203,31 @@ export default function Rack() {
 
   const elevationRows = rack ? buildElevationRows(rack) : [];
 
+  // Extra UI onder het Type-veld in de device-form-modal
+  const deviceFieldExtras = {
+    device_type_id: (
+      <form
+        onSubmit={handleAddType}
+        className="flex items-center gap-1.5 mt-1.5"
+      >
+        <input
+          type="text"
+          value={newTypeName}
+          onChange={(e) => setNewTypeName(e.target.value)}
+          placeholder="Nieuw type..."
+          className="flex-1 px-2 py-1.5 border border-border rounded-lg text-xs bg-bg-subtle text-fg focus:outline-none focus:border-accent"
+        />
+        <button
+          type="submit"
+          disabled={createTypeMutation.isPending || !newTypeName.trim()}
+          className="text-xs font-medium text-fg-subtle hover:text-fg cursor-pointer disabled:opacity-50 shrink-0 px-2 py-1.5"
+        >
+          {createTypeMutation.isPending ? "..." : "+ Type"}
+        </button>
+      </form>
+    ),
+  };
+
   return (
     <div className="min-h-screen bg-bg pb-12">
       <Header />
@@ -258,27 +283,7 @@ export default function Rack() {
               })()}
             </div>
 
-            <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-              <form
-                onSubmit={handleAddType}
-                className="flex items-center gap-1.5"
-              >
-                <input
-                  type="text"
-                  value={newTypeName}
-                  onChange={(e) => setNewTypeName(e.target.value)}
-                  placeholder="Nieuw type..."
-                  className="w-32 px-2 py-1.5 border border-border rounded-lg text-xs bg-bg-subtle text-fg focus:outline-none focus:border-accent"
-                />
-                <button
-                  type="submit"
-                  disabled={createTypeMutation.isPending}
-                  className="text-xs font-medium text-fg-subtle hover:text-fg cursor-pointer disabled:opacity-50"
-                >
-                  + Type
-                </button>
-              </form>
-
+            <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-end mb-4 gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <Link
                   to={
@@ -288,7 +293,7 @@ export default function Rack() {
                   }
                   className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-2.5 py-1.5 text-sm font-medium text-fg hover:bg-card"
                 >
-                  <FiBox /> Patchplan
+                  <FiBox /> Patchplannen overzicht
                 </Link>
               </div>
             </div>
@@ -390,6 +395,7 @@ export default function Rack() {
         config={deviceType}
         crud={deviceCRUD}
         fieldsContext={deviceTypes}
+        fieldExtras={deviceFieldExtras}
       />
       <RackItemFormModal config={patchPanelType} crud={patchPanelCRUD} />
       <RackItemFormModal config={cableType} crud={cableCRUD} />

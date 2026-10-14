@@ -8,6 +8,8 @@ import Modal from "./Modal";
  *   { name: 'email', label: 'E-mailadres', type: 'email' },
  *   { name: 'status', label: 'Status', type: 'select', options: [{ value: 'ACTIEF', label: 'Actief' }] }
  * ]
+ *
+ * fieldExtras (optioneel): { [fieldName]: ReactNode } — extra UI direct onder dat veld
  */
 function FormModal({
   isOpen,
@@ -18,6 +20,7 @@ function FormModal({
   onSubmit,
   isSubmitting = false,
   submitText = "Opslaan",
+  fieldExtras = {},
 }) {
   const [values, setValues] = useState(initialValues);
 
@@ -39,81 +42,87 @@ function FormModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {fields.map((field) => (
-          <div key={field.name} className="flex flex-col gap-1">
-            <label htmlFor={field.name} className="text-xs font-semibold text-fg-muted">
-              {field.label} {field.required && <span className="text-destructive">*</span>}
-            </label>
+      <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+        {/* Scrollbaar veld-gedeelte */}
+        <div className="flex flex-col gap-4 flex-1 min-h-0">
+          {fields.map((field) => (
+            <div key={field.name} className="flex flex-col gap-1">
+              <label htmlFor={field.name} className="text-xs font-semibold text-fg-muted">
+                {field.label} {field.required && <span className="text-destructive">*</span>}
+              </label>
 
-            {field.type === "select" ? (
-              <select
-                id={field.name}
-                value={values[field.name] || ""}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-                required={field.required}
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
-              >
-                <option value="" disabled>
-                  Selecteer {field.label.toLowerCase()}...
-                </option>
-                {field.options?.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            ) : field.type === "textarea" ? (
-              <textarea
-                id={field.name}
-                rows={3}
-                value={values[field.name] || ""}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-                placeholder={field.placeholder || ""}
-                required={field.required}
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
-              />
-            ) : field.type === "color" ? (
-              <div className="flex items-center gap-3">
-                <input
+              {field.type === "select" ? (
+                <select
                   id={field.name}
-                  type="color"
-                  value={values[field.name] || "#6366f1"}
-                  onChange={(e) => handleChange(field.name, e.target.value)}
-                  required={field.required}
-                  className="h-10 w-14 cursor-pointer rounded-lg border border-border bg-bg-subtle p-1"
-                />
-                <input
-                  type="text"
                   value={values[field.name] || ""}
                   onChange={(e) => handleChange(field.name, e.target.value)}
-                  placeholder="#6366f1"
-                  pattern="^#[0-9A-Fa-f]{6}$"
-                  className="flex-1 px-3 py-2 border border-border rounded-lg text-sm font-mono bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+                  required={field.required}
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+                >
+                  <option value="" disabled>
+                    Selecteer {field.label.toLowerCase()}...
+                  </option>
+                  {field.options?.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              ) : field.type === "textarea" ? (
+                <textarea
+                  id={field.name}
+                  rows={3}
+                  value={values[field.name] || ""}
+                  onChange={(e) => handleChange(field.name, e.target.value)}
+                  placeholder={field.placeholder || ""}
+                  required={field.required}
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
                 />
-              </div>
-            ) : (
-              <input
-                id={field.name}
-                type={field.type || "text"}
-                value={values[field.name] || ""}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-                placeholder={field.placeholder || ""}
-                required={field.required}
-                min={field.min}
-                max={field.max}
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
-              />
-            )}
+              ) : field.type === "color" ? (
+                <div className="flex items-center gap-3">
+                  <input
+                    id={field.name}
+                    type="color"
+                    value={values[field.name] || "#6366f1"}
+                    onChange={(e) => handleChange(field.name, e.target.value)}
+                    required={field.required}
+                    className="h-10 w-14 cursor-pointer rounded-lg border border-border bg-bg-subtle p-1"
+                  />
+                  <input
+                    type="text"
+                    value={values[field.name] || ""}
+                    onChange={(e) => handleChange(field.name, e.target.value)}
+                    placeholder="#6366f1"
+                    pattern="^#[0-9A-Fa-f]{6}$"
+                    className="flex-1 px-3 py-2 border border-border rounded-lg text-sm font-mono bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+                  />
+                </div>
+              ) : (
+                <input
+                  id={field.name}
+                  type={field.type || "text"}
+                  value={values[field.name] || ""}
+                  onChange={(e) => handleChange(field.name, e.target.value)}
+                  placeholder={field.placeholder || ""}
+                  required={field.required}
+                  min={field.min}
+                  max={field.max}
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-bg-subtle text-fg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+                />
+              )}
 
-            {field.hint && (
-              <p className="text-xs text-fg-subtle">{field.hint}</p>
-            )}
-          </div>
-        ))}
+              {field.hint && (
+                <p className="text-xs text-fg-subtle">{field.hint}</p>
+              )}
 
-        {/* Knoppen onderaan */}
-        <div className="flex justify-end gap-3 pt-3 border-t border-border mt-2">
+              {/* Extra UI direct onder dit veld (bv. "nieuw type") */}
+              {fieldExtras[field.name] ?? null}
+            </div>
+          ))}
+        </div>
+
+        {/* Knoppen altijd zichtbaar onderaan */}
+        <div className="flex justify-end gap-3 pt-3 border-t border-border mt-4 shrink-0">
           <button
             type="button"
             onClick={onClose}

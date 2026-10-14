@@ -82,7 +82,7 @@ export default function PatchPlan() {
               <span className="text-fg font-medium">Detail</span>
             </>
           ) : (
-            <span className="text-fg font-medium">Patchplannen</span>
+            <span className="text-fg font-medium">Patchplannen - Overzicht</span>
           )}
           <Link
             to={`/klanten/${klantId}/vlans`}
@@ -132,7 +132,7 @@ function PlanOverview({ klantId, onOpen }) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold text-fg tracking-tight">Patchplannen</h1>
+      <h1 className="text-3xl font-bold text-fg tracking-tight">Patchplannen - Overzicht</h1>
       <p className="text-sm text-fg-subtle mt-1 mb-6">
         Elk device en patch panel met poorten heeft een plan (ook als er nog
         niets gepatcht is). Titel = label.
