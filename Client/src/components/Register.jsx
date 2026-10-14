@@ -36,72 +36,86 @@ export default function Register({ setWantLogin }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center bg-bg">
-      <div className="bg-card p-8 rounded-2xl shadow-[var(--shadow-border)] border border-brand-muted/30 w-full max-w-md ml-12">
-        <h1 className="text-2xl font-semibold text-fg mb-6">
-          Account aanmaken
-        </h1>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-fg-muted mb-1">Naam</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full px-3 py-2 rounded-lg bg-card text-fg border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-fg-muted mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 rounded-lg bg-card text-fg border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-fg-muted mb-1">
-              Wachtwoord
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              className="w-full px-3 py-2 rounded-lg bg-card text-fg border border-brand-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand-light"
-            />
-            <p className="text-xs text-fg-subtle mt-1">Minstens 8 karakters</p>
-          </div>
-
-          <button
-            type="submit"
-            disabled={registerMutation.isPending}
-            className="cursor-pointer w-full bg-brand hover:bg-brand-dark disabled:opacity-50 text-white font-medium py-2 rounded-lg transition"
-          >
-            {registerMutation.isPending ? "Bezig..." : "Registreren"}
-          </button>
-        </form>
-
-        <p className="text-fg-subtle text-sm mt-4 text-center">
-          Al een account?{" "}
-          <button
-            type="button"
-            onClick={() =>
-              setWantLogin ? setWantLogin(true) : navigate("/login")
-            }
-            className="text-brand hover:underline cursor-pointer"
-          >
-            Log hier in
-          </button>
-        </p>
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col border border-border p-6 rounded-2xl bg-card shadow-xs"
+    >
+      <div className="mb-4 flex flex-col">
+        <label
+          htmlFor="name"
+          className="block text-xs font-medium text-fg-muted mb-1"
+        >
+          Naam:
+        </label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="border border-border rounded-lg p-2 text-sm focus:outline-none focus:border-accent"
+          required
+        />
       </div>
-    </div>
+
+      <div className="mb-4 flex flex-col">
+        <label
+          htmlFor="email"
+          className="block text-xs font-medium text-fg-muted mb-1"
+        >
+          Email:
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border border-border rounded-lg p-2 text-sm focus:outline-none focus:border-accent"
+          required
+        />
+      </div>
+
+      <div className="mb-4 flex flex-col">
+        <label
+          htmlFor="password"
+          className="block text-xs font-medium text-fg-muted mb-1"
+        >
+          Wachtwoord:
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="border border-border rounded-lg p-2 text-sm focus:outline-none focus:border-accent"
+          required
+          minLength={8}
+        />
+        <p className="text-xs text-fg-subtle mt-1">Minstens 8 karakters</p>
+      </div>
+
+      <button
+        type="submit"
+        disabled={registerMutation.isPending}
+        className="bg-accent text-accent-fg hover:opacity-90 px-4 py-2.5 rounded-xl font-medium text-sm transition cursor-pointer disabled:opacity-50"
+      >
+        {registerMutation.isPending ? "Bezig..." : "Registreren"}
+      </button>
+
+      <div className="mt-4 flex items-center justify-center text-sm">
+        <span className="text-fg-muted">Al een account?</span>
+        <button
+          type="button"
+          className="text-accent font-medium underline cursor-pointer ml-1"
+          onClick={() =>
+            setWantLogin ? setWantLogin(true) : navigate("/login")
+          }
+        >
+          Log hier in
+        </button>
+      </div>
+    </form>
   );
 }
