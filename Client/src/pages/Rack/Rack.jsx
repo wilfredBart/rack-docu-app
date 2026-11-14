@@ -22,7 +22,7 @@ import {
   FiSliders,
 } from "react-icons/fi";
 
-import { buildElevationRows, usedU } from "./rackElevation";
+import { buildElevationRows, usedU, firstFreeU } from "./rackElevation";
 import { usePortAndTypeMutations } from "./usePortAndTypeMutations";
 import { deviceType, patchPanelType, cableType } from "./itemTypes/itemTypeConfig";
 import { useRackItemCRUD } from "./itemTypes/useRackItemCRUD";
@@ -213,26 +213,8 @@ export default function Rack() {
 
   const handleOpenAdd = (kind, suggestedPos = null) => {
     if (!rack) return;
-    let defaultPos = suggestedPos;
-
-    if (!defaultPos) {
-      const taken = new Set();
-      const add = (item) => {
-        const s = Number(item.rack_position);
-        const u = Math.max(1, Number(item.rack_units ?? 1));
-        for (let i = s; i < s + u; i++) taken.add(i);
-      };
-      (rack.devices ?? []).forEach(add);
-      (rack.patch_panels ?? []).forEach(add);
-      (rack.cable_management ?? []).forEach(add);
-
-      let firstFree = 1;
-      const maxU = rack.height_u || 42;
-      while (firstFree <= maxU && taken.has(firstFree)) {
-        firstFree += 1;
-      }
-      defaultPos = firstFree <= maxU ? firstFree : 1;
-    }
+    // Zonder suggestie: eerste vrije U van bovenaf (hoogste vrije U).
+    const defaultPos = suggestedPos ?? firstFreeU(rack);
 
     crudByKind[kind].openNewAt({
       rack_position: defaultPos,
@@ -306,63 +288,39 @@ export default function Rack() {
     <div className="h-screen flex flex-col bg-bg overflow-hidden select-none">
       <Header />
 
-      {/* Compacte topbar met navigatie & rack status */}
-      <div className="shrink-0 px-4 sm:px-6 py-2 border-b border-border bg-card/40 flex items-center justify-between text-sm">
-        <div className="flex items-center gap-3 min-w-0">
-          <Breadcrumb
-            className="mb-0 pt-0"
-            items={[
-              { label: "Terug naar klant", to: `/klanten/${klantId}` },
-              {
-                label: isLoading
-                  ? "Laden..."
-                  : `${rack?.name ?? "Rack"}${rack ? ` · ${rack.height_u}U` : ""}`,
-              },
-            ]}
-          />
-        </div>
+      <div className="shrink-0 w-full">
+        <Breadcrumb
+          items={[
+            { label: "Dashboard", to: `/klanten/${klantId}` },
+            { label: isLoading ? "Laden..." : (rack?.name ?? "Rack") },
+          ]}
+        />
 
-        
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold text-fg">
+              {isLoading ? "Laden..." : (rack?.name ?? "Rack")}
+            </h1>
+            <p className="text-sm text-fg-subtle mt-1">
+              Rack detail
+              {rack ? ` · ${usedU(rack)}/${rack.height_u}U bezet` : ""}
+            </p>
+          </div>
 
-        {rack && (
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 text-xs font-mono text-fg-subtle">
-              <span>{usedU(rack)}/{rack.height_u}U bezet</span>
-              <div className="w-20 occ-track">
-                <div
-                  className="occ-fill"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      Math.round((usedU(rack) / rack.height_u) * 100),
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-
+          {rack && (
             <Link
               to={
                 rack.site_id
                   ? `/klanten/${klantId}/patchplan?siteId=${rack.site_id}&rackId=${rackId}`
                   : `/klanten/${klantId}/patchplan?rackId=${rackId}`
               }
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-fg hover:bg-bg-subtle transition"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-fg hover:bg-bg-subtle transition shrink-0"
             >
               <FiBox className="text-fg-subtle" /> Patchplan
             </Link>
-          </div>
-        )}
-
-      </div>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-fg">
-            rack-{rackId}
-          </h1>
-          <p className="text-sm text-fg-subtle mt-1">
-            Klant dashboard
-          </p>
+          )}
         </div>
+      </div>
 
       {/* Hoofdwerkgebied: 2 kolommen, vult exact de resterende schermhoogte */}
       {isLoading ? (
@@ -649,9 +607,14 @@ export default function Rack() {
         crud={deviceCRUD}
         fieldsContext={deviceTypes}
         fieldExtras={deviceFieldExtras}
+        rack={rack}
       />
-      <RackItemFormModal config={patchPanelType} crud={patchPanelCRUD} />
-      <RackItemFormModal config={cableType} crud={cableCRUD} />
+      <RackItemFormModal
+        config={patchPanelType}
+        crud={patchPanelCRUD}
+        rack={rack}
+      />
+      <RackItemFormModal config={cableType} crud={cableCRUD} rack={rack} />
 
       <RackItemDeleteModal config={deviceType} crud={deviceCRUD} />
       <RackItemDeleteModal config={patchPanelType} crud={patchPanelCRUD} />

@@ -1,4 +1,5 @@
 import FormModal from "../../../components/UI/FormModal";
+import { listFreeUs, occupiedUnits } from "../rackElevation";
 
 // Eén generieke FormModal voor elk item-type. `fieldsContext` is optioneel extra data
 // die config.getFields nodig kan hebben (bv. deviceTypes voor het device-type-dropdown).
@@ -9,20 +10,66 @@ import FormModal from "../../../components/UI/FormModal";
 // belandt nooit in de API-call.
 //
 // fieldExtras (optioneel): { [fieldName]: ReactNode } — extra UI onder een veld
-export default function RackItemFormModal({ config, crud, fieldsContext, fieldExtras }) {
+//
+// `rack` is nodig om Start-U als dropdown van vrije posities te tonen (hoog → laag).
+export default function RackItemFormModal({
+  config,
+  crud,
+  fieldsContext,
+  fieldExtras,
+  rack,
+}) {
   const maxUnits = crud.prefill?.maxUnits;
   const { blockLo, blockHi } = crud.prefill ?? {};
 
-  const fields = config.getFields(fieldsContext).map((field) =>
-    field.name === "rack_units" && maxUnits
-      ? {
-          ...field,
-          min: 1,
-          max: maxUnits,
-          hint: `Vrij blok: U${blockLo}–U${blockHi} (max ${maxUnits}U). Past het niet boven de gekozen U, dan schuift het item automatisch naar beneden.`,
-        }
-      : field,
-  );
+  const exclude =
+    crud.editing && rack
+      ? { excludeKind: config.kind, excludeId: crud.editing.id }
+      : undefined;
+
+  // Vrije U's (al hoog → laag) + bij bewerken de U's die dit item nu inneemt.
+  let positionOptions = [];
+  if (rack) {
+    const free = listFreeUs(rack, exclude);
+    const positions = new Set(free);
+    if (crud.editing) {
+      const { start, topU } = occupiedUnits(crud.editing);
+      for (let u = start; u <= topU; u += 1) positions.add(u);
+    }
+    positionOptions = [...positions]
+      .sort((a, b) => b - a)
+      .map((u) => ({ value: String(u), label: `U${u}` }));
+  }
+
+  const fields = config.getFields(fieldsContext).map((field) => {
+    if (field.name === "rack_position") {
+      return {
+        ...field,
+        type: "select",
+        options: positionOptions,
+        hint: positionOptions.length
+          ? "Volgorde zoals de rack: hoog → laag. Standaard de eerste vrije van boven."
+          : "Geen vrije U meer in deze rack.",
+      };
+    }
+    if (field.name === "rack_units" && maxUnits) {
+      return {
+        ...field,
+        min: 1,
+        max: maxUnits,
+        hint: `Vrij blok: U${blockLo}–U${blockHi} (max ${maxUnits}U). Past het niet boven de gekozen U, dan schuift het item automatisch naar beneden.`,
+      };
+    }
+    return field;
+  });
+
+  const baseInitial = {
+    ...config.toInitialValues(crud.editing),
+    ...crud.prefill,
+  };
+  if (baseInitial.rack_position != null && baseInitial.rack_position !== "") {
+    baseInitial.rack_position = String(baseInitial.rack_position);
+  }
 
   return (
     <FormModal
@@ -34,10 +81,7 @@ export default function RackItemFormModal({ config, crud, fieldsContext, fieldEx
       onClose={crud.closeModal}
       title={crud.editing ? config.title.edit : config.title.new}
       fields={fields}
-      initialValues={{
-        ...config.toInitialValues(crud.editing),
-        ...crud.prefill,
-      }}
+      initialValues={baseInitial}
       onSubmit={crud.submit}
       isSubmitting={crud.isSubmitting}
       fieldExtras={fieldExtras}

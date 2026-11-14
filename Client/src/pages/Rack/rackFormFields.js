@@ -1,6 +1,7 @@
 // Veld-configuratie voor de device/patch-panel/cable FormModals.
 // deviceFields hangt af van deviceTypes (voor de select-opties), vandaar als functie.
 // De andere twee zijn statisch en kunnen als losse constanten geëxporteerd worden.
+// Start-U options worden in RackItemFormModal gezet o.b.v. vrije U's (hoog → laag).
 
 export function getDeviceFields(deviceTypes) {
   return [
@@ -18,8 +19,9 @@ export function getDeviceFields(deviceTypes) {
     {
       name: "rack_position",
       label: "Start-U",
-      type: "number",
+      type: "select",
       required: true,
+      options: [],
     },
     {
       name: "rack_units",
@@ -56,8 +58,9 @@ export const patchPanelFields = [
   {
     name: "rack_position",
     label: "Start-U",
-    type: "number",
+    type: "select",
     required: true,
+    options: [],
   },
   { name: "rack_units", label: "Aantal U", type: "number", required: true },
   { name: "notes", label: "Opmerking", type: "textarea" },
@@ -69,8 +72,9 @@ export const cableFields = [
   {
     name: "rack_position",
     label: "Start-U",
-    type: "number",
+    type: "select",
     required: true,
+    options: [],
   },
   { name: "rack_units", label: "Aantal U", type: "number", required: true },
   { name: "notes", label: "Opmerking", type: "textarea" },

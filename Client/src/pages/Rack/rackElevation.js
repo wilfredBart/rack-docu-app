@@ -87,6 +87,23 @@ export function canPlaceAt(rack, start, units, exclude) {
   return true;
 }
 
+/** Vrije U-posities, gesorteerd hoog → laag (zoals de elevatie-view: 42 … 1). */
+export function listFreeUs(rack, exclude) {
+  if (!rack?.height_u) return [];
+  const taken = takenUnits(rack, exclude);
+  const free = [];
+  for (let u = rack.height_u; u >= 1; u -= 1) {
+    if (!taken.has(u)) free.push(u);
+  }
+  return free;
+}
+
+/** Eerste vrije U van bovenaf (hoogste vrije U), of 1 als de rack vol is. */
+export function firstFreeU(rack, exclude) {
+  const free = listFreeUs(rack, exclude);
+  return free.length ? free[0] : 1;
+}
+
 export function usedU(rack) {
   let used = 0;
   const add = (item) => {
