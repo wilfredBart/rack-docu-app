@@ -99,6 +99,16 @@
   }
 }
 
+/* ─── Alles recht: geen afgeronde hoeken ───
+   Geldt voor alle elementen en pseudo-elementen (modals, toasts, knoppen, inputs,
+   Tailwind rounded-*, inline styles). Uitzondering: de rack visualizer (.rack-stage)
+   en de compacte device-face in het detailpaneel (.detail-face-preview). */
+:not(:where(.rack-stage, .rack-stage *, .detail-face-preview, .detail-face-preview *)),
+:not(:where(.rack-stage, .rack-stage *, .detail-face-preview, .detail-face-preview *))::before,
+:not(:where(.rack-stage, .rack-stage *, .detail-face-preview, .detail-face-preview *))::after {
+  border-radius: 0 !important;
+}
+
 /* ─── 19" rack cabinet ─── */
 
 .rack-stage {
@@ -349,42 +359,6 @@
       rgb(255 255 255 / 0.035) 5px 6px
     ),
     linear-gradient(180deg, rgb(255 255 255 / 0.025), transparent 40%);
-}
-
-.rack-empty::after {
-  content: "";
-  position: absolute;
-  inset: 22% 8%;
-  border: 1px dashed rgb(255 255 255 / 0.06);
-  border-radius: 2px;
-  opacity: 0;
-  transition: opacity 150ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.rack-empty:hover::after,
-.rack-empty:focus-visible::after {
-  opacity: 1;
-}
-
-.rack-empty:hover,
-.rack-empty:focus-visible {
-  background: rgb(255 255 255 / 0.03);
-}
-
-.rack-empty-hint {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: rgb(255 255 255 / 0.18);
-  opacity: 0;
-  transition: opacity 150ms cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none;
-}
-
-.rack-empty:hover .rack-empty-hint,
-.rack-empty:focus-visible .rack-empty-hint {
-  opacity: 1;
 }
 
 /* equipment */

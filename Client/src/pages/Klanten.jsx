@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Header from "../components/Header";
 import Modal from "../components/UI/Modal";
@@ -21,15 +21,33 @@ import {
   FiEye,
   FiUserCheck,
   FiCalendar,
+  FiUserPlus,
+  FiAlertCircle,
 } from "react-icons/fi";
 
 // Sluit direct aan op de MySQL `customers` tabel
 const customerFields = [
-  { name: "name", label: "Klantnaam", type: "text", required: true },
+  {
+    name: "name",
+    label: "Klantnaam",
+    type: "text",
+    required: true,
+    placeholder: "bijv. Janssen Logistics",
+    hint: (
+      <span className="flex items-start gap-2 text-fg-muted">
+        <FiAlertCircle className="w-[18px] h-[18px] mt-px shrink-0 text-fg" />
+        <span>
+          Enkel de naam van de klant (organisatie). Geen filialen of vestigingen
+          in de naam zetten, die voeg je nadien toe als site.
+        </span>
+      </span>
+    ),
+  },
 ];
 
 function Klanten() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -94,7 +112,12 @@ function Klanten() {
     if (editingCustomer) {
       updateMutation.mutate({ id: editingCustomer.id, ...values });
     } else {
-      createMutation.mutate(values);
+      // Nieuwe klant → meteen door naar de setup-wizard (site → locaties → racks)
+      createMutation.mutate(values, {
+        onSuccess: (created) => {
+          if (created?.id) navigate(`/klanten/${created.id}/setup`);
+        },
+      });
     }
   };
 
@@ -134,14 +157,6 @@ function Klanten() {
       <div className="mb-6">
         <div className="flex items-center justify-between gap-3 border-b border-border pb-2 mb-2">
           <h1 className="text-2xl font-bold text-fg">Klantenbeheer</h1>
-          <button
-            type="button"
-            onClick={openNewModal}
-            className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
-            title="Nieuwe klant"
-          >
-            <FiPlus />
-          </button>
         </div>
         <p className="text-sm text-fg-subtle mt-1">
           Beheer alle organisaties en klik door naar hun specifieke
@@ -149,19 +164,35 @@ function Klanten() {
         </p>
       </div>
 
-      {/* Zoekbalk & Stats Card */}
+      
       <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
-        <div className="relative w-full sm:w-80">
-          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-fg-subtle text-lg" />
-          <input
-            type="text"
-            placeholder="Zoek op klantnaam..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-bg-subtle border border-border rounded-xl text-sm text-fg focus:outline-none focus:border-accent transition"
-          />
-        </div>
+        <div className="flex items-center gap-4"> {/* Toolbox */}
+          <div className="relative w-full sm:w-80">
+            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-fg-subtle text-lg" />
+            <input
+              type="text"
+              placeholder="Zoek op klantnaam..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-bg-subtle border border-border rounded-xl text-sm text-fg focus:outline-none focus:border-accent transition"
+            />
+            
+          </div>
 
+          <button
+            type="button"
+            onClick={openNewModal}
+            className="flex items-center gap-2 px-4 py-2 bg-bg-subtle border border-border text-white rounded-xl text-sm font-medium hover:opacity-90 transition"
+            title="Nieuwe klant"
+          >
+            <div className="flex items-center gap-2">
+              <FiUserPlus  />
+              <span className="ml-1 text-sm font-medium">Nieuwe klant</span>
+            </div>
+          </button>
+        </div>  
+
+        {/*Stats Card */}
         <div className="flex items-center gap-2 text-sm text-fg-subtle font-medium">
           <FiUserCheck className="text-accent" />
           Totaal:{" "}

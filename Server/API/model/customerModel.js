@@ -171,6 +171,56 @@ const customerModel = {
   },
 
   /**
+   * Zet de volledige boom (sites → locations → racks) van een klant in één transactie op:
+   * alles of niets. `sites` is al gevalideerd/genormaliseerd door de controller.
+   * Geeft de aangemaakte boom terug (met id's), zodat de client kan doorlinken.
+   */
+  async setupTree(customerId, sites) {
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+      const created = [];
+
+      for (const s of sites) {
+        const [siteRes] = await conn.query(
+          `INSERT INTO sites (customer_id, name, street, house_number, postal_code, city, country)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [customerId, s.name, s.street, s.house_number, s.postal_code, s.city, s.country]
+        );
+        const site = { id: siteRes.insertId, name: s.name, locations: [] };
+
+        for (const l of s.locations) {
+          const [locRes] = await conn.query(
+            'INSERT INTO locations (site_id, name, description) VALUES (?, ?, ?)',
+            [site.id, l.name, l.description]
+          );
+          const location = { id: locRes.insertId, name: l.name, racks: [] };
+
+          for (const r of l.racks) {
+            const [rackRes] = await conn.query(
+              'INSERT INTO racks (location_id, name, height_u, notes) VALUES (?, ?, ?, ?)',
+              [location.id, r.name, r.height_u, r.notes]
+            );
+            location.racks.push({ id: rackRes.insertId, name: r.name, height_u: r.height_u });
+          }
+
+          site.locations.push(location);
+        }
+
+        created.push(site);
+      }
+
+      await conn.commit();
+      return created;
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+  },
+
+  /**
    * Alle patchplannen van een klant: devices + patch panels met poort-/connection-tellingen.
    * Inclusief lege plannen (0 connections). Titel = label.
    */

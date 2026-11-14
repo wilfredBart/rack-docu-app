@@ -1,0 +1,462 @@
+/* ==========================================================================
+   RACK MOCKUPS — sandbox
+   Opbouw: 1 tokens · 2 pagina · 3 badges · 4 chassis · 5 display (LCM) + icoon
+           6 poortcomponenten · 7 tooltip · 8 device-types strip · 9 poortgalerij
+
+   Iconen: Lucide (lucide.dev, ISC-licentie), inline SVG → geen externe dependency.
+   Alle iconen hebben dezelfde kleur (--cyan-ring); types verschillen enkel in vorm + animatie.
+   ========================================================================== */
+
+/* ── 1. Tokens ── */
+:root {
+  --bg-page: #080b11;
+  --chassis-metal: linear-gradient(180deg, #e8ecf1 0%, #d8dde4 12%, #c9cfd8 60%, #b2b8c2 100%);
+  --chassis-top-highlight: #ffffff;
+  --chassis-bottom-shadow: #555d6b;
+  --chassis-border: #8e95a2;
+  --lcm-screen-bg: #020509;
+  --cyan-ring: #00a8ff;
+  --cyan-glow: rgba(0, 168, 255, 0.65);
+  --led-green: #22c55e;
+  --led-green-glow: rgba(34, 197, 94, 0.75);
+  --led-amber: #f59e0b;
+  --led-amber-glow: rgba(245, 158, 11, 0.75);
+}
+
+/* ── 2. Pagina ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg-page);
+  background-image:
+    radial-gradient(ellipse at 50% 20%, rgba(0, 168, 255, 0.05) 0%, transparent 55%),
+    linear-gradient(180deg, #0b0f17 0%, #06080e 100%);
+  color: #f1f5f9;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 1.5rem;
+  gap: 5rem;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.device-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rem;
+}
+
+.mockup-wrapper {
+  width: 100%;
+  max-width: 1300px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.mockup-title h1 {
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #fff;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.mockup-title__meta {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #64748b;
+}
+
+/* ── 3. Device-type badges (--c = r,g,b) ──
+   <span class="badge-type badge-type--router">Router</span>
+   Varianten: router | switch | ap | nvr | server | patch | pdu */
+.badge-type {
+  --c: 148, 163, 184;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(var(--c), 0.4);
+  background: rgba(var(--c), 0.12);
+  color: rgb(var(--c));
+  line-height: 1;
+}
+.badge-type::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgb(var(--c));
+  box-shadow: 0 0 6px rgb(var(--c));
+}
+.badge-type--router { --c: 56, 189, 248; }
+.badge-type--switch { --c: 74, 222, 128; }
+.badge-type--ap     { --c: 167, 139, 250; }
+.badge-type--nvr    { --c: 251, 146, 60; }
+.badge-type--server { --c: 251, 191, 36; }
+.badge-type--patch  { --c: 148, 163, 184; }
+.badge-type--pdu    { --c: 248, 113, 113; }
+
+/* ── 4. Chassis (1U basisvorm: vent-lijn, rack-oren, display) ── */
+.machine-stage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 60px; /* ruimte voor de uitstekende rack-oren */
+}
+
+.chassis {
+  width: min(1120px, 100%);
+  height: 96px;
+  background: var(--chassis-metal);
+  border-radius: 2px;
+  border-top: 1.5px solid var(--chassis-top-highlight);
+  border-bottom: 1.5px solid var(--chassis-bottom-shadow);
+  border-left: 1px solid var(--chassis-border);
+  border-right: 1px solid var(--chassis-border);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.45),
+    0 18px 38px -6px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  padding: 0 18px 0 22px;
+  position: relative;
+}
+
+.top-vent-bar {
+  position: absolute;
+  top: 7px; left: 34px; right: 34px;
+  height: 2px;
+  display: flex;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 5;
+}
+.vent-segment {
+  flex: 2;
+  height: 100%;
+  background: #141c28;
+  border-radius: 1px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.95);
+}
+.vent-segment:first-child { flex: 1; }
+.vent-segment:last-child  { flex: 3; }
+
+.rack-ear {
+  position: absolute;
+  top: -1.5px;
+  width: 36px;
+  height: calc(100% + 3px);
+  background: linear-gradient(180deg, #cdd2d9 0%, #b8bec6 50%, #a8aeb8 100%);
+  border: 1.5px solid #8e95a2;
+  border-top-color: #d4d9e0;
+  border-bottom-color: #5a6270;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  z-index: 10;
+}
+.rack-ear--left  { left: -36px;  border-radius: 2px 0 0 2px; border-right: none; box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), inset 0 -1px 0 rgba(0,0,0,0.2), -3px 2px 10px rgba(0,0,0,0.5); }
+.rack-ear--right { right: -36px; border-radius: 0 2px 2px 0; border-left: none;  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), inset 0 -1px 0 rgba(0,0,0,0.2),  3px 2px 10px rgba(0,0,0,0.5); }
+
+.ear-hole {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a4152, #0f1520);
+  border: 1px solid #5a6270;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.9), inset 0 -1px 0 rgba(255,255,255,0.08), 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* ── 5. Display (LCM) met icoon ── */
+.lcm-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-top: 8px;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+.lcm-screen {
+  --icon: 28px;
+  width: 50px; height: 50px;
+  background: var(--lcm-screen-bg);
+  border-radius: 6px;
+  border: 1.8px solid var(--cyan-ring);
+  box-shadow: 0 0 12px var(--cyan-glow), inset 0 0 8px rgba(0, 168, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.lcm-model-label {
+  font-size: 7.5px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 1.5px;
+}
+
+/* Icoon: cyan lijnen die oplichten op het scherm */
+.type-icon {
+  color: var(--cyan-ring);
+  width: var(--icon);
+  height: var(--icon);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(0, 168, 255, 0.85));
+  animation: iconGlow 2.8s infinite ease-in-out;
+}
+@keyframes iconGlow {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(0, 168, 255, 0.6)); }
+  50%      { filter: drop-shadow(0 0 8px rgba(0, 168, 255, 1)); }
+}
+
+/* Animatie-klassen op onderdelen van het icoon:
+   .a-fade-1/2/3 signaalbogen · .a-blink + .a-d1…4 LED's · .a-flow kabel · .a-flicker stroom */
+.type-icon .a-fade-1, .type-icon .a-fade-2, .type-icon .a-fade-3 { animation: arcFade 2.4s infinite ease-in-out; }
+.type-icon .a-fade-2 { animation-delay: 0.3s; }
+.type-icon .a-fade-3 { animation-delay: 0.6s; }
+@keyframes arcFade { 0%, 100% { opacity: 0.2; } 35%, 55% { opacity: 1; } }
+
+.type-icon .a-blink { animation: ledBlink 1.6s infinite ease-in-out; }
+.type-icon .a-d2 { animation-delay: 0.4s; }
+.type-icon .a-d3 { animation-delay: 0.8s; }
+.type-icon .a-d4 { animation-delay: 1.2s; }
+@keyframes ledBlink { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+
+.type-icon .a-flow { stroke-dasharray: 3.5 2.5; animation: cableFlow 1.2s infinite linear; }
+@keyframes cableFlow { to { stroke-dashoffset: -6; } }
+
+.type-icon .a-flicker { animation: zapFlicker 2.2s infinite; }
+@keyframes zapFlicker {
+  0%, 100% { opacity: 1; }
+  8%  { opacity: 0.35; }
+  12% { opacity: 1; }
+  55% { opacity: 0.9; }
+  58% { opacity: 0.4; }
+  62% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .type-icon, .type-icon * { animation: none !important; }
+}
+
+/* ── 6. Poortcomponenten (gebruikt in de poortgalerij; later op de devices) ── */
+
+/* RJ45 */
+.rj45-unit {
+  width: 24px; height: 22px;
+  background: #141a24;
+  border: 1px solid #475569; border-radius: 2px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9);
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 2px 2.5px 1.5px;
+  cursor: pointer; position: relative;
+  transition: all 0.15s ease;
+}
+.rj45-unit:hover         { border-color: #38bdf8; transform: translateY(-1px); }
+.rj45-unit.connected     { border-color: #0284c7; }
+.rj45-unit.speed-25g,
+.rj45-unit.speed-10g     { border-color: rgba(56, 189, 248, 0.5); }
+.rj45-unit.speed-25g.connected,
+.rj45-unit.speed-10g.connected { border-color: #38bdf8; }
+
+.rj45-interior { width: 100%; height: 10px; background: #080c13; border-radius: 1px; display: flex; align-items: center; justify-content: center; }
+.rj45-pins { width: 14px; height: 2.5px; background: repeating-linear-gradient(90deg, #d97706 0, #d97706 1px, transparent 1px, transparent 2.5px); }
+.rj45-leds { width: 100%; display: flex; justify-content: space-between; padding: 0 1px; }
+.led-dot { width: 2.5px; height: 2.5px; border-radius: 50%; background: #1e293b; }
+.rj45-unit.connected .led-dot.link { background: var(--led-green); box-shadow: 0 0 5px var(--led-green-glow); }
+.rj45-unit.connected .led-dot.act  { background: var(--led-amber); box-shadow: 0 0 5px var(--led-amber-glow); animation: actBlink 1.2s infinite alternate ease-in-out; }
+@keyframes actBlink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+.poe-dot { position: absolute; top: 1.5px; right: 1.5px; width: 2px; height: 2px; border-radius: 50%; background: #f97316; box-shadow: 0 0 3px rgba(249, 115, 22, 0.8); }
+
+.port-number { position: absolute; font-size: 6.5px; font-family: ui-monospace, monospace; font-weight: 700; color: #64748b; left: 50%; transform: translateX(-50%); pointer-events: none; }
+.port-number.top    { top: -10px; }
+.port-number.bottom { bottom: -10px; }
+.port-number.wan { color: #0284c7; display: flex; align-items: center; gap: 2px; white-space: nowrap; }
+.port-number.wan::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #0284c7; }
+
+/* SFP / QSFP */
+.sfp-slot {
+  width: 30px; height: 22px;
+  background: #19212d;
+  border: 1px solid #475569; border-radius: 2px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+  transition: all 0.15s ease;
+}
+.sfp-slot:hover     { border-color: #38bdf8; transform: translateY(-1px); }
+.sfp-slot.connected { border-color: #38bdf8; }
+.sfp-slot.qsfp-slot { width: 42px; }
+.sfp-bay { width: 22px; height: 14px; background: #090e17; border: 1px solid #334155; border-radius: 1px; display: flex; align-items: center; justify-content: center; }
+.qsfp-slot .sfp-bay   { width: 34px; }
+.sfp-lever { width: 9px; height: 6px; background: #475569; border-radius: 0.5px; }
+.qsfp-slot .sfp-lever { width: 16px; }
+.sfp-status-led { position: absolute; top: 2px; left: 2px; width: 2.5px; height: 2.5px; border-radius: 50%; background: #1e293b; }
+.sfp-slot.connected .sfp-status-led { background: var(--led-green); box-shadow: 0 0 5px var(--led-green-glow); }
+.sfp-wan-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; }
+.sfp-wan-tag .dot { width: 6.5px; height: 6.5px; border-radius: 50%; background: #0284c7; }
+.sfp-wan-tag span { font-size: 6px; font-family: monospace; font-weight: 700; color: #0284c7; }
+.sfp-bottom-tag { position: absolute; bottom: -11px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 3px; }
+.sfp-10g-badge { font-size: 6px; font-family: monospace; font-weight: 800; background: #334155; color: #fff; padding: 1px 3.5px; border-radius: 2px; }
+
+/* Console + reset */
+.console-port { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.console-jack { width: 14px; height: 10px; background: #141a24; border: 1px solid #475569; border-radius: 1.5px; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9); display: flex; align-items: center; justify-content: center; }
+.console-jack-inner { width: 8px; height: 5px; background: #060a10; border-radius: 1px; }
+.console-label { font-size: 5.5px; font-family: ui-monospace, monospace; font-weight: 700; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase; }
+.reset-button-wrap { display: flex; align-items: center; gap: 3px; }
+.reset-pinhole { width: 3.5px; height: 3.5px; border-radius: 50%; background: #090d14; border: 0.5px solid #475569; }
+.reset-button-wrap span { font-size: 6px; font-weight: 700; color: #64748b; letter-spacing: 0.04em; }
+
+/* USB-A */
+.usb-a { width: 24px; height: 11px; background: #141a24; border: 1px solid #475569; border-radius: 1px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9); position: relative; }
+.usb-a::before { content: ""; position: absolute; left: 3px; right: 3px; top: 2.5px; height: 2.5px; background: #475569; border-radius: 0.5px; }
+.usb-a::after  { content: ""; position: absolute; left: 4px; right: 4px; bottom: 1.5px; height: 1.5px; background: repeating-linear-gradient(90deg, #d97706 0, #d97706 2px, transparent 2px, transparent 4px); }
+
+/* USB-C */
+.usb-c { width: 18px; height: 8px; background: #141a24; border: 1px solid #475569; border-radius: 4px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9); position: relative; }
+.usb-c::before { content: ""; position: absolute; left: 4px; right: 4px; top: 2.5px; height: 1.5px; background: #475569; border-radius: 1px; }
+
+/* IEC C14 (inlaat, pennen) en C13 (uitgang, gleuven) */
+.iec { width: 30px; height: 22px; background: #141a24; border: 1px solid #475569; clip-path: polygon(0 0, 100% 0, 100% 62%, 86% 100%, 14% 100%, 0 62%); position: relative; }
+.iec i { position: absolute; width: 2.5px; height: 7px; background: #d97706; }
+.iec i.l { left: 7px;  top: 4px; }
+.iec i.r { right: 7px; top: 4px; }
+.iec i.c { left: 50%; margin-left: -1.25px; top: 11px; }
+.iec--outlet i { background: #080c13; box-shadow: 0 0 0 0.5px #475569; }
+
+/* Stopcontact type E (België, CEE 7/5) */
+.outlet-e { width: 28px; height: 28px; background: #141a24; border: 1px solid #475569; border-radius: 50%; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9); position: relative; }
+.outlet-e i { position: absolute; top: 50%; margin-top: -2px; width: 4px; height: 4px; border-radius: 50%; background: #080c13; box-shadow: 0 0 0 0.5px #475569; }
+.outlet-e i.l { left: 6px; }
+.outlet-e i.r { right: 6px; }
+.outlet-e b { position: absolute; left: 50%; top: 0; margin-left: -1.5px; width: 3px; height: 6px; background: #d97706; border-radius: 0 0 1px 1px; }
+
+/* ── 7. Tooltip (één instantie voor de hele pagina) ── */
+.port-tooltip {
+  position: fixed;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8), 0 0 14px rgba(0, 168, 255, 0.25);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: #f1f5f9;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 100;
+  white-space: nowrap;
+}
+.port-tooltip.visible { opacity: 1; transform: translateY(0) scale(1); }
+.port-tooltip .tt-title { font-weight: 700; color: #38bdf8; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.port-tooltip .tt-status { font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+.port-tooltip .tt-status.active   { background: rgba(34, 197, 94, 0.2);  color: #4ade80; }
+.port-tooltip .tt-status.inactive { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
+.port-tooltip .tt-sub    { color: #94a3b8; font-size: 0.7rem; }
+.port-tooltip .tt-client { color: #e2e8f0; font-weight: 500; margin-top: 2px; }
+
+/* ── 8. Device-types strip (display + icoon) ── */
+.type-strip, .port-strip { width: 100%; max-width: 1300px; margin-bottom: -2rem; }
+
+.type-strip__title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 1.1rem;
+}
+.type-strip__list { list-style: none; display: flex; flex-wrap: wrap; gap: 1.75rem 2rem; }
+.type-tile { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; cursor: default; }
+
+/* Zelfde displaytje als op de devices, groter. Dubbele klasse zodat de basisregel niet wint. */
+.type-tile .lcm-screen { --icon: 38px; width: 72px; height: 72px; border-radius: 8px; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.type-tile:hover .lcm-screen { transform: translateY(-2px); box-shadow: 0 0 18px var(--cyan-glow), inset 0 0 10px rgba(0, 168, 255, 0.4); }
+
+/* ── 9. Poortgalerij: poorten uitvergroot op een stukje chassis ──
+   Schaal per plaat: standaard 1.8×; --l 2.4×; --xl 3.6×; --n 1× */
+.port-group + .port-group { margin-top: 1.75rem; }
+.port-group__title { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; color: #94a3b8; margin-bottom: 0.8rem; }
+.port-list { list-style: none; display: flex; flex-wrap: wrap; gap: 1rem; }
+.port-card { width: 148px; display: flex; flex-direction: column; padding: 0.6rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(148, 163, 184, 0.16); border-radius: 3px; }
+.port-card__name { font-size: 0.78rem; font-weight: 700; color: #f1f5f9; margin-top: 0.55rem; }
+.port-card__spec { font-size: 0.66rem; line-height: 1.35; color: #94a3b8; margin-top: 0.15rem; }
+
+.port-plate {
+  --ps: 1.8;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--chassis-metal);
+  border: 1px solid var(--chassis-border);
+  border-top: 1.5px solid var(--chassis-top-highlight);
+  border-bottom: 1.5px solid var(--chassis-bottom-shadow);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+.port-plate--l  { --ps: 2.4; }
+.port-plate--xl { --ps: 3.6; }
+.port-plate--n  { --ps: 1; }
+.port-plate > * { transform: scale(var(--ps)); }
+.port-plate > .rj45-unit:hover,
+.port-plate > .sfp-slot:hover { transform: scale(var(--ps)) translateY(-1px); } /* hover mag de schaal niet resetten */
+
+/* ── 10. Switch: poortveld in het device + poortdata-tabel ── */
+.chassis[data-type="switch"] { min-width: 900px; }
+.port-field { margin-left: auto; display: flex; align-items: center; gap: 14px; margin-top: 2px; }
+.sw-grid {
+  display: grid;
+  grid-template-rows: repeat(2, 22px);
+  grid-template-columns: repeat(24, 24px);
+  grid-auto-flow: column; /* 1 boven, 2 onder, 3 boven, … */
+  gap: 4px;
+}
+.sfp-row { display: grid; grid-template-columns: repeat(4, 30px); gap: 6px; }
+.port-divider { width: 1px; height: 44px; background: rgba(0, 0, 0, 0.18); border-right: 1px solid rgba(255, 255, 255, 0.35); }
+
+/* highlight poort ↔ tabelrij */
+.rj45-unit.hl, .sfp-slot.hl { border-color: #38bdf8; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 0 2px rgba(56, 189, 248, 0.65); }
+
+.data-panel { width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(148, 163, 184, 0.16); border-radius: 3px; }
+.data-panel__head { display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 0.8rem; border-bottom: 1px solid rgba(148, 163, 184, 0.16); font-size: 0.72rem; font-weight: 600; color: #94a3b8; }
+.data-panel__head em { font-style: normal; font-weight: 500; color: #64748b; }
+.data-scroll { position: relative; max-height: 200px; overflow: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 0.68rem; }
+.data-table th, .data-table td { text-align: left; padding: 0.3rem 0.8rem; white-space: nowrap; }
+.data-table th { position: sticky; top: 0; z-index: 1; background: #0d131d; color: #64748b; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.data-table td { color: #cbd5e1; border-top: 1px solid rgba(148, 163, 184, 0.08); }
+.data-table tr.hl td { background: rgba(56, 189, 248, 0.14); }
+.chip { padding: 1px 6px; border-radius: 3px; font-size: 0.62rem; font-weight: 700; }
+.chip--up   { background: rgba(34, 197, 94, 0.2);   color: #4ade80; }
+.chip--down { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }

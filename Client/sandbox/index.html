@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rack Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Device-types: display + icoon (wordt opgebouwd uit TYPES in het script) -->
+  <section class="type-strip" aria-label="Device types">
+    <h2 class="type-strip__title">Device types</h2>
+    <ul class="type-strip__list" id="type-list"></ul>
+  </section>
+
+  <!-- Poorttypes: galerij (wordt opgebouwd uit PORT_GROUPS) -->
+  <section class="port-strip" aria-label="Poorttypes">
+    <h2 class="type-strip__title">Poorttypes</h2>
+    <div id="port-groups"></div>
+  </section>
+
+  <!-- Basisvormen per device-type (nog zonder poorten) -->
+  <div class="device-list" id="device-list"></div>
+
+  <div class="port-tooltip" id="port-tooltip">
+    <div class="tt-title"><span id="tt-name">Poort 1</span><span class="tt-status" id="tt-status">Verbonden</span></div>
+    <div id="tt-details" class="tt-sub"></div>
+    <div id="tt-client" class="tt-client"></div>
+  </div>
+
+  <script>
+    /* ══════════ 1. ICONEN (Lucide, ISC) — inner-SVG per device-type ══════════ */
+    const ICONS = {
+      router: `<rect width="20" height="8" x="2" y="14" rx="2"/><path class="a-blink a-d1" d="M6.01 18H6"/><path class="a-blink a-d3" d="M10.01 18H10"/><path d="M15 10v4"/><path class="a-fade-1" d="M17.84 7.17a4 4 0 0 0-5.66 0"/><path class="a-fade-2" d="M20.66 4.34a8 8 0 0 0-11.31 0"/>`,
+      switch: `<path d="M4 5h16"/><path d="m6.5 2.5-2.5 2.5 2.5 2.5"/><path d="m17.5 2.5 2.5 2.5-2.5 2.5"/><rect width="20" height="9" x="2" y="11" rx="1.5"/><path class="a-blink a-d1" d="M6 14.5v2"/><path class="a-blink a-d2" d="M10 14.5v2"/><path class="a-blink a-d3" d="M14 14.5v2"/><path class="a-blink a-d4" d="M18 14.5v2"/>`,
+      ap:     `<path d="M12 20h.01"/><path class="a-fade-3" d="M2 8.82a15 15 0 0 1 20 0"/><path class="a-fade-2" d="M5 12.859a10 10 0 0 1 14 0"/><path class="a-fade-1" d="M8.5 16.429a5 5 0 0 1 7 0"/>`,
+      nvr:    `<path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/><circle class="a-blink a-d1" cx="5.5" cy="9.5" r="1" fill="currentColor" stroke="none"/>`,
+      server: `<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line class="a-blink a-d1" x1="6" x2="6.01" y1="6" y2="6"/><line class="a-blink a-d3" x1="6" x2="6.01" y1="18" y2="18"/>`,
+      patch:  `<rect width="20" height="9" x="2" y="5" rx="1.5"/><rect width="3" height="3" x="4.5" y="8" rx=".5"/><rect width="3" height="3" x="8.5" y="8" rx=".5"/><rect width="3" height="3" x="12.5" y="8" rx=".5"/><rect width="3" height="3" x="16.5" y="8" rx=".5"/><path class="a-flow" d="M6 14v3.5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V14"/>`,
+      pdu:    `<polygon class="a-flicker" points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`
+    };
+    const icon = id => `<svg class="type-icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[id]}</svg>`;
+
+    /* ══════════ 2. DEVICE-TYPES — één plek om een type toe te voegen ══════════ */
+    const TYPES = [
+      { id: "router", label: "Router" },
+      { id: "switch", label: "Switch" },
+      { id: "ap",     label: "Access Point" },
+      { id: "nvr",    label: "NVR / Camera" },
+      { id: "server", label: "Server / NAS" },
+      { id: "patch",  label: "Patch Panel" },
+      { id: "pdu",    label: "PDU" }
+    ];
+
+    // Strip bovenaan: display + icoon + badge
+    document.getElementById("type-list").innerHTML = TYPES.map(t => `
+      <li class="type-tile">
+        <div class="lcm-screen">${icon(t.id)}</div>
+        <span class="badge-type badge-type--${t.id}">${t.label}</span>
+      </li>`).join("");
+
+    // Basisvorm per type: chassis + oren + vent-lijn + display met icoon (nog geen poorten)
+    const ear = side => `<div class="rack-ear rack-ear--${side}"><div class="ear-hole"></div><div class="ear-hole"></div></div>`;
+    document.getElementById("device-list").innerHTML = TYPES.map(t => `
+      <div class="mockup-wrapper">
+        <header class="mockup-title">
+          <h1>${t.label} <span class="mockup-title__meta">1U · basisvorm</span></h1>
+        </header>
+        ${t.id === "switch" ? `
+        <section class="data-panel" aria-label="Poortdata (fake)">
+          <div class="data-panel__head"><span>Poortdata <em>(fake)</em></span><span id="sw-summary"></span></div>
+          <div class="data-scroll" id="sw-scroll">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>Type</th><th>Snelheid</th><th>PoE</th><th>VLAN</th><th>Status</th><th>Verbonden met</th></tr></thead>
+              <tbody id="sw-rows"></tbody>
+            </table>
+          </div>
+        </section>` : ""}
+        <main class="machine-stage">
+          <div class="chassis" data-type="${t.id}">
+            <div class="top-vent-bar">
+              <div class="vent-segment"></div><div class="vent-segment"></div>
+              <div class="vent-segment"></div><div class="vent-segment"></div>
+            </div>
+            ${ear("left")}
+            <div class="lcm-cluster">
+              <div class="lcm-screen">${icon(t.id)}</div>
+              <div class="lcm-model-label">${t.label}</div>
+            </div>
+            ${t.id === "switch" ? `<div class="port-field" id="sw-ports"></div>` : ""}
+            ${ear("right")}
+          </div>
+        </main>
+      </div>`).join("");
+
+    /* ══════════ 3. POORTGALERIJ ══════════ */
+    const rj = (cls, speed, vlan, client, extra = "", port = 1) =>
+      `<div class="rj45-unit ${cls}" data-port="${port}" data-speed="${speed}" data-vlan="${vlan}" data-client="${client}">${extra}<div class="rj45-interior"><div class="rj45-pins"></div></div><div class="rj45-leds"><span class="led-dot link"></span><span class="led-dot act"></span></div></div>`;
+    const sfp = (cls, speed, vlan, client, tag = "", port = 1) =>
+      `<div class="sfp-slot ${cls}" data-port="${port}" data-speed="${speed}" data-vlan="${vlan}" data-client="${client}"><span class="sfp-status-led"></span><div class="sfp-bay"><div class="sfp-lever"></div></div>${tag}</div>`;
+    const speedTag = t => `<div class="sfp-bottom-tag"><span class="sfp-10g-badge">${t}</span></div>`;
+
+    // [plaat-modifier, poort-html, naam, spec]
+    const PORT_GROUPS = [
+      { title: "Koper · RJ45", cards: [
+        ["", rj("", "1 GbE", "Geen", "Vrij slot"), "RJ45 · vrij", "Geen link, LED’s uit"],
+        ["", rj("connected", "1 GbE", "VLAN 10", "Werkstation"), "RJ45 · verbonden", "Link (groen) + activiteit (amber)"],
+        ["", rj("connected", "1G PoE+", "VLAN 10", "Access Point", `<div class="poe-dot"></div>`), "RJ45 · PoE", "PoE+ / PoE++ (oranje stip)"],
+        ["", rj("speed-25g connected", "2.5 GbE", "VLAN 10", "Mac Studio"), "RJ45 · 2.5G", "Cyan rand"],
+        ["", rj("speed-10g connected", "10 GbE", "VLAN 20 (Storage)", "NAS"), "RJ45 · 10G", "Cyan rand (10GBASE-T)"],
+        ["", rj("speed-10g connected", "10 GbE WAN", "Internet WAN 1", "Fiber NTU", `<span class="port-number top wan">9</span>`, 9), "RJ45 · WAN", "Poortnummer met blauwe stip"]
+      ]},
+      { title: "Glasvezel / DAC · SFP → QSFP", cards: [
+        ["", sfp("", "1G SFP", "Geen", "Vrij slot", speedTag("1G")), "SFP", "1 Gbps · vrij"],
+        ["", sfp("connected", "10G SFP+", "Trunk (All VLANs)", "Core Switch", speedTag("10G")), "SFP+", "10 Gbps · verbonden"],
+        ["", sfp("connected", "25G SFP28", "Trunk (All VLANs)", "Aggregation Switch", speedTag("25G")), "SFP28", "25 Gbps"],
+        ["", sfp("qsfp-slot connected", "100G QSFP28", "Trunk (All VLANs)", "Core Switch — 100G", speedTag("100G")), "QSFP28", "100 / 40 Gbps (breder kooitje)"],
+        ["", sfp("connected", "10G SFP+ WAN", "Backup WAN 2", "10G Fiber Uplink", `<div class="sfp-wan-tag"><span class="dot"></span><span>10</span></div>`, 10), "SFP · WAN", "Blauwe stip voor het nummer"]
+      ]},
+      { title: "Overig · beheer, USB en voeding", cards: [
+        ["port-plate--l",  `<div class="console-port"><div class="console-jack"><div class="console-jack-inner"></div></div><span class="console-label">Con</span></div>`, "Console", "RJ45-console (serieel)"],
+        ["port-plate--xl", `<div class="reset-button-wrap"><div class="reset-pinhole"></div><span>RST</span></div>`, "Reset", "Pinhole-knop"],
+        ["", `<div class="usb-a"></div>`, "USB-A", "Opslag / LTE-stick"],
+        ["port-plate--l", `<div class="usb-c"></div>`, "USB-C", "Beheer / console"],
+        ["", `<div class="iec"><i class="l"></i><i class="r"></i><i class="c"></i></div>`, "IEC C14", "Voedingsingang (pennen)"],
+        ["", `<div class="iec iec--outlet"><i class="l"></i><i class="r"></i><i class="c"></i></div>`, "IEC C13", "PDU-uitgang (gleuven)"],
+        ["", `<div class="outlet-e"><i class="l"></i><i class="r"></i><b></b></div>`, "Type E", "Belgisch stopcontact (CEE 7/5)"]
+      ]}
+    ];
+
+    document.getElementById("port-groups").innerHTML = PORT_GROUPS.map(g => `
+      <div class="port-group">
+        <h3 class="port-group__title">${g.title}</h3>
+        <ul class="port-list">${g.cards.map(([mod, html, name, spec]) => `
+          <li class="port-card">
+            <div class="port-plate ${mod}">${html}</div>
+            <span class="port-card__name">${name}</span><span class="port-card__spec">${spec}</span>
+          </li>`).join("")}
+        </ul>
+      </div>`).join("");
+
+    /* ══════════ 4. POORT-INTERACTIE: hover = tooltip, klik = link aan/uit ══════════ */
+    const tooltip   = document.getElementById("port-tooltip");
+    const ttName    = document.getElementById("tt-name");
+    const ttStatus  = document.getElementById("tt-status");
+    const ttDetails = document.getElementById("tt-details");
+    const ttClient  = document.getElementById("tt-client");
+
+    document.querySelectorAll(".rj45-unit, .sfp-slot").forEach(port => {
+      port.addEventListener("mouseenter", () => {
+        const connected = port.classList.contains("connected");
+        ttName.textContent    = `Poort ${port.dataset.port}`;
+        ttStatus.textContent  = connected ? "Verbonden" : "Niet verbonden";
+        ttStatus.className    = "tt-status " + (connected ? "active" : "inactive");
+        ttDetails.textContent = `${port.dataset.speed} · ${port.dataset.vlan}`;
+        ttClient.textContent  = connected ? `Verbonden met: ${port.dataset.client}` : "Geen actieve link";
+        const r = port.getBoundingClientRect();
+        tooltip.style.left = `${r.left + r.width / 2 - 90}px`;
+        tooltip.style.top  = `${r.top - 72}px`;
+        tooltip.classList.add("visible");
+      });
+      port.addEventListener("mouseleave", () => tooltip.classList.remove("visible"));
+      port.addEventListener("click", () => {
+        port.classList.toggle("connected");
+        const connected = port.classList.contains("connected");
+        ttStatus.textContent = connected ? "Verbonden" : "Niet verbonden";
+        ttStatus.className   = "tt-status " + (connected ? "active" : "inactive");
+        ttClient.textContent = connected ? `Verbonden met: ${port.dataset.client}` : "Geen actieve link";
+      });
+    });
+
+    /* ══════════ 5. SWITCH: fake poortdata → tabel + poorten in het device ══════════ */
+    // [van, tot, client, vlan, PoE-verbruik in W] — poorten buiten deze reeksen zijn vrij
+    const SEGMENTS = [
+      [1, 4, "Access Point", 10, 12.5], [5, 8, "IP Camera", 20, 7.2], [9, 12, "VoIP Telefoon", 30, 4.0],
+      [13, 14, "Werkstation", 10, 0], [17, 18, "Printer", 10, 0], [33, 34, "NAS", 20, 0],
+      [35, 38, "Thin Client", 40, 0], [41, 41, "Access Point (Wall)", 10, 15.4]
+    ];
+    // De data is de bron: tabel én poorten worden hieruit opgebouwd (klik op een poort = status wisselen)
+    const SW_PORTS = Array.from({ length: 48 }, (_, i) => {
+      const n = i + 1, s = SEGMENTS.find(([a, b]) => n >= a && n <= b);
+      return { n, type: "rj45", speed: n <= 32 ? "1G" : "2.5G", poe: n <= 32 ? "PoE+" : "PoE++",
+               status: s ? "up" : "down", vlan: s ? `VLAN ${s[3]}` : null,
+               client: s ? `${s[2]} #${n - s[0] + 1}` : null, poeW: s ? s[4] : 0 };
+    }).concat([
+      { n: 49, type: "sfp", speed: "10G", poe: null, status: "up",   vlan: "Trunk", client: "Router — Uplink",     poeW: 0 },
+      { n: 50, type: "sfp", speed: "10G", poe: null, status: "down", vlan: null,    client: null,                  poeW: 0 },
+      { n: 51, type: "sfp", speed: "10G", poe: null, status: "up",   vlan: "Trunk", client: "Core Switch — Fiber", poeW: 0 },
+      { n: 52, type: "sfp", speed: "10G", poe: null, status: "down", vlan: null,    client: null,                  poeW: 0 }
+    ]);
+
+    const isUp     = p => p.status === "up";
+    const vlanOf   = p => isUp(p) ? (p.vlan || "VLAN 1") : "Geen";
+    const clientOf = p => isUp(p) ? (p.client || "Onbekend apparaat") : "Vrij slot";
+
+    const swRow = p => `<tr data-n="${p.n}"><td>${p.n}</td><td>${p.type === "sfp" ? "SFP+" : "RJ45"}</td><td>${p.speed}</td>` +
+      `<td>${p.poe ? p.poe + (isUp(p) && p.poeW ? ` · ${p.poeW.toFixed(1)} W` : "") : "—"}</td><td>${isUp(p) ? vlanOf(p) : "—"}</td>` +
+      `<td><span class="chip chip--${p.status}">${p.status}</span></td><td>${isUp(p) ? clientOf(p) : "—"}</td></tr>`;
+
+    const swPort = p => {
+      const attrs = `data-n="${p.n}" data-port="${p.n}" data-speed="${p.speed}${p.poe ? " " + p.poe : ""}" data-vlan="${vlanOf(p)}" data-client="${clientOf(p)}"`;
+      const on = isUp(p) ? "connected" : "";
+      if (p.type === "sfp") {
+        return `<div class="sfp-slot ${on}" ${attrs}><div class="sfp-wan-tag"><span>${p.n}</span></div><span class="sfp-status-led"></span><div class="sfp-bay"><div class="sfp-lever"></div></div>${speedTag(p.speed)}</div>`;
+      }
+      return `<div class="rj45-unit ${p.speed === "2.5G" ? "speed-25g" : ""} ${on}" ${attrs}><span class="port-number ${p.n % 2 ? "top" : "bottom"}">${p.n}</span>` +
+        `${isUp(p) && p.poeW ? `<div class="poe-dot"></div>` : ""}<div class="rj45-interior"><div class="rj45-pins"></div></div><div class="rj45-leds"><span class="led-dot link"></span><span class="led-dot act"></span></div></div>`;
+    };
+
+    function renderSwitch() {
+      const up = SW_PORTS.filter(isUp), watt = up.reduce((s, p) => s + p.poeW, 0);
+      document.getElementById("sw-summary").textContent = `${SW_PORTS.length} poorten · ${up.length} verbonden · PoE ${watt.toFixed(1)} W`;
+      document.getElementById("sw-rows").innerHTML = SW_PORTS.map(swRow).join("");
+      document.getElementById("sw-ports").innerHTML =
+        `<div class="sw-grid">${SW_PORTS.filter(p => p.type === "rj45").map(swPort).join("")}</div>` +
+        `<div class="port-divider"></div>` +
+        `<div class="sfp-row">${SW_PORTS.filter(p => p.type === "sfp").map(swPort).join("")}</div>`;
+    }
+
+    // poort ↔ tabelrij highlighten
+    const swHl = (n, on, scroll) => {
+      document.querySelectorAll(`#sw-ports [data-n="${n}"], #sw-rows tr[data-n="${n}"]`).forEach(el => el.classList.toggle("hl", on));
+      if (on && scroll) {
+        const row = document.querySelector(`#sw-rows tr[data-n="${n}"]`), box = document.getElementById("sw-scroll");
+        box.scrollTop = row.offsetTop - box.clientHeight / 2;
+      }
+    };
+    const showTip = el => {
+      const up = el.classList.contains("connected");
+      ttName.textContent    = `Poort ${el.dataset.port}`;
+      ttStatus.textContent  = up ? "Verbonden" : "Niet verbonden";
+      ttStatus.className    = "tt-status " + (up ? "active" : "inactive");
+      ttDetails.textContent = `${el.dataset.speed} · ${el.dataset.vlan}`;
+      ttClient.textContent  = up ? `Verbonden met: ${el.dataset.client}` : "Geen actieve link";
+      const r = el.getBoundingClientRect();
+      tooltip.style.left = `${r.left + r.width / 2 - 90}px`;
+      tooltip.style.top  = `${r.top - 72}px`;
+      tooltip.classList.add("visible");
+    };
+
+    const swPortsEl = document.getElementById("sw-ports"), swRowsEl = document.getElementById("sw-rows");
+    swPortsEl.addEventListener("mouseover", e => { const p = e.target.closest("[data-n]"); if (p && !p.contains(e.relatedTarget)) { showTip(p); swHl(p.dataset.n, true, true); } });
+    swPortsEl.addEventListener("mouseout",  e => { const p = e.target.closest("[data-n]"); if (p && !p.contains(e.relatedTarget)) { tooltip.classList.remove("visible"); swHl(p.dataset.n, false); } });
+    swPortsEl.addEventListener("click", e => {
+      const p = e.target.closest("[data-n]"); if (!p) return;
+      const d = SW_PORTS.find(x => x.n == p.dataset.n);
+      d.status = isUp(d) ? "down" : "up";
+      renderSwitch();
+      showTip(swPortsEl.querySelector(`[data-n="${d.n}"]`)); swHl(d.n, true);
+    });
+    swRowsEl.addEventListener("mouseover", e => { const r = e.target.closest("tr"); if (r && !r.contains(e.relatedTarget)) swHl(r.dataset.n, true); });
+    swRowsEl.addEventListener("mouseout",  e => { const r = e.target.closest("tr"); if (r && !r.contains(e.relatedTarget)) swHl(r.dataset.n, false); });
+
+    renderSwitch();
+  </script>
+  <script type="module" src="app.js" defer></script>
+</body>
+</html>

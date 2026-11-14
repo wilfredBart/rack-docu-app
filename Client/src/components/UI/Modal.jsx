@@ -15,8 +15,8 @@ function Modal({ isOpen, onClose, title, children, size = "md", headerExtra }) {
 
   const bodyClass =
     size === "full"
-      ? "flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-6 pt-1"
-      : "flex-1 min-h-0 overflow-y-auto px-6 pb-6";
+      ? "flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-6 pt-6"
+      : "flex-1 min-h-0 overflow-y-auto px-6 pb-6 pt-6";
 
   const headerClass =
     size === "full"
@@ -30,15 +30,9 @@ function Modal({ isOpen, onClose, title, children, size = "md", headerExtra }) {
           ? "flex items-stretch sm:items-center justify-center sm:p-4"
           : "flex items-center justify-center p-4"
       }`}
-      onClick={onClose}
       role="presentation"
     >
-      <div
-        className={panelClass}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
+      <div className={panelClass} role="dialog" aria-modal="true">
         <div
           className={`flex justify-between items-center gap-3 shrink-0 ${headerClass}`}
         >
@@ -54,7 +48,7 @@ function Modal({ isOpen, onClose, title, children, size = "md", headerExtra }) {
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors cursor-pointer flex items-center justify-center"
+              className="p-1.5 rounded-lg text-fg-subtle hover:text-fg transition-colors cursor-pointer flex items-center justify-center"
               aria-label="Sluiten"
             >
               <IoCloseCircleOutline className="text-inherit hover:text-destructive w-5 h-5" />

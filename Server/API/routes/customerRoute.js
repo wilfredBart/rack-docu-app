@@ -9,6 +9,7 @@ router.get('/:id/patchplans', customerController.listPatchPlans);
 router.get('/:id', customerController.getOne);
 router.get('/:id/sites', customerController.getOneWithSites);
 router.post('/', customerController.create);
+router.post('/:id/setup', customerController.setup);
 router.put('/:id', customerController.update);
 router.delete('/:id', customerController.remove);
 

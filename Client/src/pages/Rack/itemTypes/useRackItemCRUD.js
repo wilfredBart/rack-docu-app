@@ -97,9 +97,9 @@ export function useRackItemCRUD(config, ctx) {
     onSettled: () => invalidateRack(),
   });
 
-  const openNew = () => {
+  const openNew = (values = null) => {
     setEditing(null);
-    setPrefill(null);
+    setPrefill(values && typeof values === "object" && !values.nativeEvent ? values : null);
     setModalOpen(true);
   };
 

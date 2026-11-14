@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { fetchCustomerOverview } from "../api/customers";
+import {
+  fetchCustomerOverview,
+  fetchCustomerPatchPlans,
+} from "../api/customers";
 import { createSite, updateSite, deleteSite } from "../api/sites";
 import {
   createLocation,
@@ -25,10 +28,14 @@ import {
   FiTrash2,
   FiExternalLink,
   FiTag,
+  FiBox,
+  FiHardDrive,
+  FiLayers,
+  FiBarChart2,
 } from "react-icons/fi";
 
 // KPI's = boom die hieronder zichtbaar is (sites → locaties → racks).
-// Devices / patch panels zitten in de rack-view, niet in dit overzicht.
+// Patchplannen (devices + patch panels) staan in een eigen sectie onder de sites.
 const KPI_ITEMS = [
   { key: "sites", label: "Sites", icon: FiMapPin },
   { key: "locations", label: "Locaties", icon: FiGrid },
@@ -89,6 +96,11 @@ function formatAddress(site) {
   return parts.length ? parts.join(", ") : null;
 }
 
+function patchPlanLink(klantId, siteId, plan) {
+  const param = plan.kind === "device" ? "device" : "panel";
+  return `/klanten/${klantId}/patchplan?${param}=${plan.id}&siteId=${siteId}`;
+}
+
 export default function Dashboard() {
   const { klantId } = useParams();
   const navigate = useNavigate();
@@ -144,6 +156,22 @@ export default function Dashboard() {
   }, [sites, searchTerm]);
 
   const selectedSite = sites.find((s) => s.id === selectedSiteId) ?? null;
+
+  // Zelfde queryKey als de PatchPlan-pagina → gedeelde cache + bestaande invalidations.
+  const { data: patchPlans = [] } = useQuery({
+    queryKey: ["patchplans-index", klantId],
+    queryFn: () => fetchCustomerPatchPlans(klantId),
+    enabled: !!klantId,
+  });
+
+  const plansByRack = useMemo(() => {
+    const map = new Map();
+    for (const plan of patchPlans) {
+      if (!map.has(plan.rack_id)) map.set(plan.rack_id, []);
+      map.get(plan.rack_id).push(plan);
+    }
+    return map;
+  }, [patchPlans]);
 
   const invalidateOverview = () =>
     queryClient.invalidateQueries({ queryKey: overviewQueryKey });
@@ -375,7 +403,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-bg pb-12">
         <Header />
-        <div className="max-w-4xl mx-auto mt-8 p-4 bg-destructive/10 border border-destructive/40 rounded-xl text-destructive font-medium text-center">
+        <div className="mt-8 p-4 bg-destructive/10 border border-destructive/40 rounded-xl text-destructive font-medium text-center">
           Er is een fout opgetreden bij het laden van de klantgegevens.
         </div>
       </div>
@@ -396,7 +424,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-bg pb-12">
       <Header />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="w-full">
         <nav className="flex items-center gap-2 text-sm text-fg-subtle mb-4 pt-2">
           <Link
             to="/"
@@ -414,15 +442,27 @@ export default function Dashboard() {
             {overview.name}
           </h1>
           <p className="text-sm text-fg-subtle mt-1">
-            Infrastructuur-overzicht
+            Klant dashboard
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] overflow-hidden mb-8">
+          {/* Gezamenlijke kop: groepeert de drie tellers onder één noemer */}
+          <div className="sm:col-span-3 flex items-center gap-3 border-b border-border bg-bg-subtle px-6 py-4">
+            <FiBarChart2 className="text-lg text-fg-subtle shrink-0" />
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-fg">
+                Kerncijfers
+              </h2>
+              <p className="mt-0.5 text-xs text-fg-subtle">
+                Totaal aantal sites, locaties en racks
+              </p>
+            </div>
+          </div>
           {KPI_ITEMS.map(({ key, label, icon: Icon }) => (
             <div
               key={key}
-              className="bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] px-4 py-4 flex flex-col gap-1"
+              className="px-6 py-4 flex flex-col gap-1 border-b sm:border-b-0 sm:border-r border-border last:border-b-0 sm:last:border-r-0"
             >
               <div className="flex items-center gap-2 text-fg-subtle">
                 <Icon className="text-base" />
@@ -457,9 +497,21 @@ export default function Dashboard() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 md:items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] md:items-stretch bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] overflow-hidden">
+            {/* Gezamenlijke kop: groepeert sitelijst + site-detail onder één noemer */}
+            <div className="md:col-span-2 flex items-center gap-3 border-b border-border bg-bg-subtle px-6 py-4">
+              <FiLayers className="text-lg text-fg-subtle shrink-0" />
+              <div className="min-w-0">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-fg">
+                  Infrastructuur
+                </h2>
+                <p className="mt-0.5 text-xs text-fg-subtle">
+                  Sites, locaties en racks van {overview.name}
+                </p>
+              </div>
+            </div>
             {/* Aside minstens zo hoog als site-detail; mag hoger als de sitelijst langer is. */}
-            <aside className="bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] p-6 h-full min-h-full flex flex-col">
+            <aside className="p-6 h-full min-h-full flex flex-col border-b md:border-b-0 md:border-r border-border">
               <div className="flex items-center justify-between border-b border-border pb-2 mb-4">
                 <h3 className="uppercase text-bold font-semibold inline-flex items-center gap-2">
                   <FiMapPin className="text-base text-fg-subtle" />
@@ -525,7 +577,7 @@ export default function Dashboard() {
               )}
             </aside>
 
-            <section className="bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] p-6">
+            <section className="p-6 min-w-0">
               {selectedSite ? (
                 <>
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -740,6 +792,107 @@ export default function Dashboard() {
               )}
             </section>
           </div>
+        )}
+
+        {/* Patchplannen per locatie en rack van de geselecteerde site */}
+        {selectedSite && (
+          <section className="mt-8 bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] p-6">
+            <div className="flex items-center justify-between border-b border-border pb-2 mb-4">
+              <h3 className="text-sm font-semibold text-fg inline-flex items-center gap-2">
+                <FiBox className="text-base text-fg-subtle" />
+                Patchplannen — {selectedSite.name}
+              </h3>
+              <Link
+                to={`/klanten/${klantId}/patchplan`}
+                className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle"
+                title="Alle patchplannen openen"
+              >
+                <FiExternalLink />
+              </Link>
+            </div>
+
+            {(selectedSite.locations ?? []).length === 0 ? (
+              <p className="text-sm text-fg-subtle">
+                Nog geen locaties voor deze site.
+              </p>
+            ) : (
+              <div className="space-y-5">
+                {selectedSite.locations.map((location) => (
+                  <div key={location.id}>
+                    <h4 className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-fg-subtle">
+                      <FiGrid className="text-sm" />
+                      {location.name}
+                    </h4>
+
+                    {(location.racks ?? []).length === 0 ? (
+                      <p className="text-xs italic text-fg-subtle">Geen racks.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        {location.racks.map((rack) => {
+                          const plans = plansByRack.get(rack.id) ?? [];
+                          return (
+                            <div
+                              key={rack.id}
+                              className="border border-border rounded-xl p-3 bg-bg-subtle"
+                            >
+                              <div className="mb-2 flex items-center justify-between gap-2">
+                                <Link
+                                  to={`/klanten/${klantId}/racks/${rack.id}`}
+                                  className="inline-flex items-center gap-1.5 truncate text-xs font-semibold text-fg hover:text-accent"
+                                >
+                                  <FiServer className="shrink-0 text-fg-subtle" />
+                                  {rack.name}
+                                </Link>
+                                <span className="shrink-0 text-[11px] tabular-nums text-fg-subtle">
+                                  {plans.length}{" "}
+                                  {plans.length === 1 ? "plan" : "plannen"}
+                                </span>
+                              </div>
+
+                              {plans.length === 0 ? (
+                                <p className="text-xs italic text-fg-subtle">
+                                  Geen patchplannen
+                                </p>
+                              ) : (
+                                <ul className="flex flex-col gap-1">
+                                  {plans.map((plan) => (
+                                    <li key={`${plan.kind}-${plan.id}`}>
+                                      <Link
+                                        to={patchPlanLink(
+                                          klantId,
+                                          selectedSite.id,
+                                          plan,
+                                        )}
+                                        className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm text-fg hover:bg-card transition"
+                                      >
+                                        <span className="inline-flex min-w-0 items-center gap-2">
+                                          {plan.kind === "device" ? (
+                                            <FiHardDrive className="shrink-0 text-fg-subtle" />
+                                          ) : (
+                                            <FiBox className="shrink-0 text-fg-subtle" />
+                                          )}
+                                          <span className="truncate font-medium">
+                                            {plan.label}
+                                          </span>
+                                        </span>
+                                        <span className="shrink-0 text-xs tabular-nums text-fg-subtle">
+                                          {plan.connected_count}/{plan.port_count}
+                                        </span>
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         )}
 
         {/* VLAN beheer — beheer vanuit het klanten-dashboard */}

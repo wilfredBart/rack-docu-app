@@ -122,7 +122,7 @@ function FormModal({
         </div>
 
         {/* Knoppen altijd zichtbaar onderaan */}
-        <div className="flex justify-end gap-3 pt-3 border-t border-border mt-4 shrink-0">
+        <div className="flex justify-end gap-3 pt-3 border-t border-border mt-6 shrink-0">
           <button
             type="button"
             onClick={onClose}

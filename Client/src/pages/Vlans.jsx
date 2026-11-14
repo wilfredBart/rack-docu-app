@@ -123,7 +123,7 @@ export default function Vlans() {
     <div className="min-h-screen bg-bg pb-12">
       <Header />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <div className="w-full">
         <nav className="flex items-center gap-2 text-sm text-fg-subtle mb-4 pt-2">
           <Link
             to={`/klanten/${klantId}`}

@@ -32,6 +32,10 @@ export const fetchCustomerById = (id) =>
 export const fetchCustomerOverview = (id) =>
   api.get(`/customers/${id}/overview`).then((res) => res.data);
 
+// POST setup: sites → locaties → racks van een klant in één transactie (wizard)
+export const setupCustomer = (id, sites) =>
+  api.post(`/customers/${id}/setup`, { sites }).then((res) => res.data);
+
 // GET alle patchplannen (devices + panels), inclusief lege
 export const fetchCustomerPatchPlans = (id) =>
   api.get(`/customers/${id}/patchplans`).then((res) => res.data);
