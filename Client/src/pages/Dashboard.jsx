@@ -26,6 +26,7 @@ import {
   FiEdit2,
   FiTrash2,
   FiExternalLink,
+  FiSettings,
   FiTag,
   FiBox,
   FiHardDrive,
@@ -746,9 +747,9 @@ export default function Dashboard() {
                                           )
                                         }
                                         className="p-1.5 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
-                                        title="Openen"
+                                        title="Rack detail"
                                       >
-                                        <FiExternalLink className="text-sm" />
+                                        <FiSettings className="text-sm" />
                                       </button>
                                       <button
                                         type="button"
