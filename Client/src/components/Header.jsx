@@ -1,13 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { NavLink } from "react-router-dom";
 import { logout } from "../redux/slices/authSlice";
 import { IoIosLogOut } from "react-icons/io";
 import { FaUserCircle } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
-
-// Nieuwe pagina's: gewoon een regel bijvoegen.
-const NAV_LINKS = [{ to: "/", label: "Klanten", end: true }];
 
 // Instellingen van het netwerk-effect
 const LINK_DIST = 150; // max. afstand (px) waarop twee nodes verbonden zijn
@@ -294,75 +290,54 @@ function Header() {
     dispatch(logout()); // Wist de Redux state & localStorage
   };
 
-  const linkStyle = ({ isActive }) =>
-    `flex items-center gap-2 px-4 py-2 font-medium text-sm transition-colors ${
-      isActive ? "bg-accent text-accent-fg shadow-xs" : "text-fg-muted hover:bg-card hover:text-fg"
-    }`;
-
   return (
     <header className="relative mb-8 border border-border bg-card shadow-xs">
       <NetworkBackground />
 
-      <div className="relative flex flex-col gap-4 px-5 py-4 sm:px-6 sm:py-5">
-        {/* Titel + gebruikersmenu */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <BrandMark />
-            <h1 className="truncate text-xl font-bold tracking-tight text-fg sm:text-2xl">
-              Connect!
-            </h1>
-          </div>
-
-          {/* Dropdown Menu Container */}
-          <div className="relative shrink-0" ref={dropdownRef}>
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              aria-expanded={isOpen}
-              aria-haspopup="menu"
-              className="flex cursor-pointer items-center gap-2.5 border border-border bg-bg-subtle px-3 py-2 font-medium text-fg-muted transition hover:bg-card"
-            >
-              <FaUserCircle className="text-xl text-fg-subtle" />
-              <span className="hidden text-sm sm:inline">
-                Welcome, <strong className="font-semibold text-fg">{user?.name || "User"}</strong>!
-              </span>
-              <IoChevronDown
-                className={`text-sm text-fg-subtle transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {/* Menu Card */}
-            {isOpen && (
-              <div className="absolute right-0 z-50 mt-2 w-48 animate-in fade-in slide-in-from-top-1 border border-border bg-card py-1.5 shadow-[var(--shadow-border)] duration-150">
-                <div className="border-b border-border px-4 py-2">
-                  <p className="text-xs text-fg-subtle">Ingelogd als</p>
-                  <p className="truncate text-xs font-medium text-fg-muted">{user?.email || ""}</p>
-                </div>
-
-                <button
-                  onClick={handleLogout}
-                  className="flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive transition hover:bg-destructive/10"
-                >
-                  <IoIosLogOut className="text-lg" />
-                  Uitloggen
-                </button>
-              </div>
-            )}
-          </div>
+      <div className="relative flex items-center justify-between gap-4 px-5 py-4 sm:px-6 sm:py-5">
+        {/* Titel */}
+        <div className="flex min-w-0 items-center gap-3">
+          <BrandMark />
+          <h1 className="truncate text-xl font-bold tracking-tight text-fg sm:text-2xl">
+            Connect!
+          </h1>
         </div>
 
-        {/* Navigatie onder de titel */}
-        <nav className="flex w-fit items-center gap-1 border border-border bg-bg-subtle p-1" aria-label="Hoofdnavigatie">
-          {NAV_LINKS.map((l) => (
-            <NavLink key={l.to} to={l.to} end={l.end} className={linkStyle}>
-              {({ isActive }) => (
-                <>
-                  {isActive && <span className="size-1.5 bg-accent-fg motion-safe:animate-pulse" aria-hidden="true" />}
-                  {l.label}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
+        {/* Dropdown Menu Container */}
+        <div className="relative shrink-0" ref={dropdownRef}>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+            aria-haspopup="menu"
+            className="flex cursor-pointer items-center gap-2.5 border border-border bg-bg-subtle px-3 py-2 font-medium text-fg-muted transition hover:bg-card"
+          >
+            <FaUserCircle className="text-xl text-fg-subtle" />
+            <span className="hidden text-sm sm:inline">
+              Welcome, <strong className="font-semibold text-fg">{user?.name || "User"}</strong>!
+            </span>
+            <IoChevronDown
+              className={`text-sm text-fg-subtle transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {/* Menu Card */}
+          {isOpen && (
+            <div className="absolute right-0 z-50 mt-2 w-48 animate-in fade-in slide-in-from-top-1 border border-border bg-card py-1.5 shadow-[var(--shadow-border)] duration-150">
+              <div className="border-b border-border px-4 py-2">
+                <p className="text-xs text-fg-subtle">Ingelogd als</p>
+                <p className="truncate text-xs font-medium text-fg-muted">{user?.email || ""}</p>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive transition hover:bg-destructive/10"
+              >
+                <IoIosLogOut className="text-lg" />
+                Uitloggen
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* subtiele accentlijn onderaan */}

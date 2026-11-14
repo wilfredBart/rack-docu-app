@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
-  FiArrowLeft,
-  FiChevronRight,
   FiCheck,
   FiPlus,
   FiTrash2,
@@ -13,6 +11,7 @@ import {
   FiServer,
 } from "react-icons/fi";
 import Header from "../components/Header";
+import Breadcrumb from "../components/UI/Breadcrumb";
 import CountrySelect from "../components/UI/CountrySelect";
 import { fetchCustomerById, setupCustomer } from "../api/customers";
 
@@ -379,19 +378,13 @@ export default function CustomerSetup() {
       <Header />
 
       <div className="w-full">
-        <nav className="flex items-center gap-2 text-sm text-fg-subtle mb-4 pt-2">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 hover:text-fg transition font-medium"
-          >
-            <FiArrowLeft className="text-base" />
-            Klanten
-          </Link>
-          <FiChevronRight className="text-fg-subtle" />
-          <span className="text-fg-muted font-medium">{customer.name}</span>
-          <FiChevronRight className="text-fg-subtle" />
-          <span className="text-fg font-medium">Setup</span>
-        </nav>
+        <Breadcrumb
+          items={[
+            { label: "Klanten", to: "/" },
+            { label: customer.name },
+            { label: "Setup" },
+          ]}
+        />
 
         <div className="mb-6">
           <div className="flex items-center justify-between gap-3 border-b border-border pb-2 mb-2">

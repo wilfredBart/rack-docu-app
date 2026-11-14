@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { FiArrowLeft, FiChevronRight, FiEdit2, FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiPlus, FiTrash2 } from "react-icons/fi";
 import Header from "../components/Header";
 import FormModal from "../components/UI/FormModal";
+import Breadcrumb from "../components/UI/Breadcrumb";
 import { fetchVlans, createVlan, updateVlan, deleteVlan } from "../api/vlans";
 import { vlanColor } from "./PatchPlan/vlanColors";
 
@@ -124,17 +125,12 @@ export default function Vlans() {
       <Header />
 
       <div className="w-full">
-        <nav className="flex items-center gap-2 text-sm text-fg-subtle mb-4 pt-2">
-          <Link
-            to={`/klanten/${klantId}`}
-            className="inline-flex items-center gap-1.5 hover:text-fg transition font-medium"
-          >
-            <FiArrowLeft className="text-base" />
-            Dashboard
-          </Link>
-          <FiChevronRight className="text-fg-subtle" />
-          <span className="text-fg font-medium">VLAN beheer</span>
-        </nav>
+        <Breadcrumb
+          items={[
+            { label: "Dashboard", to: `/klanten/${klantId}` },
+            { label: "VLAN beheer" },
+          ]}
+        />
 
         <div className="mb-6">
           <div className="flex items-center justify-between gap-3 border-b border-border pb-2 mb-2">

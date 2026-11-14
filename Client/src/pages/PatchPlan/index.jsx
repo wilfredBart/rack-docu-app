@@ -3,8 +3,6 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
-  FiArrowLeft,
-  FiChevronRight,
   FiBox,
   FiHardDrive,
   FiPlus,
@@ -13,6 +11,7 @@ import {
 } from "react-icons/fi";
 import Header from "../../components/Header";
 import Modal from "../../components/UI/Modal";
+import Breadcrumb from "../../components/UI/Breadcrumb";
 import { fetchCustomerPatchPlans } from "../../api/customers";
 import { fetchPatchPlan } from "../../api/patchPanels";
 import { fetchDevicePatchPlan } from "../../api/devices";
@@ -61,36 +60,28 @@ export default function PatchPlan() {
     <div className="min-h-screen bg-bg pb-12">
       <Header />
       <div className="w-full">
-        <nav className="flex items-center gap-2 text-sm text-fg-subtle mb-4 pt-2 flex-wrap">
-          <Link
-            to={backTo}
-            className="inline-flex items-center gap-1.5 hover:text-fg transition font-medium"
-          >
-            <FiArrowLeft className="text-base" />
-            {backLabel}
-          </Link>
-          <FiChevronRight className="text-fg-subtle" />
-          {detailKind ? (
-            <>
-              <Link
-                to={`/klanten/${klantId}/patchplan`}
-                className="hover:text-fg font-medium"
-              >
-                Patchplannen
-              </Link>
-              <FiChevronRight className="text-fg-subtle" />
-              <span className="text-fg font-medium">Detail</span>
-            </>
-          ) : (
-            <span className="text-fg font-medium">Patchplannen - Overzicht</span>
-          )}
-          <Link
-            to={`/klanten/${klantId}/vlans`}
-            className="ml-auto text-fg-muted hover:text-accent font-medium"
-          >
-            VLAN beheer
-          </Link>
-        </nav>
+        <Breadcrumb
+          items={
+            detailKind
+              ? [
+                  { label: backLabel, to: backTo },
+                  { label: "Patchplannen", to: `/klanten/${klantId}/patchplan` },
+                  { label: "Detail" },
+                ]
+              : [
+                  { label: backLabel, to: backTo },
+                  { label: "Patchplannen - Overzicht" },
+                ]
+          }
+          trailing={
+            <Link
+              to={`/klanten/${klantId}/vlans`}
+              className="ml-auto text-fg-muted hover:text-accent font-medium"
+            >
+              VLAN beheer
+            </Link>
+          }
+        />
 
         {detailKind ? (
           <PlanDetail

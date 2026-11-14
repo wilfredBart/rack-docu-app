@@ -16,9 +16,8 @@ import { createRack, updateRack, deleteRack } from "../api/racks";
 import Header from "../components/Header";
 import Modal from "../components/UI/Modal";
 import FormModal from "../components/UI/FormModal";
+import Breadcrumb from "../components/UI/Breadcrumb";
 import {
-  FiArrowLeft,
-  FiChevronRight,
   FiMapPin,
   FiServer,
   FiGrid,
@@ -425,17 +424,12 @@ export default function Dashboard() {
       <Header />
 
       <div className="w-full">
-        <nav className="flex items-center gap-2 text-sm text-fg-subtle mb-4 pt-2">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 hover:text-fg transition font-medium"
-          >
-            <FiArrowLeft className="text-base" />
-            Klanten
-          </Link>
-          <FiChevronRight className="text-fg-subtle" />
-          <span className="text-fg font-medium">{overview.name}</span>
-        </nav>
+        <Breadcrumb
+          items={[
+            { label: "Klanten", to: "/" },
+            { label: overview.name },
+          ]}
+        />
 
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-fg">

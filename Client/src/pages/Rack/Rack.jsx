@@ -7,8 +7,8 @@ import { fetchDeviceTypes } from "../../api/deviceTypes";
 import { fetchPatchPanelWithPorts } from "../../api/patchPanels";
 import { fetchVlans } from "../../api/vlans";
 import Header from "../../components/Header";
+import Breadcrumb from "../../components/UI/Breadcrumb";
 import {
-  FiArrowLeft,
   FiChevronLeft,
   FiChevronRight,
   FiBox,
@@ -308,23 +308,18 @@ export default function Rack() {
 
       {/* Compacte topbar met navigatie & rack status */}
       <div className="shrink-0 px-4 sm:px-6 py-2 border-b border-border bg-card/40 flex items-center justify-between text-sm">
-        <div className="flex items-center gap-3">
-          <Link
-            to={`/klanten/${klantId}`}
-            className="inline-flex items-center gap-1.5 text-fg-subtle hover:text-fg transition font-medium"
-          >
-            <FiArrowLeft className="text-base" />
-            <span className="hidden sm:inline">Terug naar klant</span>
-          </Link>
-          <span className="text-border">|</span>
-          <span className="text-fg font-semibold flex items-center gap-2">
-            {isLoading ? "Laden..." : (rack?.name ?? "Rack")}
-            {rack && (
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-bg-subtle border border-border text-fg-subtle">
-                {rack.height_u}U
-              </span>
-            )}
-          </span>
+        <div className="flex items-center gap-3 min-w-0">
+          <Breadcrumb
+            className="mb-0 pt-0"
+            items={[
+              { label: "Terug naar klant", to: `/klanten/${klantId}` },
+              {
+                label: isLoading
+                  ? "Laden..."
+                  : `${rack?.name ?? "Rack"}${rack ? ` · ${rack.height_u}U` : ""}`,
+              },
+            ]}
+          />
         </div>
 
         
