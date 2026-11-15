@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { FiEdit2, FiPlus, FiTrash2 } from "react-icons/fi";
 import Header from "../components/Header";
 import FormModal from "../components/UI/FormModal";
-import Breadcrumb from "../components/UI/Breadcrumb";
+import PageHeader from "../components/UI/PageHeader";
 import { fetchVlans, createVlan, updateVlan, deleteVlan } from "../api/vlans";
 import { vlanColor } from "./PatchPlan/vlanColors";
 
@@ -39,9 +39,12 @@ const FIELDS = [
   },
 ];
 
-// Route: /klanten/:klantId/vlans — bereikbaar via klanten-dashboard (VLAN beheer).
+// Route: /klanten/:klantId/vlans
+// Optioneel ?rackId= — breadcrumb terug naar dat rack (vanuit rack-toolbar).
 export default function Vlans() {
   const { klantId } = useParams();
+  const [searchParams] = useSearchParams();
+  const rackId = searchParams.get("rackId");
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(null);
 
@@ -120,36 +123,44 @@ export default function Vlans() {
     }
   };
 
+  // Vanuit rack-toolbar: altijd terug naar dat rack, nergens anders.
+  const breadcrumbItems = rackId
+    ? [
+        { label: "Terug naar rack", to: `/klanten/${klantId}/racks/${rackId}` },
+        { label: "VLAN beheer" },
+      ]
+    : [
+        { label: "Dashboard", to: `/klanten/${klantId}` },
+        { label: "VLAN beheer" },
+      ];
+
   return (
     <div className="min-h-screen bg-bg pb-12">
-      <Header />
+      <Header breadcrumb={breadcrumbItems} />
 
       <div className="w-full">
-        <Breadcrumb
-          items={[
-            { label: "Dashboard", to: `/klanten/${klantId}` },
-            { label: "VLAN beheer" },
-          ]}
-        />
-
-        <div className="mb-6">
-          <div className="flex items-center justify-between gap-3 border-b border-border pb-2 mb-2">
-            <h1 className="text-2xl font-bold text-fg">VLAN beheer</h1>
+        <PageHeader
+          title="VLAN beheer"
+          subtitle={
+            <>
+              Definieer VLAN&apos;s per klant. Kleur kies je zelf; die zie je
+              terug in dit overzicht en op het patchplan. Toewijzing aan
+              device-poorten gebeurt op het{" "}
+              <span className="font-medium text-fg-muted">patchplan</span>.
+            </>
+          }
+          actions={
             <button
               type="button"
               onClick={() => setEditing({})}
-              className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-bg-subtle border border-border text-white rounded-xl text-sm font-medium hover:opacity-90 transition cursor-pointer"
               title="Nieuwe VLAN"
             >
               <FiPlus />
+              <span className="ml-1 text-sm font-medium">Nieuwe VLAN</span>
             </button>
-          </div>
-          <p className="text-sm text-fg-subtle">
-            Definieer VLAN&apos;s per klant. Kleur kies je zelf; die zie je terug
-            in dit overzicht en op het patchplan. Toewijzing gebeurt per
-            device-poort.
-          </p>
-        </div>
+          }
+        />
 
         {isLoading ? (
           <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-fg-subtle">
@@ -161,79 +172,67 @@ export default function Vlans() {
             <button
               type="button"
               onClick={() => setEditing({})}
-              className="mt-3 inline-flex items-center gap-1.5 text-accent hover:text-fg text-sm font-medium cursor-pointer"
+              className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-bg-subtle border border-border text-white rounded-xl text-sm font-medium hover:opacity-90 transition cursor-pointer"
             >
-              <FiPlus /> Eerste VLAN toevoegen
+              <FiPlus />
+              <span className="ml-1 text-sm font-medium">Nieuwe VLAN</span>
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-[var(--shadow-border)]">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs text-fg-subtle">
-                <tr>
-                  <th className="p-3 font-medium">Kleur</th>
-                  <th className="p-3 font-medium">VLAN</th>
-                  <th className="p-3 font-medium">Naam</th>
-                  <th className="p-3 font-medium hidden sm:table-cell">
-                    Omschrijving
-                  </th>
-                  <th className="p-3 font-medium text-right">Poorten</th>
-                  <th className="p-3" />
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-border)]">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border bg-bg-subtle text-xs font-semibold uppercase tracking-wider text-fg-subtle">
+                  <th className="p-3 w-10">Kleur</th>
+                  <th className="p-3">VLAN</th>
+                  <th className="p-3">Naam</th>
+                  <th className="p-3 hidden sm:table-cell">Omschrijving</th>
+                  <th className="p-3 text-right">Poorten</th>
+                  <th className="p-3 text-right">Acties</th>
                 </tr>
               </thead>
-              <tbody>
-                {vlans.map((v) => {
-                  const c = vlanColor(v.color);
-                  return (
-                    <tr key={v.id} className="border-t border-border">
-                      <td className="p-3">
-                        <span className="inline-flex items-center gap-2">
-                          <span
-                            className="block h-5 w-5 rounded-md border border-border shrink-0"
-                            style={{ background: c }}
-                            title={c}
-                          />
-                          <span
-                            className="text-xs font-mono hidden sm:inline"
-                            style={{ color: c }}
-                          >
-                            {c}
-                          </span>
-                        </span>
-                      </td>
-                      <td className="p-3 font-mono text-fg">{v.vlan_number}</td>
-                      <td className="p-3 font-medium" style={{ color: c }}>
-                        {v.name}
-                      </td>
-                      <td className="p-3 text-fg-muted hidden sm:table-cell">
-                        {v.description}
-                      </td>
-                      <td className="p-3 text-right font-mono text-fg-muted">
-                        {v.port_count}
-                      </td>
-                      <td className="p-3">
-                        <div className="flex justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setEditing(v)}
-                            className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
-                            title="Bewerken"
-                          >
-                            <FiEdit2 />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(v)}
-                            className="p-2 rounded-lg text-fg-subtle hover:text-destructive hover:bg-bg-subtle cursor-pointer"
-                            title="Verwijderen"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+              <tbody className="divide-y divide-border">
+                {vlans.map((vlan) => (
+                  <tr key={vlan.id} className="hover:bg-bg-subtle/50">
+                    <td className="p-3">
+                      <span
+                        className="inline-block h-3 w-3 rounded-full border border-border"
+                        style={{ background: vlanColor(vlan.color) }}
+                        title={vlanColor(vlan.color)}
+                      />
+                    </td>
+                    <td className="p-3 font-mono text-fg-muted">
+                      {vlan.vlan_number}
+                    </td>
+                    <td className="p-3 font-medium text-fg">{vlan.name}</td>
+                    <td className="p-3 hidden sm:table-cell text-fg-subtle max-w-xs truncate">
+                      {vlan.description || "—"}
+                    </td>
+                    <td className="p-3 text-right text-fg-muted">
+                      {vlan.port_count ?? 0}
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setEditing(vlan)}
+                          className="p-2 rounded-lg text-fg-subtle hover:text-accent hover:bg-bg-subtle cursor-pointer"
+                          title="Bewerken"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(vlan)}
+                          className="p-2 rounded-lg text-fg-subtle hover:text-destructive hover:bg-bg-subtle cursor-pointer"
+                          title="Verwijderen"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -247,7 +246,9 @@ export default function Vlans() {
         fields={FIELDS}
         initialValues={initialValues}
         onSubmit={(values) =>
-          saveMutation.mutate({ ...values, id: editing?.id })
+          saveMutation.mutate(
+            editing?.id ? { ...values, id: editing.id } : values,
+          )
         }
         isSubmitting={saveMutation.isPending}
       />

@@ -4,6 +4,7 @@ import { logout } from "../redux/slices/authSlice";
 import { IoIosLogOut } from "react-icons/io";
 import { FaUserCircle } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
+import Breadcrumb from "./UI/Breadcrumb";
 
 // Instellingen van het netwerk-effect
 const LINK_DIST = 150; // max. afstand (px) waarop twee nodes verbonden zijn
@@ -267,7 +268,7 @@ function BrandMark() {
   );
 }
 
-function Header() {
+function HeaderBar() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -291,10 +292,10 @@ function Header() {
   };
 
   return (
-    <header className="relative mb-8 border border-border bg-card shadow-xs">
+    <header className="relative border border-border bg-card shadow-xs">
       <NetworkBackground />
 
-      <div className="relative flex items-center justify-between gap-4 px-5 py-4 sm:px-6 sm:py-5">
+      <div className="relative flex min-h-28 items-center justify-between gap-4 px-5 py-4 sm:min-h-32 sm:px-6 sm:py-5">
         {/* Titel */}
         <div className="flex min-w-0 items-center gap-3">
           <BrandMark />
@@ -347,6 +348,26 @@ function Header() {
         aria-hidden="true"
       />
     </header>
+  );
+}
+
+/**
+ * App-header met daar vlak onder (optioneel) de breadcrumb als navigatiestrook.
+ * Samen vormen ze één blok; de pagina-inhoud begint pas eronder.
+ *
+ * @param {{ label: string, to?: string }[]} [props.breadcrumb]  zie Breadcrumb
+ * @param {React.ReactNode} [props.breadcrumbTrailing]  actie rechts in de strook
+ */
+function Header({ breadcrumb = [], breadcrumbTrailing = null }) {
+  return (
+    <div className="mb-8">
+      <HeaderBar />
+      {breadcrumb.length > 0 && (
+        <div className="border border-t-0 border-border bg-bg-subtle px-5 py-2.5 sm:px-6">
+          <Breadcrumb items={breadcrumb} trailing={breadcrumbTrailing} />
+        </div>
+      )}
+    </div>
   );
 }
 

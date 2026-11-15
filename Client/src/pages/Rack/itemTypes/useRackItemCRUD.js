@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 // elke instantie nodig heeft: rackId (voor nieuwe items), invalidateRack (na elke
 // mutatie) en setSelectedItem (om de selectie te resetten na een delete).
 export function useRackItemCRUD(config, ctx) {
-  const { rackId, invalidateRack, setSelectedItem } = ctx;
+  const { rackId, invalidateRack, setSelectedItem, onCreateSuccess } = ctx;
   const queryClient = useQueryClient();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -26,6 +26,7 @@ export function useRackItemCRUD(config, ctx) {
       setModalOpen(false);
       setEditing(null);
       setPrefill(null);
+      onCreateSuccess?.();
     },
     onError: (err) => {
       toast.error(
@@ -103,13 +104,12 @@ export function useRackItemCRUD(config, ctx) {
     setModalOpen(true);
   };
 
-  // Nieuw item openen met voorgevulde waarden (klik op een lege U in de rack).
-  // Bewust een aparte functie: openNew wordt als onClick={...openNew} gebruikt en
-  // zou dan het click-event als argument krijgen.
+  // Nieuw item: alleen prefill zetten. De UI toont een volledige form-view
+  // (geen modal). openNew blijft modal openen voor eventuele legacy-aanroepen.
   const openNewAt = (values) => {
     setEditing(null);
     setPrefill(values);
-    setModalOpen(true);
+    setModalOpen(false);
   };
 
   const openEdit = (item) => {

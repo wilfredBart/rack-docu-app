@@ -18,7 +18,7 @@ export default function Breadcrumb({ items = [], trailing = null, className = ""
 
   return (
     <nav
-      className={`flex items-center gap-2 text-sm text-fg-subtle mb-4 pt-2 flex-wrap ${className}`.trim()}
+      className={`flex items-center gap-2 text-sm text-fg-subtle flex-wrap ${className}`.trim()}
       aria-label="Breadcrumb"
     >
       {items.map((item, index) => {

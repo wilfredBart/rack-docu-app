@@ -56,10 +56,17 @@ function ItemRow({ row, selected, onSelectItem, viewMode }) {
         )}
       </div>
 
-      {/* Het authentieke UniFi Frontpaneel direct in de rack gemonteerd */}
-      <button
-        type="button"
+      {/* Paneel: div i.p.v. button — poorten erin zijn zelf buttons (geen nested <button>). */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => onSelectItem({ kind, item })}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelectItem({ kind, item });
+          }
+        }}
         className={`flex-1 min-w-0 h-full p-0 relative cursor-pointer overflow-hidden transition border ${
           selected
             ? "border-cyan-400 ring-2 ring-cyan-400 shadow-[0_0_14px_rgba(0,176,255,0.7)] z-10 brightness-105"
@@ -72,7 +79,7 @@ function ItemRow({ row, selected, onSelectItem, viewMode }) {
           showEars={false}
           className="w-full h-full"
         />
-      </button>
+      </div>
 
       {/* Rechter rail met U-nummers */}
       <div

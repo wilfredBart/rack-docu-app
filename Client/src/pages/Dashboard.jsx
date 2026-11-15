@@ -16,7 +16,7 @@ import { createRack, updateRack, deleteRack } from "../api/racks";
 import Header from "../components/Header";
 import Modal from "../components/UI/Modal";
 import FormModal from "../components/UI/FormModal";
-import Breadcrumb from "../components/UI/Breadcrumb";
+import PageHeader from "../components/UI/PageHeader";
 import {
   FiMapPin,
   FiServer,
@@ -33,6 +33,7 @@ import {
   FiLayers,
   FiBarChart2,
 } from "react-icons/fi";
+
 
 // KPI's = boom die hieronder zichtbaar is (sites → locaties → racks).
 // Patchplannen (devices + patch panels) staan in een eigen sectie onder de sites.
@@ -422,24 +423,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-bg pb-12">
-      <Header />
+      <Header
+        breadcrumb={[
+          { label: "Klanten", to: "/" },
+          { label: overview.name },
+        ]}
+      />
 
       <div className="w-full">
-        <Breadcrumb
-          items={[
-            { label: "Klanten", to: "/" },
-            { label: overview.name },
-          ]}
+        <PageHeader
+          title={overview.name}
+          subtitle="Klant dashboard"
         />
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-fg">
-            {overview.name}
-          </h1>
-          <p className="text-sm text-fg-subtle mt-1">
-            Klant dashboard
-          </p>
-        </div>
+        
 
         <div className="grid grid-cols-1 sm:grid-cols-3 bg-card rounded-2xl border border-border shadow-[var(--shadow-border)] overflow-hidden mb-8">
           {/* Gezamenlijke kop: groepeert de drie tellers onder één noemer */}

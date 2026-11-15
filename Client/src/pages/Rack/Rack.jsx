@@ -7,14 +7,11 @@ import { fetchDeviceTypes } from "../../api/deviceTypes";
 import { fetchPatchPanelWithPorts } from "../../api/patchPanels";
 import { fetchVlans } from "../../api/vlans";
 import Header from "../../components/Header";
-import Breadcrumb from "../../components/UI/Breadcrumb";
+import PageHeader from "../../components/UI/PageHeader";
 import {
   FiChevronLeft,
   FiChevronRight,
   FiBox,
-  FiHardDrive,
-  FiGrid,
-  FiLayers,
   FiPlus,
   FiX,
   FiEdit2,
@@ -31,27 +28,8 @@ import RackItemDeleteModal from "./itemTypes/RackItemDeleteModal";
 import RackElevationView from "./RackElevationView";
 import RackItemDetailPanel from "./RackItemDetailPanel";
 import UnifiDeviceFace from "./devices/UnifiDeviceFace";
-
-const ADD_KIND_OPTIONS = [
-  {
-    kind: "device",
-    label: "Device",
-    description: "Switch, router, firewall, server, …",
-    icon: FiHardDrive,
-  },
-  {
-    kind: "patch_panel",
-    label: "Patch panel",
-    description: "Patchpaneel met poorten",
-    icon: FiGrid,
-  },
-  {
-    kind: "cable_management",
-    label: "Cable management",
-    description: "Borstel / vingers organizer",
-    icon: FiLayers,
-  },
-];
+import RackToolbar from "./RackToolbar";
+import RackItemFormView from "./RackItemFormView";
 
 export default function Rack() {
   const { klantId, rackId } = useParams();
@@ -71,6 +49,8 @@ export default function Rack() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [activePortNumber, setActivePortNumber] = useState(null);
   const [newTypeName, setNewTypeName] = useState("");
+  /** null = rack detail; anders kind van item dat we toevoegen (geen modal). */
+  const [addKind, setAddKind] = useState(null);
   const [portForm, setPortForm] = useState({
     count: 24,
     prefix: "Port ",
@@ -81,7 +61,12 @@ export default function Rack() {
   const invalidateRack = () =>
     queryClient.invalidateQueries({ queryKey: ["rack-contents", rackId] });
 
-  const crudCtx = { rackId, invalidateRack, setSelectedItem };
+  const crudCtx = {
+    rackId,
+    invalidateRack,
+    setSelectedItem,
+    onCreateSuccess: () => setAddKind(null),
+  };
 
   const deviceCRUD = useRackItemCRUD(deviceType, crudCtx);
   const patchPanelCRUD = useRackItemCRUD(patchPanelType, crudCtx);
@@ -213,6 +198,7 @@ export default function Rack() {
 
   const handleOpenAdd = (kind, suggestedPos = null) => {
     if (!rack) return;
+    setSelectedItem(null);
     // Zonder suggestie: eerste vrije U van bovenaf (hoogste vrije U).
     const defaultPos = suggestedPos ?? firstFreeU(rack);
 
@@ -220,7 +206,30 @@ export default function Rack() {
       rack_position: defaultPos,
       rack_units: 1,
     });
+    setAddKind(kind);
   };
+
+  const handleCancelAdd = () => {
+    if (addKind) crudByKind[addKind]?.closeModal();
+    setAddKind(null);
+  };
+
+  const rackPatchplanTo = useMemo(() => {
+    if (!rack) return `/klanten/${klantId}/patchplan?rackId=${rackId}`;
+    return rack.site_id
+      ? `/klanten/${klantId}/patchplan?siteId=${rack.site_id}&rackId=${rackId}`
+      : `/klanten/${klantId}/patchplan?rackId=${rackId}`;
+  }, [rack, klantId, rackId]);
+
+  const addConfig =
+    addKind === "device"
+      ? deviceType
+      : addKind === "patch_panel"
+        ? patchPanelType
+        : addKind === "cable_management"
+          ? cableType
+          : null;
+  const addCRUD = addKind ? crudByKind[addKind] : null;
 
   const handleBulkPortSubmit = (e) => {
     e.preventDefault();
@@ -286,44 +295,43 @@ export default function Rack() {
 
   return (
     <div className="h-screen flex flex-col bg-bg overflow-hidden select-none">
-      <Header />
+      <Header
+        breadcrumb={[
+          { label: "Dashboard", to: `/klanten/${klantId}` },
+          { label: isLoading ? "Laden..." : (rack?.name ?? "Rack") },
+        ]}
+      />
 
       <div className="shrink-0 w-full">
-        <Breadcrumb
-          items={[
-            { label: "Dashboard", to: `/klanten/${klantId}` },
-            { label: isLoading ? "Laden..." : (rack?.name ?? "Rack") },
-          ]}
+        <PageHeader
+          compact
+          title={isLoading ? "Laden..." : (rack?.name ?? "Rack")}
+          subtitle={`Rack detail${rack ? ` · ${usedU(rack)}/${rack.height_u}U bezet` : ""}`}
         />
 
-        <div className="mb-6 flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-bold text-fg">
-              {isLoading ? "Laden..." : (rack?.name ?? "Rack")}
-            </h1>
-            <p className="text-sm text-fg-subtle mt-1">
-              Rack detail
-              {rack ? ` · ${usedU(rack)}/${rack.height_u}U bezet` : ""}
-            </p>
-          </div>
-
-          {rack && (
-            <Link
-              to={
-                rack.site_id
-                  ? `/klanten/${klantId}/patchplan?siteId=${rack.site_id}&rackId=${rackId}`
-                  : `/klanten/${klantId}/patchplan?rackId=${rackId}`
-              }
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-fg hover:bg-bg-subtle transition shrink-0"
-            >
-              <FiBox className="text-fg-subtle" /> Patchplan
-            </Link>
-          )}
-        </div>
+        {!addKind && (
+          <RackToolbar
+            disabled={!rack || isLoading}
+            onAdd={handleOpenAdd}
+            patchplanTo={rackPatchplanTo}
+            vlanTo={`/klanten/${klantId}/vlans`}
+          />
+        )}
       </div>
 
-      {/* Hoofdwerkgebied: 2 kolommen, vult exact de resterende schermhoogte */}
-      {isLoading ? (
+      {/* Toevoegen: volledige form-view i.p.v. modal */}
+      {addKind && addConfig && addCRUD ? (
+        <RackItemFormView
+          config={addConfig}
+          fieldsContext={addKind === "device" ? deviceTypes : undefined}
+          fieldExtras={addKind === "device" ? deviceFieldExtras : undefined}
+          rack={rack}
+          prefill={addCRUD.prefill}
+          onSubmit={addCRUD.submit}
+          onCancel={handleCancelAdd}
+          isSubmitting={addCRUD.isSubmitting}
+        />
+      ) : isLoading ? (
         <div className="flex-1 flex items-center justify-center text-sm text-fg-subtle">
           Rack laden...
         </div>
@@ -484,54 +492,23 @@ export default function Rack() {
                 </div>
               </div>
             ) : (
-              /* --- WEERGAVE WANNEER GEEN APPARAAT GESELECTEERD IS (Overzicht & Toevoegen) --- */
+              /* --- WEERGAVE WANNEER GEEN APPARAAT GESELECTEERD IS (Overzicht) --- */
               <div className="h-full flex flex-col min-h-0">
                 <div className="px-5 py-4 border-b border-border bg-bg-subtle/50 shrink-0">
                   <h2 className="text-base font-semibold text-fg flex items-center gap-2">
-                    <FiSliders className="text-accent" /> Rack Beheer & Toevoegen
+                    <FiSliders className="text-accent" /> Geïnstalleerde items
                   </h2>
                   <p className="text-xs text-fg-subtle mt-0.5">
-                    Selecteer een component in het rack of voeg een nieuw item toe.
+                    Selecteer een component in de lijst of in de elevatie. Nieuw
+                    item via{" "}
+                    <span className="font-medium text-fg-muted">Toevoegen</span>{" "}
+                    in de toolbar.
                   </p>
                 </div>
 
                 <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-5">
-                  {/* Knoppen om direct items toe te voegen */}
-                  <div className="space-y-2.5">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-fg-subtle block">
-                      Item toevoegen aan rack
-                    </span>
-                    <div className="grid grid-cols-1 gap-2.5">
-                      {ADD_KIND_OPTIONS.map(
-                        ({ kind, label, description, icon: Icon }) => (
-                          <button
-                            key={kind}
-                            type="button"
-                            onClick={() => handleOpenAdd(kind)}
-                            className="flex items-center gap-3 w-full text-left rounded-xl border border-border bg-bg-subtle hover:bg-card hover:border-accent/50 p-3 transition group cursor-pointer"
-                          >
-                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-fg-muted group-hover:text-accent group-hover:border-accent/40 transition">
-                              <Icon className="text-lg" />
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium text-fg group-hover:text-accent transition">
-                                  + {label}
-                                </span>
-                                <FiPlus className="text-fg-subtle text-xs group-hover:text-accent transition" />
-                              </div>
-                              <span className="text-xs text-fg-subtle block truncate">
-                                {description}
-                              </span>
-                            </div>
-                          </button>
-                        ),
-                      )}
-                    </div>
-                  </div>
-
                   {/* Geïnstalleerde items lijst */}
-                  <div className="space-y-2.5 pt-3 border-t border-border">
+                  <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-semibold uppercase tracking-wider text-fg-subtle">
                         Geïnstalleerd ({allInstalledItems.length})

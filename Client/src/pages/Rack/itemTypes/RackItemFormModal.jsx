@@ -71,15 +71,15 @@ export default function RackItemFormModal({
     baseInitial.rack_position = String(baseInitial.rack_position);
   }
 
+  // Alleen nog voor bewerken; nieuw item gaat via RackItemFormView.
+  const isOpen = crud.modalOpen && !!crud.editing;
+
   return (
     <FormModal
-      key={
-        crud.editing?.id ??
-        `new-${config.kind}-${crud.prefill?.rack_position ?? ""}`
-      }
-      isOpen={crud.modalOpen}
+      key={crud.editing?.id ?? "edit-closed"}
+      isOpen={isOpen}
       onClose={crud.closeModal}
-      title={crud.editing ? config.title.edit : config.title.new}
+      title={config.title.edit}
       fields={fields}
       initialValues={baseInitial}
       onSubmit={crud.submit}

@@ -11,7 +11,7 @@ import {
   FiServer,
 } from "react-icons/fi";
 import Header from "../components/Header";
-import Breadcrumb from "../components/UI/Breadcrumb";
+import PageHeader from "../components/UI/PageHeader";
 import CountrySelect from "../components/UI/CountrySelect";
 import { fetchCustomerById, setupCustomer } from "../api/customers";
 
@@ -375,32 +375,24 @@ export default function CustomerSetup() {
 
   return (
     <div className="min-h-screen bg-bg pb-12">
-      <Header />
+      <Header
+        breadcrumb={[
+          { label: "Klanten", to: "/" },
+          { label: customer.name },
+          { label: "Setup" },
+        ]}
+      />
 
       <div className="w-full">
-        <Breadcrumb
-          items={[
-            { label: "Klanten", to: "/" },
-            { label: customer.name },
-            { label: "Setup" },
-          ]}
-        />
-
-        <div className="mb-6">
-          <div className="flex items-center justify-between gap-3 border-b border-border pb-2 mb-2">
-            <h1 className="text-2xl font-bold text-fg">
-              Klant Setup — {customer.name}
-            </h1>
+        <PageHeader
+          title={`Klant Setup — ${customer.name}`}
+          subtitle="Zet in een paar stappen de basisstructuur op: site, locaties en racks. Alles is later aanpasbaar op het dashboard, en elke stap mag je overslaan."
+          actions={
             <button type="button" onClick={abort} className={BTN_GHOST}>
               Afbreken
             </button>
-          </div>
-          <p className="text-sm text-fg-subtle">
-            Zet in een paar stappen de basisstructuur op: site, locaties en
-            racks. Alles is later aanpasbaar op het dashboard, en elke stap mag
-            je overslaan.
-          </p>
-        </div>
+          }
+        />
 
         {/* Stappen-indicator */}
         <ol className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-2">

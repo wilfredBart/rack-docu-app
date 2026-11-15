@@ -11,7 +11,7 @@ import {
 } from "react-icons/fi";
 import Header from "../../components/Header";
 import Modal from "../../components/UI/Modal";
-import Breadcrumb from "../../components/UI/Breadcrumb";
+import PageHeader from "../../components/UI/PageHeader";
 import { fetchCustomerPatchPlans } from "../../api/customers";
 import { fetchPatchPlan } from "../../api/patchPanels";
 import { fetchDevicePatchPlan } from "../../api/devices";
@@ -20,6 +20,8 @@ import {
   updateConnection,
   deleteConnection,
 } from "../../api/connections";
+import { assignVlan } from "../../api/ports";
+import { fetchVlans } from "../../api/vlans";
 import { vlanColor, vlanLabel } from "./vlanColors";
 
 const STATUS_MAP = { actief: "Actief", niet_getest: "Niet getest", defect: "Defect" };
@@ -56,33 +58,37 @@ export default function PatchPlan() {
       : `/klanten/${klantId}`;
   const backLabel = rackId ? "Terug naar rack" : "Terug";
 
+  const breadcrumb = detailKind
+    ? [
+        { label: backLabel, to: backTo },
+        { label: "Patchplannen", to: `/klanten/${klantId}/patchplan` },
+        { label: "Detail" },
+      ]
+    : [
+        { label: backLabel, to: backTo },
+        { label: "Patchplannen - Overzicht" },
+      ];
+
+  const breadcrumbTrailing = (
+    <Link
+      to={
+        rackId
+          ? `/klanten/${klantId}/vlans?rackId=${rackId}`
+          : `/klanten/${klantId}/vlans`
+      }
+      className="ml-auto text-fg-muted hover:text-accent font-medium"
+    >
+      VLAN beheer
+    </Link>
+  );
+
   return (
     <div className="min-h-screen bg-bg pb-12">
-      <Header />
+      <Header
+        breadcrumb={breadcrumb}
+        breadcrumbTrailing={breadcrumbTrailing}
+      />
       <div className="w-full">
-        <Breadcrumb
-          items={
-            detailKind
-              ? [
-                  { label: backLabel, to: backTo },
-                  { label: "Patchplannen", to: `/klanten/${klantId}/patchplan` },
-                  { label: "Detail" },
-                ]
-              : [
-                  { label: backLabel, to: backTo },
-                  { label: "Patchplannen - Overzicht" },
-                ]
-          }
-          trailing={
-            <Link
-              to={`/klanten/${klantId}/vlans`}
-              className="ml-auto text-fg-muted hover:text-accent font-medium"
-            >
-              VLAN beheer
-            </Link>
-          }
-        />
-
         {detailKind ? (
           <PlanDetail
             klantId={klantId}
@@ -123,11 +129,10 @@ function PlanOverview({ klantId, onOpen }) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold text-fg tracking-tight">Patchplannen - Overzicht</h1>
-      <p className="text-sm text-fg-subtle mt-1 mb-6">
-        Elk device en patch panel met poorten heeft een plan (ook als er nog
-        niets gepatcht is). Titel = label.
-      </p>
+      <PageHeader
+        title="Patchplannen - Overzicht"
+        subtitle="Elk device en patch panel met poorten heeft een plan (ook als er nog niets gepatcht is). Titel = label."
+      />
 
       {isLoading ? (
         <Empty>Laden...</Empty>
@@ -200,10 +205,28 @@ function PlanDetail({ klantId, kind, id, onBack }) {
     enabled: !!id,
   });
 
+  const { data: vlans = [] } = useQuery({
+    queryKey: ["vlans", klantId],
+    queryFn: () => fetchVlans(klantId),
+    enabled: !!klantId && kind === "device",
+  });
+
   const indexQuery = useQuery({
     queryKey: ["patchplans-index", klantId],
     queryFn: () => fetchCustomerPatchPlans(klantId),
     enabled: !!klantId,
+  });
+
+  const assignVlanMutation = useMutation({
+    mutationFn: assignVlan,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patchplan", kind, id] });
+      queryClient.invalidateQueries({ queryKey: ["vlans", klantId] });
+      queryClient.invalidateQueries({ queryKey: ["selected-item-ports"] });
+      toast.success("VLAN bijgewerkt");
+    },
+    onError: (err) =>
+      toast.error(err.response?.data?.message || "Fout bij instellen van VLAN"),
   });
 
   const plan = planQuery.data;
@@ -272,31 +295,33 @@ function PlanDetail({ klantId, kind, id, onBack }) {
     );
   }, [indexQuery.data, kind, id]);
 
-  if (planQuery.isLoading) return <Empty>Patchplan laden...</Empty>;
-  if (!plan) return <Empty>Plan niet gevonden.</Empty>;
+  if (planQuery.isLoading || !plan) {
+    return (
+      <>
+        <PageHeader title="Patchplan" />
+        <Empty>
+          {planQuery.isLoading ? "Patchplan laden..." : "Plan niet gevonden."}
+        </Empty>
+      </>
+    );
+  }
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.12em] text-fg-subtle font-semibold">
-            {kind === "device" ? "Device" : "Patch panel"}
-          </p>
-          <h1 className="text-3xl font-bold text-fg tracking-tight">
-            {plan.label}
-          </h1>
-          <p className="text-sm text-fg-subtle mt-1">
-            {rows.filter((r) => r.connection).length}/{rows.length} gepatcht
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-sm font-medium text-fg-muted hover:text-fg cursor-pointer"
-        >
-          Alle plannen
-        </button>
-      </div>
+      <PageHeader
+        eyebrow={kind === "device" ? "Device" : "Patch panel"}
+        title={plan.label}
+        subtitle={`${rows.filter((r) => r.connection).length}/${rows.length} gepatcht`}
+        actions={
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-sm font-medium text-fg-muted hover:text-fg cursor-pointer"
+          >
+            Alle plannen
+          </button>
+        }
+      />
 
       {rows.length === 0 ? (
         <Empty>
@@ -343,7 +368,29 @@ function PlanDetail({ klantId, kind, id, onBack }) {
                     {row.otherPort || "—"}
                   </td>
                   <td className="p-3">
-                    {row.vlan ? (
+                    {kind === "device" ? (
+                      <select
+                        value={row.port.vlan_id ?? row.vlan?.id ?? ""}
+                        disabled={assignVlanMutation.isPending}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          assignVlanMutation.mutate({
+                            portIds: [row.port.id],
+                            vlanId: val ? Number(val) : null,
+                            portMode: row.port.port_mode ?? "access",
+                          });
+                        }}
+                        className="max-w-[11rem] rounded-md border border-border bg-bg-subtle px-2 py-1 text-xs text-fg"
+                        aria-label={`VLAN van ${row.port.name}`}
+                      >
+                        <option value="">Geen VLAN</option>
+                        {vlans.map((v) => (
+                          <option key={v.id} value={v.id}>
+                            VLAN {v.vlan_number} · {v.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : row.vlan ? (
                       <span
                         className="inline-flex items-center gap-1.5 text-xs font-medium"
                         style={{ color: vlanColor(row.vlan.color) }}
